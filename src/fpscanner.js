@@ -8,6 +8,7 @@ var fpscanner = (function () {
   uaParser.setUA(navigator.userAgent);
 
   const getAudio = require('./audio.js');
+  const getFonts = require('./fonts.js');
 
   const UNKNOWN = "unknown";
   // Fingerprints can be either a list of attributes or attributes
@@ -28,24 +29,32 @@ var fpscanner = (function () {
             hash: false,
             isAsync: true,
           },
-          //"fonts",
+          {
+            name: "fonts",
+            hash: false,
+            isAsync: true
+          },
           {
             name: "plugins",
             hash: false,
             isAsync: false
           },
-          //"mimeTypes",
+          {
+            name: "mimeTypes",
+            hash: false,
+            isAsync: false
+          },
           /*"webGL",*/
           {
             name: "userAgent",
             hash: false,
             isAsync: false
           },
-		  {
-			name: "dnt",
-			hash: false,
-			isAsync: false
-		  },
+          {
+            name: "dnt",
+            hash: false,
+            isAsync: false
+          },
           {
             name: "adBlock",
             hash: false,
@@ -243,8 +252,16 @@ var fpscanner = (function () {
           return window.doNotTrack;
         }
         return UNKNOWN;
-      }
-
+      },
+      mimeTypes : function() {
+        var mimeTypes = [];
+        for (var i = 0; i < navigator.mimeTypes.length; i++) {
+          var mt = navigator.mimeTypes[i];
+          mimeTypes.push([mt.description, mt.type, mt.suffixes].join("~~"));
+        }
+        return mimeTypes.join(";;");
+      },
+      fonts: getFonts
     },
     os : {
       platform: function() {
@@ -257,33 +274,39 @@ var fpscanner = (function () {
   };
 
   var generateFingerprint = function() {
-    var promises = [];
-    var fingerprint = {};
-    defaultOptions.all.forEach((attribute) => {
-      // attribute is either an object if it represents a category of the fingerprint
-      // or a string if it represents an attribute at the root level of the fingerprint
-      if(typeof attribute === "string") {
-        // TODO root attribute needs to be adapted they will also be object
-        fingerprint[attribute] = defaultAttributeToFunction[attribute]();
-      } else {
-        var subPropertyName = Object.keys(attribute)[0];
-        fingerprint[subPropertyName] = {};
-        attribute[subPropertyName].forEach((subAttribute) => {
-          // TODO needs to be adapted depending on sync/async/
-          if(subAttribute.isAsync) {
-            promises.push(new Promise((resolve, reject) => {
-              defaultAttributeToFunction[subPropertyName][subAttribute.name]().then((val) => {
-                fingerprint[subPropertyName][subAttribute.name] = val;
-                return resolve(val);
-              });
-            }))
-          } else {
-            fingerprint[subPropertyName][subAttribute.name] = defaultAttributeToFunction[subPropertyName][subAttribute.name]();
-          }
-        });
-      }
+    return new Promise((resolve, reject) => {
+      var promises = [];
+      var fingerprint = {};
+
+      defaultOptions.all.forEach((attribute) => {
+        // attribute is either an object if it represents a category of the fingerprint
+        // or a string if it represents an attribute at the root level of the fingerprint
+        if(typeof attribute === "string") {
+          // TODO root attribute needs to be adapted they will also be object
+          fingerprint[attribute] = defaultAttributeToFunction[attribute]();
+        } else {
+          var subPropertyName = Object.keys(attribute)[0];
+          fingerprint[subPropertyName] = {};
+          attribute[subPropertyName].forEach((subAttribute) => {
+            if(subAttribute.isAsync) {
+              promises.push(new Promise((resolve, reject) => {
+                defaultAttributeToFunction[subPropertyName][subAttribute.name]().then((val) => {
+                  fingerprint[subPropertyName][subAttribute.name] = val;
+                  return resolve(val);
+                });
+              }))
+            } else {
+              fingerprint[subPropertyName][subAttribute.name] = defaultAttributeToFunction[subPropertyName][subAttribute.name]();
+            }
+          });
+        }
+      });
+
+      return Promise.all(promises).then(() => {
+        // TODO do all the things like hash etc
+        return resolve(fingerprint);
+      });
     });
-    return fingerprint;
   };
 
  return {
