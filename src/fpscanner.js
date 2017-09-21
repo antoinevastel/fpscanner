@@ -1,31 +1,88 @@
 "use strict";
 
+// TODO say if attribute needs to be hashed or stored in plain text
 var fpscanner = (function () {
   const UNKNOWN = "unknown";
 
+  // Fingerprints can be either a list of attributes or attributes
+  // structured by categories
+  // It is only possible to have at most one level of category
   var defaultOptions = {
     "all": [
-      "userAgent",
-      "platform"
-    ]
-  }
-
-  var attributeToFunction = {
-    "userAgent": function() {
-      return navigator.userAgent;
-    },
-    "platform": function() {
-      if (navigator.platform) {
-        return navigator.platform;
+      {
+        "browser": [
+          /*"canvas",*/
+          //"canvasBis", // Can be seen as custom canvas function
+          //"audio",
+          //"fonts",
+          "plugins",
+          //"mimeTypes",
+          /*"webGL",*/
+          "userAgent",
+          /*"dnt",*/
+          //"adBlock",
+          //"cookies",
+          //"name",
+          //"version",
+          //"maths",
+          //"productSub",
+          //"navigatorPrototype",
+          /*"localStorage",*/
+        ]
+      },
+      {
+        "os": [
+          "platform"
+        ],
       }
-      return UNKNOWN;
+    ]
+  };
+
+  var defaultAttributeToFunction = {
+    browser: {
+      userAgent: function() {
+        return navigator.userAgent;
+      },
+      plugins: function() {
+        var pluginsRes = [];
+        var plugins = [];
+        for(var i = 0; i < navigator.plugins.length; i++) {
+          var plugin = navigator.plugins[i];
+          var pluginStr = [plugin.name, plugin.description, plugin.filename, plugin.version].join("::");
+          var mimeTypes = [];
+          Object.keys(plugin).forEach((mt) => {
+            mimeTypes.push([plugin[mt].type, plugin[mt].suffixes, plugin[mt].description].join("~"));
+          });
+          mimeTypes = mimeTypes.join(",");
+          pluginsRes.push(pluginStr + "__" + mimeTypes);
+        }
+        return pluginsRes.join(";;;");
+      }
+    },
+    os : {
+      platform: function() {
+        if (navigator.platform) {
+          return navigator.platform;
+        }
+        return UNKNOWN;
+      }
     }
-  }
+  };
 
   var generateFingerprint = function() {
     var fingerprint = {};
     defaultOptions.all.forEach(function(attribute) {
-      fingerprint[attribute] = attributeToFunction[attribute]();
+      // attribute is either an object if it represents a category of the fingerprint
+      // or a string if it represents an attribute at the root level of the fingerprint
+      if(typeof attribute === "string") {
+        fingerprint[attribute] = defaultAttributeToFunction[attribute]();
+      } else {
+        var subPropertyName = Object.keys(attribute)[0];
+        fingerprint[subPropertyName] = {};
+        attribute[subPropertyName].forEach(function(subAttribute) {
+          fingerprint[subPropertyName][subAttribute] = defaultAttributeToFunction[subPropertyName][subAttribute]();
+        });
+      }
     });
     return fingerprint;
   };
