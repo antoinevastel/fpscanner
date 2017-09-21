@@ -41,7 +41,11 @@ var fpscanner = (function () {
             hash: false,
             isAsync: false
           },
-          /*"dnt",*/
+		  {
+			name: "dnt",
+			hash: false,
+			isAsync: false
+		  },
           {
             name: "adBlock",
             hash: false,
@@ -229,7 +233,18 @@ var fpscanner = (function () {
         canvasContext.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 4, 45);
         return canvas.toDataURL();
       },
-      audio: getAudio
+      audio: getAudio,
+      dnt: function() {
+        if (navigator.doNotTrack) {
+          return navigator.doNotTrack;
+        } else if (navigator.msDoNotTrack) {
+          return navigator.msDoNotTrack;
+        } else if (window.doNotTrack) {
+          return window.doNotTrack;
+        }
+        return UNKNOWN;
+      }
+
     },
     os : {
       platform: function() {
