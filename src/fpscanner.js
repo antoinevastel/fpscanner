@@ -15,7 +15,7 @@ var fpscanner = (function () {
     "all": [
       {
         "browser": [
-          /*"canvas",*/
+          "canvas",
           //"canvasBis", // Can be seen as custom canvas function
           //"audio",
           //"fonts",
@@ -29,7 +29,7 @@ var fpscanner = (function () {
           "name",
           "version",
           "maths",
-          //"productSub",
+          //"productSub", // move to a scanner part
           //"navigatorPrototype",
           "localStorage",
         ]
@@ -165,6 +165,23 @@ var fpscanner = (function () {
           domLocalStorage = "no";
         }
         return domLocalStorage;
+      },
+      canvas: function() {
+        var canvas = document.createElement("canvas");
+        canvas.height = 60;
+        canvas.width = 400;
+        var canvasContext = canvas.getContext("2d");
+        canvas.style.display = "inline";
+        canvasContext.textBaseline = "alphabetic";
+        canvasContext.fillStyle = "#f60";
+        canvasContext.fillRect(125, 1, 62, 20);
+        canvasContext.fillStyle = "#069";
+        canvasContext.font = "11pt no-real-font-123";
+        canvasContext.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 2, 15);
+        canvasContext.fillStyle = "rgba(102, 204, 0, 0.7)";
+        canvasContext.font = "18pt Arial";
+        canvasContext.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 4, 45);
+        return canvas.toDataURL();
       }
     },
     os : {
