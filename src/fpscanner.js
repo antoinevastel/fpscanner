@@ -7,6 +7,8 @@ var fpscanner = (function () {
   const uaParser = new parser.UAParser();
   uaParser.setUA(navigator.userAgent);
 
+  const getAudio = require('./audio.js');
+
   const UNKNOWN = "unknown";
   // Fingerprints can be either a list of attributes or attributes
   // structured by categories
@@ -15,28 +17,72 @@ var fpscanner = (function () {
     "all": [
       {
         "browser": [
-          "canvas",
+          {
+            name: "canvas",
+            hash: false,
+            isAsync: false
+          },
           //"canvasBis", // Can be seen as custom canvas function
-          //"audio",
+          {
+            name: "audio",
+            hash: false,
+            isAsync: true,
+          },
           //"fonts",
-          "plugins",
+          {
+            name: "plugins",
+            hash: false,
+            isAsync: false
+          },
           //"mimeTypes",
           /*"webGL",*/
-          "userAgent",
+          {
+            name: "userAgent",
+            hash: false,
+            isAsync: false
+          },
           /*"dnt",*/
-          "adBlock",
-          "cookies",
-          "name",
-          "version",
-          "maths",
+          {
+            name: "adBlock",
+            hash: false,
+            isAsync: false
+          },
+          {
+            name: "cookies",
+            hash: false,
+            isAsync: false
+          },
+          {
+            name: "name",
+            hash: false,
+            isAsync: false
+          },
+          {
+            name: "version",
+            hash: false,
+            isAsync: false
+          },
+          {
+            name: "maths",
+            hash: false,
+            isAsync: false
+          },
           //"productSub", // move to a scanner part
           //"navigatorPrototype",
-          "localStorage",
+          {
+            name: "localStorage",
+            hash: false,
+            isAsync: false
+          }
         ]
       },
       {
         "os": [
-          "platform"
+          {
+            name: "platform",
+            hash: false,
+            isAsync: false
+          }
         ],
       }
     ]
@@ -182,7 +228,8 @@ var fpscanner = (function () {
         canvasContext.font = "18pt Arial";
         canvasContext.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 4, 45);
         return canvas.toDataURL();
-      }
+      },
+      audio: getAudio
     },
     os : {
       platform: function() {
@@ -195,17 +242,29 @@ var fpscanner = (function () {
   };
 
   var generateFingerprint = function() {
+    var promises = [];
     var fingerprint = {};
     defaultOptions.all.forEach((attribute) => {
       // attribute is either an object if it represents a category of the fingerprint
       // or a string if it represents an attribute at the root level of the fingerprint
       if(typeof attribute === "string") {
+        // TODO root attribute needs to be adapted they will also be object
         fingerprint[attribute] = defaultAttributeToFunction[attribute]();
       } else {
         var subPropertyName = Object.keys(attribute)[0];
         fingerprint[subPropertyName] = {};
         attribute[subPropertyName].forEach((subAttribute) => {
-          fingerprint[subPropertyName][subAttribute] = defaultAttributeToFunction[subPropertyName][subAttribute]();
+          // TODO needs to be adapted depending on sync/async/
+          if(subAttribute.isAsync) {
+            promises.push(new Promise((resolve, reject) => {
+              defaultAttributeToFunction[subPropertyName][subAttribute.name]().then((val) => {
+                fingerprint[subPropertyName][subAttribute.name] = val;
+                return resolve(val);
+              });
+            }))
+          } else {
+            fingerprint[subPropertyName][subAttribute.name] = defaultAttributeToFunction[subPropertyName][subAttribute.name]();
+          }
         });
       }
     });
