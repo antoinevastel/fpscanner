@@ -1,9 +1,13 @@
 "use strict";
 
+
 // TODO say if attribute needs to be hashed or stored in plain text
 var fpscanner = (function () {
-  const UNKNOWN = "unknown";
+  const parser = require('ua-parser-js');
+  const uaParser = new parser.UAParser();
+  uaParser.setUA(navigator.userAgent);
 
+  const UNKNOWN = "unknown";
   // Fingerprints can be either a list of attributes or attributes
   // structured by categories
   // It is only possible to have at most one level of category
@@ -22,8 +26,8 @@ var fpscanner = (function () {
           /*"dnt",*/
           //"adBlock",
           //"cookies",
-          //"name",
-          //"version",
+          "name",
+          "version",
           //"maths",
           //"productSub",
           //"navigatorPrototype",
@@ -57,6 +61,12 @@ var fpscanner = (function () {
           pluginsRes.push(pluginStr + "__" + mimeTypes);
         }
         return pluginsRes.join(";;;");
+      },
+      name: function() {
+        return uaParser.getBrowser().name;
+      },
+      version: function() {
+        return uaParser.getBrowser().version;
       }
     },
     os : {
@@ -71,7 +81,7 @@ var fpscanner = (function () {
 
   var generateFingerprint = function() {
     var fingerprint = {};
-    defaultOptions.all.forEach(function(attribute) {
+    defaultOptions.all.forEach((attribute) => {
       // attribute is either an object if it represents a category of the fingerprint
       // or a string if it represents an attribute at the root level of the fingerprint
       if(typeof attribute === "string") {
@@ -79,7 +89,7 @@ var fpscanner = (function () {
       } else {
         var subPropertyName = Object.keys(attribute)[0];
         fingerprint[subPropertyName] = {};
-        attribute[subPropertyName].forEach(function(subAttribute) {
+        attribute[subPropertyName].forEach((subAttribute) => {
           fingerprint[subPropertyName][subAttribute] = defaultAttributeToFunction[subPropertyName][subAttribute]();
         });
       }
