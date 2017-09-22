@@ -1,6 +1,6 @@
 "use strict";
 
-
+// TODO separate collect code from scanner code so that scanner can be placed on serverside
 // TODO say if attribute needs to be hashed or stored in plain text
 const fpscanner = (function () {
   const parser = require('ua-parser-js');
@@ -18,6 +18,7 @@ const fpscanner = (function () {
     return {name: name, hash: hash, isAsync: isAsync};
   }
 
+  // TODO add geolocation
   const defaultOptions = {
     "all": [
       {
@@ -37,29 +38,74 @@ const fpscanner = (function () {
           option("version", false, false),
           option("maths", false, false),
           option("localStorage", false, false),
-          //"productSub", // TODO move to a scanner part
-          //"navigatorPrototype", // TODO move to scanner
         ]
       },
       {
-
         "os": [
+          option("name", false, false),
           option("platform", false, false),
           option("languages", false, false),
           option("processors", false, false),
           option("hardwareConcurrency", false, false),
           option("resolution", false, false),
+          option("colorDepth", false, false),
+          option("screenDensity", false, false),
+          option("oscpu", false, false),
+          option("touchScreen", false, false),
+          option("videoCard", false, false),
+          option("multimediaDevices", false, true),
         ],
+      },
+      {
+        "network": [
+          option("ipAddresses", false, true)
+        ]
+      },
+      {
+        "geolocation": [
+          option("timezone", false, false),
+          option("timezoneLocale", false, false),
+        ]
+      },
+      {
+        "scanner": [
+          option("productSub", false, false),
+          option("navigatorPrototype", false, false),
+          option("etsl", false, false),
+          option("showModal", false, false),
+          option("sendBeacon", false, false),
+          option("spawn", false, false),
+          option("emit", false, false),
+          option("buffer", false, false),
+          option("timezoneOffsetDesc", false, false),
+          option("screenDesc", false, false),
+          option("historyDesc", false, false),
+          option("bindDesc", false, false),
+          option("canvasDesc", false, false),
+
+          option("awesomium", false, false),
+          option("ghostJS", false, false),
+          option("nightmareJS", false, false),
+          option("fmget", false, false),
+          option("webDriver", false, false),
+          option("seleniumIDE", false, false),
+          option("domAutomation", false, false),
+
+          option("errorsGenerated", false, false),
+          option("resOverflow", false, false),
+          option("emoji", false, false),
+          option("accelerometerUsed", false, true)
+        ]
       }
     ]
   };
 
   const defaultAttributeToFunction = {
     browser: {
-      userAgent: function() {
+      userAgent: () => {
         return navigator.userAgent;
       },
-      plugins: function() {
+      plugins: () => {
         const pluginsRes = [];
         for(let i = 0; i < navigator.plugins.length; i++) {
           const plugin = navigator.plugins[i];
@@ -73,13 +119,13 @@ const fpscanner = (function () {
         }
         return pluginsRes.join(";;;");
       },
-      name: function() {
+      name: () => {
         return uaParser.getBrowser().name;
       },
-      version: function() {
+      version: () => {
         return uaParser.getBrowser().version;
       },
-      maths: function() {
+      maths: () => {
         function asinh(x) {
           if (x === -Infinity) {
             return x;
@@ -142,7 +188,7 @@ const fpscanner = (function () {
           tanh(1)
         ].join(";");
       },
-      adBlock: function() {
+      adBlock: () => {
         const ads = document.createElement("div");
         ads.innerHTML = "&nbsp;";
         ads.className = "adsbox";
@@ -157,10 +203,10 @@ const fpscanner = (function () {
         }
         return result;
       },
-      cookies: function() {
+      cookies: () => {
         return window.navigator.cookieEnabled ? "yes" : "no";
       },
-      localStorage: function() {
+      localStorage: () => {
         let domLocalStorage;
         try {
           localStorage.fp = "test";
@@ -178,7 +224,7 @@ const fpscanner = (function () {
         }
         return domLocalStorage;
       },
-      canvas: function() {
+      canvas: () => {
         const canvas = document.createElement("canvas");
         canvas.height = 60;
         canvas.width = 400;
@@ -196,7 +242,7 @@ const fpscanner = (function () {
         return canvas.toDataURL();
       },
       audio: getAudio,
-      dnt: function() {
+      dnt: () => {
         if (navigator.doNotTrack) {
           return navigator.doNotTrack;
         } else if (navigator.msDoNotTrack) {
@@ -206,7 +252,7 @@ const fpscanner = (function () {
         }
         return UNKNOWN;
       },
-      mimeTypes : function() {
+      mimeTypes : () => {
         const mimeTypes = [];
         for (let i = 0; i < navigator.mimeTypes.length; i++) {
           let mt = navigator.mimeTypes[i];
@@ -215,7 +261,7 @@ const fpscanner = (function () {
         return mimeTypes.join(";;");
       },
       fonts: getFonts,
-      webGL: function() {
+      webGL: () => {
         function describeRange(opt_attributes) {
           return "[" + opt_attributes[0] + ", " + opt_attributes[1] + "]";
         }
@@ -320,34 +366,371 @@ const fpscanner = (function () {
       }
     },
     os : {
-      platform: function() {
+      name: () => {
+        let value = uaParser.getOS();
+        if (value.name === "Windows") {
+          return value.name + " " + value.version;
+        }
+        return value.name;
+      },
+      platform: () => {
         if (navigator.platform) {
           return navigator.platform;
         }
         return UNKNOWN;
       },
-      languages: function() {
+      languages: () => {
         if (navigator.languages) {
           return navigator.languages.join("~~");
         }
         return UNKNOWN;
       },
-      processors: function() {
+      processors: () => {
         if (navigator.cpuClass) {
           return navigator.cpuClass;
         }
         return UNKNOWN;
       },
-      hardwareConcurrency: function() {
+      hardwareConcurrency: () => {
         if (navigator.hardwareConcurrency) {
           return navigator.hardwareConcurrency;
         }
         return UNKNOWN;
       },
-      resolution: function() {
+      resolution: () => {
         return [screen.width, screen.height, screen.availWidth, screen.availHeight].join(",");
-      }
+      },
+      colorDepth: () => {
+        return screen.colorDepth || -1;
+      },
+      screenDensity: () => {
+        return (window.devicePixelRatio || "") + (window.screen.deviceXDPI ? window.screen.deviceXDPI + "x" + window.screen.deviceYDPI : "");
+      },
+      oscpu: () => {
+        if (navigator.oscpu) {
+          return navigator.oscpu;
+        }
+        return UNKNOWN;
+      },
+      touchScreen: () => {
+        let maxTouchPoints = 0;
+        let touchEvent = false;
+        if (typeof navigator.maxTouchPoints !== "undefined") {
+          maxTouchPoints = navigator.maxTouchPoints;
+        } else if (typeof navigator.msMaxTouchPoints !== "undefined") {
+          maxTouchPoints = navigator.msMaxTouchPoints;
+        }
+        try {
+          document.createEvent("TouchEvent");
+          touchEvent = true;
+        } catch (_) {}
 
+        const touchStart = "ontouchstart" in window;
+        return [maxTouchPoints, touchEvent, touchStart].join(";");
+      },
+      videoCard: () => {
+        const canvas = document.createElement('canvas');
+        var ctx = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        let webGLVendor, webGLRenderer;
+        if (ctx.getSupportedExtensions().indexOf("WEBGL_debug_renderer_info") >= 0) {
+          webGLVendor = ctx.getParameter(ctx.getExtension('WEBGL_debug_renderer_info').UNMASKED_VENDOR_WEBGL);
+          webGLRenderer = ctx.getParameter(ctx.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL);
+        } else {
+          webGLVendor = "Not supported";
+          webGLRenderer = "Not supported";
+        }
+        return [webGLVendor, webGLRenderer].join(";;;");
+      },
+      multimediaDevices: () => {
+        return new Promise((resolve) => {
+          const deviceToCount = {
+            "audiooutput": 0,
+            "audioinput": 0,
+            "videoinput": 0
+          };
+
+          if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+            navigator.mediaDevices.enumerateDevices().then((devices) => {
+              let name;
+              for (let i = 0; i < devices.length; i++) {
+                name = [devices[i].kind];
+                deviceToCount[name] = deviceToCount[name] + 1;
+              }
+              resolve(deviceToCount.audiooutput+","+deviceToCount.audioinput+","+deviceToCount.videoinput);
+            });
+          } else {
+            resolve(deviceToCount);
+          }
+        });
+      }
+    },
+    network: {
+      ipAddresses: () => {
+        function getIPs(callback) {
+          var ip_dups = {};
+          var RTCPeerConnection = window.RTCPeerConnection ||
+            window.mozRTCPeerConnection ||
+            window.webkitRTCPeerConnection;
+          var mediaConstraints = {
+            optional: [{RtpDataChannels: true}]
+          };
+          var servers = {iceServers: [{urls: "stun:stun.services.mozilla.com"}]};
+          //construct a new RTCPeerConnection
+          var pc = new RTCPeerConnection(servers, mediaConstraints);
+
+          function handleCandidate(candidate) {
+            //match just the IP address
+            var ip_regex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/;
+            var ip_addr = ip_regex.exec(candidate)[1];
+            //remove duplicates
+            if (ip_dups[ip_addr] === undefined) {
+              callback(ip_addr);
+            }
+            ip_dups[ip_addr] = true;
+          }
+
+          //listen for candidate events
+          pc.onicecandidate = (ice) => {
+            //skip non-candidate events
+            if (ice.candidate) {
+              handleCandidate(ice.candidate.candidate);
+            }
+          };
+          //create a bogus data channel
+          pc.createDataChannel("");
+          //create an offer sdp
+          pc.createOffer((result) => {
+            //trigger the stun server request
+            pc.setLocalDescription(result, () => {}, () => {});
+          }, () => {});
+          setTimeout(() => {
+            //read candidate info from local description
+            const lines = pc.localDescription.sdp.split('\n');
+            lines.forEach((line) => {
+              if (line.indexOf('a=candidate:') === 0) {
+                handleCandidate(line);
+              }
+            });
+          }, 1000);
+        }
+
+        return new Promise((resolve) => {
+          const network = {};
+          getIPs((ip) => {
+            //local IPs
+            if (ip.match(/^(192\.168\.|169\.254\.|10\.|172\.(1[6-9]|2\d|3[01]))/)) {
+              network.local = ip;
+              return resolve(network);
+            }
+            //IPv6 addresses
+            else if (ip.match(/^[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7}$/)) {
+              network.ipv6 = ip;
+              return resolve(network);
+            }
+            //assume the rest are public IPs
+            else {
+              network.public = ip;
+              return resolve(network);
+            }
+          });
+        });
+      }
+    },
+    scanner: {
+      productSub: () => {
+        return navigator.productSub;
+      },
+      navigatorPrototype: () => {
+        let obj = window.navigator;
+        const protoNavigator = [];
+        do Object.getOwnPropertyNames(obj).forEach((name) => {
+          protoNavigator.push(name);
+        });
+        while (obj = Object.getPrototypeOf(obj));
+
+        let res;
+        const finalProto = [];
+        protoNavigator.forEach((prop) => {
+          const objDesc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(navigator), prop);
+          if (objDesc != undefined) {
+            if (objDesc.value != undefined) {
+              res = objDesc.value.toString();
+            } else if (objDesc.get != undefined) {
+              res = objDesc.get.toString();
+            }
+          } else {
+            res = "";
+          }
+          finalProto.push(prop + "~~~" + res);
+        });
+        return finalProto.join(";;;");
+      },
+      etsl: () => {
+        return eval.toString().length;
+      },
+      showModal: () => {
+        return typeof window.showModalDialog !== "undefined";
+      },
+      sendBeacon: () => {
+        return "sendBeacon" in navigator;
+      },
+      spawn: () => {
+        return typeof window.spawn !== "undefined";
+      },
+      emit: () => {
+        return typeof window.emit !== "undefined";
+      },
+      buffer: () => {
+        return typeof window.Buffer !== "undefined";
+      },
+      timezoneOffsetDesc: () => {
+        try {
+          return Object.getOwnPropertyDescriptor(Date.prototype, "getTimezoneOffset").value.toString();
+        } catch (e) {
+          return "Error";
+        }
+      },
+      screenDesc: () => {
+        try {
+          return Object.getOwnPropertyDescriptor(Object.getPrototypeOf(screen), "width").get.toString();
+        } catch (e) {
+          return "Error";
+        }
+      },
+      historyDesc: () => {
+        try {
+          return Object.getOwnPropertyDescriptor(window, "History").value.toString()
+        } catch (e) {
+          return "Error";
+        }
+      },
+      bindDesc: () => {
+        try {
+          return Object.getOwnPropertyDescriptor(Function.prototype, "bind").value.toString();
+        } catch (e) {
+          return "Error";
+        }
+      },
+      canvasDesc: () => {
+        try {
+          return Object.getOwnPropertyDescriptor(window.HTMLCanvasElement.prototype, "toDataURL").value.toString();
+        } catch (e) {
+          return "Error";
+        }
+      },
+      awesomium: () => {
+        return !!window.awesomium;
+      },
+      ghostJS: () => {
+        return !!window.fmget_targets;
+      },
+      nightmareJS: () => {
+        return !!window.__nightmare;
+      },
+      fmget: () => {
+        return !!window.fmget_targets;
+      },
+      webDriver: () => {
+        return "webdriver" in window || "true" == document.getElementsByTagName("html")[0].getAttribute("webdriver");
+      },
+      seleniumIDE: () => {
+        return !!window._Selenium_IDE_Recorder;
+      },
+      domAutomation: () => {
+        return "domAutomation" in window || "domAutomationController" in window;
+      },
+      errorsGenerated: () => {
+        const errors = [];
+        try {
+          azeaze + 3;
+        } catch (e) {
+          errors.push(e.message);
+          errors.push(e.fileName);
+          errors.push(e.lineNumber);
+          errors.push(e.description);
+          errors.push(e.number);
+          errors.push(e.columnNumber);
+          try {
+            errors.push(e.toSource().toString());
+          } catch (e) {
+            errors.push(undefined);
+          }
+        }
+
+        try {
+          new WebSocket("itsgonnafail");
+        } catch (e) {
+          errors.push(e.toString());
+        }
+        return errors;
+      },
+      resOverflow: () => {
+        let depth = 0;
+        let errorMessage;
+        let errorName;
+
+        function inc() {
+          try {
+            depth++;
+            inc();
+          } catch (e) {
+            errorMessage = e.message;
+            errorName = e.name;
+          }
+        }
+
+        inc();
+        return [depth, errorName, errorMessage];
+      },
+      emoji: () => {
+        const canvas = document.createElement("canvas");
+        canvas.height = 60;
+        canvas.width = 60;
+        const canvasContext = canvas.getContext("2d");
+        canvas.style.display = "inline";
+        canvasContext.textBaseline = "alphabetic";
+        canvasContext.font = "40pt no-real-font-123";
+        canvasContext.fillText("\uD83E\uDD84", -5, 50);
+        return canvas.toDataURL();
+      },
+      accelerometerUsed: () => {
+        return new Promise((resolve) => {
+          window.ondevicemotion = function (event) {
+            if (event.accelerationIncludingGravity.x !== null) {
+              return resolve(true);
+            }
+          };
+
+          setTimeout(() => {
+            return resolve(false);
+          }, 200);
+        });
+      }
+    },
+    geolocation: {
+      timezone: () => {
+        return new Date().getTimezoneOffset();
+      },
+      timezoneLocale: () => {
+        // TODO maybe remove beginning of the function to keep only the part related to the timezone
+        const d = new Date();
+        let skip = d.getTimezoneOffset();
+        d.setTime(0);
+        let val;
+        const value = 1E9;
+        let locale = value.toLocaleString ? value.toLocaleString() + d.toLocaleString() : "";
+        let ms = 0;
+        // ms += nb of ms in a day
+        for (; ms < 1769390779860; ms += 864E5) {
+          d.setTime(ms);
+          val = d.getTimezoneOffset();
+          if (val !== skip) {
+            locale += "" + val + Math.round(ms / 1E3);
+            skip = val;
+          }
+        }
+        return locale;
+      }
     }
   };
 
@@ -361,6 +744,7 @@ const fpscanner = (function () {
         // or a string if it represents an attribute at the root level of the fingerprint
         if (typeof attribute === "string") {
           // TODO root attribute needs to be adapted they will also be object
+          // Maybe useless, the solution is to create a single fake category
           fingerprint[attribute] = defaultAttributeToFunction[attribute]();
         } else {
           const subPropertyName = Object.keys(attribute)[0];
@@ -380,7 +764,7 @@ const fpscanner = (function () {
         }
       });
 
-      return Promise.all(promises).then(() => {
+      return Promise.all(promises).then((val) => {
         // TODO do all the things like hash etc
         return resolve(fingerprint);
       });
