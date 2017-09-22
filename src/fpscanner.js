@@ -14,97 +14,41 @@ const fpscanner = (function () {
   // Fingerprints can be either a list of attributes or attributes
   // structured by categories
   // It is only possible to have at most one level of category
+  const option = function(name, hash, isAsync) {
+    return {name: name, hash: hash, isAsync: isAsync};
+  }
+
   const defaultOptions = {
     "all": [
       {
         "browser": [
           //"canvasBis", // Can be seen as custom canvas function
-          {
-            name: "canvas",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "audio",
-            hash: false,
-            isAsync: true,
-          },
-          {
-            name: "fonts",
-            hash: false,
-            isAsync: true
-          },
-          {
-            name: "plugins",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "mimeTypes",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "webGL",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "userAgent",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "dnt",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "adBlock",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "cookies",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "name",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "version",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "maths",
-            hash: false,
-            isAsync: false
-          },
+          option("canvas", false, false),
+          option("audio", false, true),
+          option("fonts", false, true),
+          option("plugins", false, false),
+          option("mimeTypes", false, false),
+          option("webGL", false, false),
+          option("userAgent", false, false),
+          option("dnt", false, false),
+          option("adBlock", false, false),
+          option("cookies", false, false),
+          option("name", false, false),
+          option("version", false, false),
+          option("maths", false, false),
+          option("localStorage", false, false),
           //"productSub", // TODO move to a scanner part
           //"navigatorPrototype", // TODO move to scanner
-          {
-            name: "localStorage",
-            hash: false,
-            isAsync: false
-          }
         ]
       },
       {
+
         "os": [
-          {
-            name: "platform",
-            hash: false,
-            isAsync: false
-          },
-          {
-            name: "languages",
-            hash: false,
-            isAsync: false
-          }
+          option("platform", false, false),
+          option("languages", false, false),
+          option("processors", false, false),
+          option("hardwareConcurrency", false, false),
+          option("resolution", false, false),
         ],
       }
     ]
@@ -387,13 +331,28 @@ const fpscanner = (function () {
           return navigator.languages.join("~~");
         }
         return UNKNOWN;
+      },
+      processors: function() {
+        if (navigator.cpuClass) {
+          return navigator.cpuClass;
+        }
+        return UNKNOWN;
+      },
+      hardwareConcurrency: function() {
+        if (navigator.hardwareConcurrency) {
+          return navigator.hardwareConcurrency;
+        }
+        return UNKNOWN;
+      },
+      resolution: function() {
+        return [screen.width, screen.height, screen.availWidth, screen.availHeight].join(",");
       }
 
     }
   };
 
   const generateFingerprint = function () {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const promises = [];
       const fingerprint = {};
 
@@ -408,7 +367,7 @@ const fpscanner = (function () {
           fingerprint[subPropertyName] = {};
           attribute[subPropertyName].forEach((subAttribute) => {
             if (subAttribute.isAsync) {
-              promises.push(new Promise((resolve, reject) => {
+              promises.push(new Promise((resolve) => {
                 defaultAttributeToFunction[subPropertyName][subAttribute.name]().then((val) => {
                   fingerprint[subPropertyName][subAttribute.name] = val;
                   return resolve(val);
