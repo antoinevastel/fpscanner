@@ -84,8 +84,8 @@ const fpscanner = (function () {
             hash: false,
             isAsync: false
           },
-          //"productSub", // move to a scanner part
-          //"navigatorPrototype",
+          //"productSub", // TODO move to a scanner part
+          //"navigatorPrototype", // TODO move to scanner
           {
             name: "localStorage",
             hash: false,
@@ -97,6 +97,11 @@ const fpscanner = (function () {
         "os": [
           {
             name: "platform",
+            hash: false,
+            isAsync: false
+          },
+          {
+            name: "languages",
             hash: false,
             isAsync: false
           }
@@ -111,12 +116,11 @@ const fpscanner = (function () {
         return navigator.userAgent;
       },
       plugins: function() {
-        var pluginsRes = [];
-        var plugins = [];
-        for(var i = 0; i < navigator.plugins.length; i++) {
-          var plugin = navigator.plugins[i];
-          var pluginStr = [plugin.name, plugin.description, plugin.filename, plugin.version].join("::");
-          var mimeTypes = [];
+        const pluginsRes = [];
+        for(let i = 0; i < navigator.plugins.length; i++) {
+          const plugin = navigator.plugins[i];
+          const pluginStr = [plugin.name, plugin.description, plugin.filename, plugin.version].join("::");
+          let mimeTypes = [];
           Object.keys(plugin).forEach((mt) => {
             mimeTypes.push([plugin[mt].type, plugin[mt].suffixes, plugin[mt].description].join("~"));
           });
@@ -149,12 +153,12 @@ const fpscanner = (function () {
         }
 
         function cbrt(x) {
-          var y = Math.pow(Math.abs(x), 1 / 3);
+          let y = Math.pow(Math.abs(x), 1 / 3);
           return x < 0 ? -y : y;
         }
 
         function cosh(x) {
-          var y = Math.exp(x);
+          const y = Math.exp(x);
           return (y + 1 / y) / 2;
         }
 
@@ -167,7 +171,7 @@ const fpscanner = (function () {
         }
 
         function sinh(x) {
-          var y = Math.exp(x);
+          const y = Math.exp(x);
           return (y - 1 / y) / 2;
         }
 
@@ -177,8 +181,8 @@ const fpscanner = (function () {
           } else if (x === -Infinity) {
               return -1;
           } else {
-              var y = Math.exp(2 * x);
-              return (y - 1) / (y + 1);
+            const y = Math.exp(2 * x);
+            return (y - 1) / (y + 1);
           }
         }
 
@@ -195,10 +199,10 @@ const fpscanner = (function () {
         ].join(";");
       },
       adBlock: function() {
-        var ads = document.createElement("div");
+        const ads = document.createElement("div");
         ads.innerHTML = "&nbsp;";
         ads.className = "adsbox";
-        var result = false;
+        let result = false;
         try {
           // body may not exist, that's why we need try/catch
           document.body.appendChild(ads);
@@ -213,13 +217,14 @@ const fpscanner = (function () {
         return window.navigator.cookieEnabled ? "yes" : "no";
       },
       localStorage: function() {
+        let domLocalStorage;
         try {
           localStorage.fp = "test";
         } catch (ex) {}
 
         try {
-          var domLocalStorage = "";
-          if (localStorage.fp == "test") {
+          domLocalStorage = "";
+          if (localStorage.fp === "test") {
             domLocalStorage = "yes";
           } else {
             domLocalStorage = "no";
@@ -230,10 +235,10 @@ const fpscanner = (function () {
         return domLocalStorage;
       },
       canvas: function() {
-        var canvas = document.createElement("canvas");
+        const canvas = document.createElement("canvas");
         canvas.height = 60;
         canvas.width = 400;
-        var canvasContext = canvas.getContext("2d");
+        const canvasContext = canvas.getContext("2d");
         canvas.style.display = "inline";
         canvasContext.textBaseline = "alphabetic";
         canvasContext.fillStyle = "#f60";
@@ -258,9 +263,9 @@ const fpscanner = (function () {
         return UNKNOWN;
       },
       mimeTypes : function() {
-        var mimeTypes = [];
-        for (var i = 0; i < navigator.mimeTypes.length; i++) {
-          var mt = navigator.mimeTypes[i];
+        const mimeTypes = [];
+        for (let i = 0; i < navigator.mimeTypes.length; i++) {
+          let mt = navigator.mimeTypes[i];
           mimeTypes.push([mt.description, mt.type, mt.suffixes].join("~~"));
         }
         return mimeTypes.join(";;");
@@ -272,8 +277,8 @@ const fpscanner = (function () {
         }
 
         function getMaxAnisotropy(gl) {
-          var hasMembers;
-          var e = gl.getExtension("EXT_texture_filter_anisotropic") || (gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic") || gl.getExtension("MOZ_EXT_texture_filter_anisotropic"));
+          let hasMembers;
+          const e = gl.getExtension("EXT_texture_filter_anisotropic") || (gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic") || gl.getExtension("MOZ_EXT_texture_filter_anisotropic"));
           return e ? (hasMembers = gl.getParameter(e.MAX_TEXTURE_MAX_ANISOTROPY_EXT), hasMembers || (hasMembers = 2), hasMembers) : null;
         }
 
@@ -286,8 +291,8 @@ const fpscanner = (function () {
         }
 
         function getShader(shaderType, gl) {
-          var high = gl.getShaderPrecisionFormat(shaderType, gl.HIGH_FLOAT);
-          var low = gl.getShaderPrecisionFormat(shaderType, gl.MEDIUM_FLOAT);
+          const high = gl.getShaderPrecisionFormat(shaderType, gl.HIGH_FLOAT);
+          const low = gl.getShaderPrecisionFormat(shaderType, gl.MEDIUM_FLOAT);
           return {
             High: getPrecisionDescription(high, 1),
             Medium: getPrecisionDescription(low, 1),
@@ -297,7 +302,7 @@ const fpscanner = (function () {
         }
 
         function getFloatIntPrecision(gl) {
-          var high = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
+          let high = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
           return (high.precision ? "highp/" : "mediump/") + (high = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_INT) && high.rangeMax ? "highp" : "lowp");
         }
 
@@ -306,14 +311,14 @@ const fpscanner = (function () {
         }
 
         function getAngle(gl) {
-          var lineWidthRange = describeRange(gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE));
-          var a = "Win32" === navigator.platform && ("Internet Explorer" !== gl.getParameter(gl.RENDERER) && lineWidthRange === describeRange([1, 1]));
+          const lineWidthRange = describeRange(gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE));
+          const a = "Win32" === navigator.platform && ("Internet Explorer" !== gl.getParameter(gl.RENDERER) && lineWidthRange === describeRange([1, 1]));
           return a ? isPowerOfTwo(gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS)) && isPowerOfTwo(gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS)) ? 2 : 1 : 0;
         }
 
         function turnObjToArray(map) {
-          var bProperties = [];
-          var letter;
+          const bProperties = [];
+          let letter;
           for (letter in map) {
             bProperties.push([letter, map[letter]]);
           }
@@ -321,14 +326,14 @@ const fpscanner = (function () {
         }
 
         if (window.WebGLRenderingContext) {
-          var gl;
-          var cur;
-          var i = 4;
-          var test_canvas = window.document.createElement("canvas");
-          var names = ["webkit-3d", "moz-webgl", "experimental-webgl", "webgl"];
+          let gl;
+          let cur;
+          let i = 4;
+          const test_canvas = window.document.createElement("canvas");
+          const names = ["webkit-3d", "moz-webgl", "experimental-webgl", "webgl"];
           for (; i--;) {
             {
-                if ((gl = test_canvas.getContext(cur = names[i])) && "function" == typeof gl.getParameter) {
+                if ((gl = test_canvas.getContext(cur = names[i])) && "function" === typeof gl.getParameter) {
                   return [turnObjToArray({
                       contextName: cur,
                       glVersion: gl.getParameter(gl.VERSION),
@@ -376,26 +381,33 @@ const fpscanner = (function () {
           return navigator.platform;
         }
         return UNKNOWN;
+      },
+      languages: function() {
+        if (navigator.languages) {
+          return navigator.languages.join("~~");
+        }
+        return UNKNOWN;
       }
+
     }
   };
 
-  var generateFingerprint = function() {
+  const generateFingerprint = function () {
     return new Promise((resolve, reject) => {
-      var promises = [];
-      var fingerprint = {};
+      const promises = [];
+      const fingerprint = {};
 
       defaultOptions.all.forEach((attribute) => {
         // attribute is either an object if it represents a category of the fingerprint
         // or a string if it represents an attribute at the root level of the fingerprint
-        if(typeof attribute === "string") {
+        if (typeof attribute === "string") {
           // TODO root attribute needs to be adapted they will also be object
           fingerprint[attribute] = defaultAttributeToFunction[attribute]();
         } else {
-          var subPropertyName = Object.keys(attribute)[0];
+          const subPropertyName = Object.keys(attribute)[0];
           fingerprint[subPropertyName] = {};
           attribute[subPropertyName].forEach((subAttribute) => {
-            if(subAttribute.isAsync) {
+            if (subAttribute.isAsync) {
               promises.push(new Promise((resolve, reject) => {
                 defaultAttributeToFunction[subPropertyName][subAttribute.name]().then((val) => {
                   fingerprint[subPropertyName][subAttribute.name] = val;
@@ -416,7 +428,7 @@ const fpscanner = (function () {
     });
   };
 
- return {
+  return {
    generateFingerprint: generateFingerprint
  };
 
