@@ -2,7 +2,7 @@
 
 
 // TODO say if attribute needs to be hashed or stored in plain text
-var fpscanner = (function () {
+const fpscanner = (function () {
   const parser = require('ua-parser-js');
   const uaParser = new parser.UAParser();
   uaParser.setUA(navigator.userAgent);
@@ -14,16 +14,16 @@ var fpscanner = (function () {
   // Fingerprints can be either a list of attributes or attributes
   // structured by categories
   // It is only possible to have at most one level of category
-  var defaultOptions = {
+  const defaultOptions = {
     "all": [
       {
         "browser": [
+          //"canvasBis", // Can be seen as custom canvas function
           {
             name: "canvas",
             hash: false,
             isAsync: false
           },
-          //"canvasBis", // Can be seen as custom canvas function
           {
             name: "audio",
             hash: false,
@@ -44,7 +44,11 @@ var fpscanner = (function () {
             hash: false,
             isAsync: false
           },
-          /*"webGL",*/
+          {
+            name: "webGL",
+            hash: false,
+            isAsync: false
+          },
           {
             name: "userAgent",
             hash: false,
@@ -101,7 +105,7 @@ var fpscanner = (function () {
     ]
   };
 
-  var defaultAttributeToFunction = {
+  const defaultAttributeToFunction = {
     browser: {
       userAgent: function() {
         return navigator.userAgent;
@@ -261,7 +265,110 @@ var fpscanner = (function () {
         }
         return mimeTypes.join(";;");
       },
-      fonts: getFonts
+      fonts: getFonts,
+      webGL: function() {
+        function describeRange(opt_attributes) {
+          return "[" + opt_attributes[0] + ", " + opt_attributes[1] + "]";
+        }
+
+        function getMaxAnisotropy(gl) {
+          var hasMembers;
+          var e = gl.getExtension("EXT_texture_filter_anisotropic") || (gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic") || gl.getExtension("MOZ_EXT_texture_filter_anisotropic"));
+          return e ? (hasMembers = gl.getParameter(e.MAX_TEXTURE_MAX_ANISOTROPY_EXT), hasMembers || (hasMembers = 2), hasMembers) : null;
+        }
+
+        function formatPower(exponent, recurring) {
+          return recurring ? "" + Math.pow(2, exponent) : "2^" + exponent;
+        }
+
+        function getPrecisionDescription(precision, recurring) {
+          return "[-" + formatPower(precision.rangeMin, recurring) + ", " + formatPower(precision.rangeMax, recurring) + "] (" + precision.precision + (recurring ? " bit mantissa" : "") + ")";
+        }
+
+        function getShader(shaderType, gl) {
+          var high = gl.getShaderPrecisionFormat(shaderType, gl.HIGH_FLOAT);
+          var low = gl.getShaderPrecisionFormat(shaderType, gl.MEDIUM_FLOAT);
+          return {
+            High: getPrecisionDescription(high, 1),
+            Medium: getPrecisionDescription(low, 1),
+            Low: getPrecisionDescription(gl.getShaderPrecisionFormat(shaderType, gl.LOW_FLOAT), 1),
+            Best: getPrecisionDescription(high.precision ? high : low, 0)
+          };
+        }
+
+        function getFloatIntPrecision(gl) {
+          var high = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
+          return (high.precision ? "highp/" : "mediump/") + (high = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_INT) && high.rangeMax ? "highp" : "lowp");
+        }
+
+        function isPowerOfTwo(x) {
+          return x && 0 === (x & x - 1);
+        }
+
+        function getAngle(gl) {
+          var lineWidthRange = describeRange(gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE));
+          var a = "Win32" === navigator.platform && ("Internet Explorer" !== gl.getParameter(gl.RENDERER) && lineWidthRange === describeRange([1, 1]));
+          return a ? isPowerOfTwo(gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS)) && isPowerOfTwo(gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS)) ? 2 : 1 : 0;
+        }
+
+        function turnObjToArray(map) {
+          var bProperties = [];
+          var letter;
+          for (letter in map) {
+            bProperties.push([letter, map[letter]]);
+          }
+          return bProperties.sort().toString();
+        }
+
+        if (window.WebGLRenderingContext) {
+          var gl;
+          var cur;
+          var i = 4;
+          var test_canvas = window.document.createElement("canvas");
+          var names = ["webkit-3d", "moz-webgl", "experimental-webgl", "webgl"];
+          for (; i--;) {
+            {
+                if ((gl = test_canvas.getContext(cur = names[i])) && "function" == typeof gl.getParameter) {
+                  return [turnObjToArray({
+                      contextName: cur,
+                      glVersion: gl.getParameter(gl.VERSION),
+                      shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
+                      vendor: gl.getParameter(gl.VENDOR),
+                      renderer: gl.getParameter(gl.RENDERER),
+                      antialias: gl.getContextAttributes().antialias ? "Available" : "Not available",
+                      angle: getAngle(gl),
+                      redBits: gl.getParameter(gl.RED_BITS),
+                      greenBits: gl.getParameter(gl.GREEN_BITS),
+                      blueBits: gl.getParameter(gl.BLUE_BITS),
+                      alphaBits: gl.getParameter(gl.ALPHA_BITS),
+                      depthBits: gl.getParameter(gl.DEPTH_BITS),
+                      stencilBits: gl.getParameter(gl.STENCIL_BITS),
+                      maxRenderBufferSize: gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
+                      maxCombinedTextureImageUnits: gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS),
+                      maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
+                      maxFragmentUniformVectors: gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS),
+                      maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
+                      maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+                      maxVaryingVectors: gl.getParameter(gl.MAX_VARYING_VECTORS),
+                      maxVertexAttributes: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
+                      maxVertexTextureImageUnits: gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS),
+                      maxVertexUniformVectors: gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS),
+                      aliasedLineWidthRange: describeRange(gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE)),
+                      aliasedPointSizeRange: describeRange(gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE)),
+                      maxViewportDimensions: describeRange(gl.getParameter(gl.MAX_VIEWPORT_DIMS)),
+                      maxAnisotropy: getMaxAnisotropy(gl),
+                      extensions: gl.getSupportedExtensions().sort().toString(),
+                      vertexShaderBestPrecision: turnObjToArray(getShader(gl.VERTEX_SHADER, gl)),
+                      fragmentShaderBestPrecision: turnObjToArray(getShader(gl.FRAGMENT_SHADER, gl)),
+                      fragmentShaderFloatIntPrecision: getFloatIntPrecision(gl)
+                  }), gl.getSupportedExtensions().indexOf("WEBGL_debug_renderer_info") !== -1 ? gl.getParameter(gl.getExtension("WEBGL_debug_renderer_info").UNMASKED_VENDOR_WEBGL) + " " + gl.getParameter(gl.getExtension("WEBGL_debug_renderer_info").UNMASKED_RENDERER_WEBGL) : init].join(",");
+              }
+            }
+          }
+          return "Supported. Disabled";
+        }
+        return "WebGL not supported";
+      }
     },
     os : {
       platform: function() {
