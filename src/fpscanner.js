@@ -14,90 +14,81 @@ const fpscanner = (function () {
   // Fingerprints can be either a list of attributes or attributes
   // structured by categories
   // It is only possible to have at most one level of category
-  const option = function(name, hash, isAsync) {
-    return {name: name, hash: hash, isAsync: isAsync};
+  const option = function(hash, isAsync, unpack, params) {
+    return {hash: hash, isAsync: isAsync, unpack: unpack, params: params};
   }
 
   // TODO add geolocation
-  const defaultOptions = {
-    "all": [
-      {
-        "browser": [
-          //"canvasBis", // Can be seen as custom canvas function
-          option("canvas", false, false),
-          option("audio", false, true),
-          option("fonts", false, true),
-          option("plugins", false, false),
-          option("mimeTypes", false, false),
-          option("webGL", false, false),
-          option("userAgent", false, false),
-          option("dnt", false, false),
-          option("adBlock", false, false),
-          option("cookies", false, false),
-          option("name", false, false),
-          option("version", false, false),
-          option("maths", false, false),
-          option("localStorage", false, false),
-        ]
-      },
-      {
-        "os": [
-          option("name", false, false),
-          option("platform", false, false),
-          option("languages", false, false),
-          option("processors", false, false),
-          option("hardwareConcurrency", false, false),
-          option("resolution", false, false),
-          option("colorDepth", false, false),
-          option("screenDensity", false, false),
-          option("oscpu", false, false),
-          option("touchScreen", false, false),
-          option("videoCard", false, false),
-          option("multimediaDevices", false, true),
-        ],
-      },
-      {
-        "network": [
-          option("ipAddresses", false, true)
-        ]
-      },
-      {
-        "geolocation": [
-          option("timezone", false, false),
-          option("timezoneLocale", false, false),
-        ]
-      },
-      {
-        "scanner": [
-          option("productSub", false, false),
-          option("navigatorPrototype", false, false),
-          option("etsl", false, false),
-          option("showModal", false, false),
-          option("sendBeacon", false, false),
-          option("spawn", false, false),
-          option("emit", false, false),
-          option("buffer", false, false),
-          option("timezoneOffsetDesc", false, false),
-          option("screenDesc", false, false),
-          option("historyDesc", false, false),
-          option("bindDesc", false, false),
-          option("canvasDesc", false, false),
+  const DEFAULT_OPTIONS = {
+    browser: {
+      //"canvasBis", // Can be seen as custom canvas function
+      canvas: option(false, false, false, {}),
+      audio: option(false, true, false, {}),
+      fonts: option(false, true, false, {}),
+      plugins: option(false, false, false, {}),
+      mimeTypes: option(false, false, false, {}),
+      webGL: option(false, false, false, {}),
+      userAgent: option(false, false, false, {}),
+      dnt: option(false, false, false, {}),
+      adBlock: option(false, false, false, {}),
+      cookies: option(false, false, false, {}),
+      name: option(false, false, false, {}),
+      version: option(false, false, false, {}),
+      maths: option(false, false, false, {}),
+      localStorage: option(false, false, false, {}),
+      httpHeaders: option(false, false, false, {httpHeadersURL: ''})
+    },
+    os: {
+      name: option(false, false, false, {}),
+      platform: option(false, false, false, {}),
+      languages: option(false, false, false, {}),
+      processors: option(false, false, false, {}),
+      hardwareConcurrency: option(false, false, false, {}),
+      resolution: option(false, false, false, {}),
+      colorDepth: option(false, false, false, {}),
+      screenDensity: option(false, false, false, {}),
+      oscpu: option(false, false, false, {}),
+      touchScreen: option(false, false, false, {}),
+      videoCard: option(false, false, false, {}),
+      multimediaDevices: option(false, true, false, {}),
+    },
+    network: {
+      // TODO Fix so that it returns multiple ip addresses
+      ipAddresses: option(false, true, true, {})
+    },
+    geolocation: {
+      timezone: option(false, false, false, {}),
+      timezoneLocale: option(false, false, false, {}),
+      info: option(false, false, false, {geolocationURL: ""})
+    },
+    scanner: {
+      productSub: option(false, false, false, {}),
+      navigatorPrototype: option(false, false, false, {}),
+      etsl: option(false, false, false, {}),
+      showModal: option(false, false, false, {}),
+      sendBeacon: option(false, false, false, {}),
+      spawn: option(false, false, false, {}),
+      emit: option(false, false, false, {}),
+      buffer: option(false, false, false, {}),
+      timezoneOffsetDesc: option(false, false, false, {}),
+      screenDesc: option(false, false, false, {}),
+      historyDesc: option(false, false, false, {}),
+      bindDesc: option(false, false, false, {}),
+      canvasDesc: option(false, false, false, {}),
 
-          option("awesomium", false, false),
-          option("ghostJS", false, false),
-          option("nightmareJS", false, false),
-          option("fmget", false, false),
-          option("webDriver", false, false),
-          option("seleniumIDE", false, false),
-          option("domAutomation", false, false),
+      awesomium: option(false, false, false, {}),
+      ghostJS: option(false, false, false, {}),
+      nightmareJS: option(false, false, false, {}),
+      fmget: option(false, false, false, {}),
+      webDriver: option(false, false, false, {}),
+      seleniumIDE: option(false, false, false, {}),
+      domAutomation: option(false, false, false, {}),
 
-          option("errorsGenerated", false, false),
-          option("resOverflow", false, false),
-          option("emoji", false, false),
-          option("accelerometerUsed", false, true)
-        ]
-      }
-    ]
+      errorsGenerated: option(false, false, false, {}),
+      resOverflow: option(false, false, false, {}),
+      emoji: option(false, false, false, {}),
+      accelerometerUsed: option(false, true, false, {})
+    }
   };
 
   const defaultAttributeToFunction = {
@@ -243,14 +234,7 @@ const fpscanner = (function () {
       },
       audio: getAudio,
       dnt: () => {
-        if (navigator.doNotTrack) {
-          return navigator.doNotTrack;
-        } else if (navigator.msDoNotTrack) {
-          return navigator.msDoNotTrack;
-        } else if (window.doNotTrack) {
-          return window.doNotTrack;
-        }
-        return UNKNOWN;
+        return navigator.doNotTrack ? navigator.doNotTrack : UNKNOWN;
       },
       mimeTypes : () => {
         const mimeTypes = [];
@@ -363,6 +347,23 @@ const fpscanner = (function () {
           return "Supported. Disabled";
         }
         return "WebGL not supported";
+      },
+      httpHeaders: () => {
+        // TODO needs to pass a parameter
+        return new Promise(function(resolve, reject){
+          const url = "http://localhost:3000/headers";
+          get(url).then(function(response) {
+            const httpHeaders = JSON.parse(response);
+            const headersProperties = Object.getOwnPropertyNames(httpHeaders);
+            const res = [];
+            headersProperties.forEach(function(prop){
+              res.push(prop+";;"+httpHeaders[prop]);
+            });
+            resolve(res.join("~~~"));
+          }, function(error) {
+            reject(error);
+          })
+        });
       }
     },
     os : {
@@ -552,10 +553,10 @@ const fpscanner = (function () {
         const finalProto = [];
         protoNavigator.forEach((prop) => {
           const objDesc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(navigator), prop);
-          if (objDesc != undefined) {
-            if (objDesc.value != undefined) {
+          if (objDesc !== undefined) {
+            if (objDesc.value !== undefined) {
               res = objDesc.value.toString();
-            } else if (objDesc.get != undefined) {
+            } else if (objDesc.get !== undefined) {
               res = objDesc.get.toString();
             }
           } else {
@@ -631,7 +632,7 @@ const fpscanner = (function () {
         return !!window.fmget_targets;
       },
       webDriver: () => {
-        return "webdriver" in window || "true" == document.getElementsByTagName("html")[0].getAttribute("webdriver");
+        return "webdriver" in window || "true" === document.getElementsByTagName("html")[0].getAttribute("webdriver");
       },
       seleniumIDE: () => {
         return !!window._Selenium_IDE_Recorder;
@@ -730,35 +731,114 @@ const fpscanner = (function () {
           }
         }
         return locale;
+      },
+      info: () => {
+        return new Promise((resolve, reject) => {
+          const url = "http://localhost:3000/ip_geo";
+          get(url).then((response) => {
+            resolve(response);
+          }, function(error) {
+            reject(error);
+          })
+        });
       }
     }
   };
 
-  const generateFingerprint = function () {
-    return new Promise((resolve) => {
+  function get(url) {
+    return new Promise(function(resolve, reject) {
+      var req = new XMLHttpRequest();
+      req.open('GET', url);
+      req.onload = function() {
+        if (req.status == 200) {
+          resolve(req.response);
+        }
+        else {
+          reject(Error(req.statusText));
+        }
+      };
+
+      req.onerror = function(e) {
+        reject(Error("Network Error"));
+      };
+
+      req.send();
+    });
+  }
+
+  const addCustomFunction = function(category, name, options, f) {
+    // TODO probably don't use default options
+    DEFAULT_OPTIONS[category][name] = options;
+    defaultAttributeToFunction[category][name] = f;
+  };
+
+  const generateFingerprint = function (options) {
+    // TODO maybe if a function returns an object such as geolocation.info, unroll returned object and add its properties to object above in hierarchy?
+    return new Promise((resolve, reject) => {
+      let attributeOptions;
+      if(typeof options !== "object") {
+        reject("options parameter needs to be an object");
+      }
+
+      if (options.name === "default"){
+          attributeOptions = DEFAULT_OPTIONS;
+          if(Object.keys(options.params).length > 0) {
+            if(typeof options.params.geolocationURL === "string") {
+              attributeOptions.geolocation.info.params = options.params.geolocationURL;
+            } else {
+              // We remove call to geolocation function since URL is mandatory
+              console.log("Call to geolocation removed");
+              delete attributeOptions["geolocation"];
+            }
+
+            if(typeof options.params.httHeadersURL === "string") {
+              attributeOptions.browser.httpHeaders.params = options.params.httpHeadersURL;
+            } else {
+              console.log("Call to HTTP Headers removed");
+              delete attributeOptions["httpHeadersURL"];
+            }
+          } else {
+            console.log("Call to geolocation removed");
+            console.log("Call to HTTP Headers removed");
+            delete attributeOptions.geolocation.info;
+            delete attributeOptions.browser.httpHeaders;
+          }
+      }
+
       const promises = [];
       const fingerprint = {};
 
-      defaultOptions.all.forEach((attribute) => {
+      Object.keys(attributeOptions).forEach((attribute) => {
         // attribute is either an object if it represents a category of the fingerprint
         // or a string if it represents an attribute at the root level of the fingerprint
-        if (typeof attribute === "string") {
-          // TODO root attribute needs to be adapted they will also be object
-          // Maybe useless, the solution is to create a single fake category
-          fingerprint[attribute] = defaultAttributeToFunction[attribute]();
-        } else {
-          const subPropertyName = Object.keys(attribute)[0];
-          fingerprint[subPropertyName] = {};
-          attribute[subPropertyName].forEach((subAttribute) => {
-            if (subAttribute.isAsync) {
+        // TODO root attribute needs to be an object
+        // If user doesn't want categories then he just has to create a fake category
+        if (typeof attributeOptions[attribute] === "object") {
+          fingerprint[attribute] = {};
+          Object.keys(attributeOptions[attribute]).forEach((subPropertyName) => {
+            if (attributeOptions[attribute][subPropertyName].isAsync) {
               promises.push(new Promise((resolve) => {
-                defaultAttributeToFunction[subPropertyName][subAttribute.name]().then((val) => {
-                  fingerprint[subPropertyName][subAttribute.name] = val;
-                  return resolve(val);
+                defaultAttributeToFunction[attribute][subPropertyName]().then((val) => {
+                  if(typeof val === "object" && attributeOptions[attribute][subPropertyName].unpack) {
+                    // Flatten returned object to add its properties directly in category
+                    Object.keys(val).forEach((retProp) => {
+                      fingerprint[attribute][retProp] = val[retProp];
+                    });
+                  } else {
+                    fingerprint[attribute][subPropertyName] = val;
+                  }
+                  return resolve();
                 });
               }))
             } else {
-              fingerprint[subPropertyName][subAttribute.name] = defaultAttributeToFunction[subPropertyName][subAttribute.name]();
+              let returnVal = defaultAttributeToFunction[attribute][subPropertyName]();
+              if(typeof returnVal === "object" && attributeOptions[attribute][subPropertyName].unpack) {
+                Object.keys(returnVal).forEach((retProp) => {
+                  fingerprint[attribute][retProp] = returnVal[retProp];
+                });
+              } else {
+                fingerprint[attribute][subPropertyName] = returnVal;
+              }
             }
           });
         }
@@ -771,8 +851,14 @@ const fpscanner = (function () {
     });
   };
 
+  const scanFingerprint = function() {
+    return "toto";
+  };
+
   return {
-   generateFingerprint: generateFingerprint
+    addCustomFunction: addCustomFunction,
+    generateFingerprint: generateFingerprint,
+    scanFingerprint: scanFingerprint
  };
 
 })();
