@@ -12,12 +12,12 @@ var audio = (function () {
           audioData.push(0);
         }
         // Create oscillator
-        pxi_oscillator = context.createOscillator();
+        const pxi_oscillator = context.createOscillator();
         pxi_oscillator.type = "triangle";
         pxi_oscillator.frequency.value = 1e4;
 
         // Create and configure compressor
-        pxi_compressor = context.createDynamicsCompressor();
+        const pxi_compressor = context.createDynamicsCompressor();
         pxi_compressor.threshold && (pxi_compressor.threshold.value = -50);
         pxi_compressor.knee && (pxi_compressor.knee.value = 40);
         pxi_compressor.ratio && (pxi_compressor.ratio.value = 12);
@@ -39,7 +39,7 @@ var audio = (function () {
             for (var i = 0; i < evnt.renderedBuffer.length; i++) {
               sha1.update(evnt.renderedBuffer.getChannelData(0)[i].toString());
             }
-            hash = sha1.finalize();
+            const hash = sha1.finalize();
             audioData.push(hash.toString(CryptoJS.enc.Hex));
             var tmp = [];
             for (var i = 4500; 5e3 > i; i++) {
