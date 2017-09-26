@@ -1,7 +1,6 @@
-require("babel-polyfill");
+//require("babel-polyfill");
 
-// TODO separate collect code from scanner code so that scanner can be placed on serverside
-// TODO say if attribute needs to be hashed or stored in plain text
+// TODO add canvas bis in auxiliary function
 const fpscanner = (function () {
 
   const fpCollect = require('./collect.js');
