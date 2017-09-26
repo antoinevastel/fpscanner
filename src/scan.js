@@ -333,7 +333,7 @@ const scan = (function () {
   const areUasIdentical = function(fp) {
     let consistent = true;
     if(typeof fp.browser.httpHeaders !== "undefined") {
-      consistent = fp.browser.userAgent === fp.browser.httpHeaders["user-agent"];
+      consistent = fp.browser.userAgent === fp.browser.userAgentHttp;
     }
     return analysisResult(uasIdentical, consistent, {});
   };

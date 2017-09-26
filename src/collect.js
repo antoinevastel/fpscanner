@@ -16,77 +16,79 @@ const fpCollect = (function () {
   // Fingerprints can be either a list of attributes or attributes
   // structured by categories
   // It is only possible to have at most one level of category
-  const option = function(hash, isAsync, unpack, params, save) {
+  const option = function(hash, isAsync, unpack) {
     //save parameters usefull only if hash is set to true
-    return {hash: hash, isAsync: isAsync, unpack: unpack, params: params};
+    return {hash: hash, isAsync: isAsync, unpack: unpack};
   };
+
+  let HTTP_HEADERS_URL;
 
   // TODO add geolocation
   const DEFAULT_OPTIONS = {
     browser: {
       //"canvasBis", // Can be seen as custom canvas function
-      canvas: option(true, false, false, {}),
-      // audio: option(true, true, false, {}),
-      fonts: option(true, true, false, {}),
-      plugins: option(true, false, false, {}),
-      mimeTypes: option(true, false, false, {}),
-      webGL: option(true, false, false, {}),
-      userAgent: option(false, false, false, {}),
-      dnt: option(false, false, false, {}),
-      adBlock: option(false, false, false, {}),
-      cookies: option(false, false, false, {}),
-      name: option(false, false, false, {}),
-      version: option(false, false, false, {}),
-      maths: option(true, false, false, {}),
-      localStorage: option(false, false, false, {}),
-      httpHeaders: option(false, false, false, {httpHeadersURL: ''})
+      canvas: option(true, false, false),
+      // audio: option(true, true, false),
+      fonts: option(true, true, false),
+      plugins: option(true, false, false),
+      mimeTypes: option(true, false, false),
+      webGL: option(true, false, false),
+      userAgent: option(false, false, false),
+      dnt: option(false, false, false),
+      adBlock: option(false, false, false),
+      cookies: option(false, false, false),
+      name: option(false, false, false),
+      version: option(false, false, false),
+      maths: option(true, false, false),
+      localStorage: option(false, false, false),
+      httpHeaders: option(false, true, true, {httpHeadersURL: ''})
     },
     os: {
-      name: option(false, false, false, {}),
-      platform: option(false, false, false, {}),
-      languages: option(false, false, false, {}),
-      processors: option(false, false, false, {}),
-      hardwareConcurrency: option(false, false, false, {}),
-      resolution: option(false, false, false, {}),
-      colorDepth: option(false, false, false, {}),
-      screenDensity: option(false, false, false, {}),
-      oscpu: option(false, false, false, {}),
-      touchScreen: option(false, false, false, {}),
-      videoCard: option(false, false, false, {}),
-      multimediaDevices: option(false, true, true, {}),
+      name: option(false, false, false),
+      platform: option(false, false, false),
+      languages: option(false, false, false),
+      processors: option(false, false, false),
+      hardwareConcurrency: option(false, false, false),
+      resolution: option(false, false, false),
+      colorDepth: option(false, false, false),
+      screenDensity: option(false, false, false),
+      oscpu: option(false, false, false),
+      touchScreen: option(false, false, false),
+      videoCard: option(false, false, false),
+      multimediaDevices: option(false, true, true),
     },
     geolocation: {
-      timezone: option(false, false, false, {}),
-      timezoneLocale: option(true, false, false, {}),
+      timezone: option(false, false, false),
+      timezoneLocale: option(true, false, false),
     },
     scanner: {
-      productSub: option(false, false, false, {}),
-      navigatorPrototype: option(false, false, false, {}),
-      etsl: option(false, false, false, {}),
-      showModal: option(false, false, false, {}),
-      sendBeacon: option(false, false, false, {}),
-      spawn: option(false, false, false, {}),
-      emit: option(false, false, false, {}),
-      buffer: option(false, false, false, {}),
-      timezoneOffsetDesc: option(false, false, false, {}),
-      screenDesc: option(false, false, false, {}),
-      historyDesc: option(false, false, false, {}),
-      bindDesc: option(false, false, false, {}),
-      canvasDesc: option(false, false, false, {}),
+      productSub: option(false, false, false),
+      navigatorPrototype: option(false, false, false),
+      etsl: option(false, false, false),
+      showModal: option(false, false, false),
+      sendBeacon: option(false, false, false),
+      spawn: option(false, false, false),
+      emit: option(false, false, false),
+      buffer: option(false, false, false),
+      timezoneOffsetDesc: option(false, false, false),
+      screenDesc: option(false, false, false),
+      historyDesc: option(false, false, false),
+      bindDesc: option(false, false, false),
+      canvasDesc: option(false, false, false),
 
-      awesomium: option(false, false, false, {}),
-      ghostJS: option(false, false, false, {}),
-      nightmareJS: option(false, false, false, {}),
-      fmget: option(false, false, false, {}),
-      webDriver: option(false, false, false, {}),
-      seleniumIDE: option(false, false, false, {}),
-      domAutomation: option(false, false, false, {}),
+      awesomium: option(false, false, false),
+      ghostJS: option(false, false, false),
+      nightmareJS: option(false, false, false),
+      fmget: option(false, false, false),
+      webDriver: option(false, false, false),
+      seleniumIDE: option(false, false, false),
+      domAutomation: option(false, false, false),
 
-      errorsGenerated: option(false, false, false, {}),
-      resOverflow: option(false, false, false, {}),
-      emoji: option(false, false, false, {}),
-      accelerometerUsed: option(false, true, false, {}),
-      mediaQueries: option(false, false, false, {})
+      errorsGenerated: option(false, false, false),
+      resOverflow: option(false, false, false),
+      emoji: option(false, false, false),
+      accelerometerUsed: option(false, true, false),
+      mediaQueries: option(false, false, false)
     }
   };
 
@@ -350,16 +352,17 @@ const fpCollect = (function () {
       httpHeaders: () => {
         // TODO needs to pass a parameter
         return new Promise(function(resolve, reject){
-          const url = "http://localhost:3000/headers";
-          get(url).then(function(response) {
+          get(HTTP_HEADERS_URL).then((response) => {
             const httpHeaders = JSON.parse(response);
-            const headersProperties = Object.getOwnPropertyNames(httpHeaders);
-            const res = [];
-            headersProperties.forEach(function(prop){
-              res.push(prop+";;"+httpHeaders[prop]);
-            });
-            resolve(res.join("~~~"));
-          }, function(error) {
+            const res = {};
+            res.connectionHttp = httpHeaders.connection;
+            res.userAgentHttp = httpHeaders["user-agent"];
+            res.pragmaHttp = httpHeaders.pragma;
+            res.acceptHttp = httpHeaders.accept;
+            res.languageHttp = httpHeaders["accept-language"];
+
+            resolve(res);
+          }, (error) => {
             reject(error);
           })
         });
@@ -718,8 +721,8 @@ const fpCollect = (function () {
       if (options.name === "default"){
         attributeOptions = DEFAULT_OPTIONS;
         if(Object.keys(options.params).length > 0) {
-          if(typeof options.params.httHeadersURL === "string") {
-            attributeOptions.browser.httpHeaders.params = options.params.httpHeadersURL;
+          if(typeof options.params.httpHeadersURL === "string") {
+            HTTP_HEADERS_URL = options.params.httpHeadersURL;
           } else {
             console.log("Call to HTTP Headers removed");
             delete attributeOptions["httpHeadersURL"];
