@@ -5,32 +5,39 @@ const fpCollect = (function () {
 
   const getAudio = require('./audio.js');
   const getFonts = require('./fonts.js');
+  const hash = require('./hash.js');
 
   const UNKNOWN = "unknown";
+
+  // TODO needs to be a parameter later
+  // use "" if you want to override original value
+  const HASH_SUFFIX = "Hashed";
+  const SEED = 42;
   // Fingerprints can be either a list of attributes or attributes
   // structured by categories
   // It is only possible to have at most one level of category
-  const option = function(hash, isAsync, unpack, params) {
+  const option = function(hash, isAsync, unpack, params, save) {
+    //save parameters usefull only if hash is set to true
     return {hash: hash, isAsync: isAsync, unpack: unpack, params: params};
-  }
+  };
 
   // TODO add geolocation
   const DEFAULT_OPTIONS = {
     browser: {
       //"canvasBis", // Can be seen as custom canvas function
-      canvas: option(false, false, false, {}),
-      audio: option(false, true, false, {}),
-      fonts: option(false, true, false, {}),
-      plugins: option(false, false, false, {}),
-      mimeTypes: option(false, false, false, {}),
-      webGL: option(false, false, false, {}),
+      canvas: option(true, false, false, {}),
+      // audio: option(true, true, false, {}),
+      fonts: option(true, true, false, {}),
+      plugins: option(true, false, false, {}),
+      mimeTypes: option(true, false, false, {}),
+      webGL: option(true, false, false, {}),
       userAgent: option(false, false, false, {}),
       dnt: option(false, false, false, {}),
       adBlock: option(false, false, false, {}),
       cookies: option(false, false, false, {}),
       name: option(false, false, false, {}),
       version: option(false, false, false, {}),
-      maths: option(false, false, false, {}),
+      maths: option(true, false, false, {}),
       localStorage: option(false, false, false, {}),
       httpHeaders: option(false, false, false, {httpHeadersURL: ''})
     },
@@ -46,16 +53,11 @@ const fpCollect = (function () {
       oscpu: option(false, false, false, {}),
       touchScreen: option(false, false, false, {}),
       videoCard: option(false, false, false, {}),
-      multimediaDevices: option(false, true, false, {}),
-    },
-    network: {
-      // TODO Fix so that it returns multiple ip addresses
-      ipAddresses: option(false, true, true, {})
+      multimediaDevices: option(false, true, true, {}),
     },
     geolocation: {
       timezone: option(false, false, false, {}),
-      timezoneLocale: option(false, false, false, {}),
-      info: option(false, false, false, {geolocationURL: ""})
+      timezoneLocale: option(true, false, false, {}),
     },
     scanner: {
       productSub: option(false, false, false, {}),
@@ -83,7 +85,8 @@ const fpCollect = (function () {
       errorsGenerated: option(false, false, false, {}),
       resOverflow: option(false, false, false, {}),
       emoji: option(false, false, false, {}),
-      accelerometerUsed: option(false, true, false, {})
+      accelerometerUsed: option(false, true, false, {}),
+      mediaQueries: option(false, false, false, {})
     }
   };
 
@@ -453,83 +456,19 @@ const fpCollect = (function () {
                 name = [devices[i].kind];
                 deviceToCount[name] = deviceToCount[name] + 1;
               }
-              resolve(deviceToCount.audiooutput+","+deviceToCount.audioinput+","+deviceToCount.videoinput);
+              resolve({
+                speakers: deviceToCount.audiooutput,
+                micros: deviceToCount.audioinput,
+                webcams: deviceToCount.videoinput
+              });
             });
           } else {
-            resolve(deviceToCount);
-          }
-        });
-      }
-    },
-    network: {
-      ipAddresses: () => {
-        function getIPs(callback) {
-          var ip_dups = {};
-          var RTCPeerConnection = window.RTCPeerConnection ||
-            window.mozRTCPeerConnection ||
-            window.webkitRTCPeerConnection;
-          var mediaConstraints = {
-            optional: [{RtpDataChannels: true}]
-          };
-          var servers = {iceServers: [{urls: "stun:stun.services.mozilla.com"}]};
-          //construct a new RTCPeerConnection
-          var pc = new RTCPeerConnection(servers, mediaConstraints);
-
-          function handleCandidate(candidate) {
-            //match just the IP address
-            var ip_regex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/;
-            var ip_addr = ip_regex.exec(candidate)[1];
-            //remove duplicates
-            if (ip_dups[ip_addr] === undefined) {
-              callback(ip_addr);
-            }
-            ip_dups[ip_addr] = true;
-          }
-
-          //listen for candidate events
-          pc.onicecandidate = (ice) => {
-            //skip non-candidate events
-            if (ice.candidate) {
-              handleCandidate(ice.candidate.candidate);
-            }
-          };
-          //create a bogus data channel
-          pc.createDataChannel("");
-          //create an offer sdp
-          pc.createOffer((result) => {
-            //trigger the stun server request
-            pc.setLocalDescription(result, () => {}, () => {});
-          }, () => {});
-          setTimeout(() => {
-            //read candidate info from local description
-            const lines = pc.localDescription.sdp.split('\n');
-            lines.forEach((line) => {
-              if (line.indexOf('a=candidate:') === 0) {
-                handleCandidate(line);
-              }
+            resolve({
+              speakers: 0,
+              micros: 0,
+              webcams: 0
             });
-          }, 1000);
-        }
-
-        return new Promise((resolve) => {
-          const network = {};
-          getIPs((ip) => {
-            //local IPs
-            if (ip.match(/^(192\.168\.|169\.254\.|10\.|172\.(1[6-9]|2\d|3[01]))/)) {
-              network.local = ip;
-              return resolve(network);
-            }
-            //IPv6 addresses
-            else if (ip.match(/^[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7}$/)) {
-              network.ipv6 = ip;
-              return resolve(network);
-            }
-            //assume the rest are public IPs
-            else {
-              network.public = ip;
-              return resolve(network);
-            }
-          });
+          }
         });
       }
     },
@@ -702,6 +641,16 @@ const fpCollect = (function () {
             return resolve(false);
           }, 200);
         });
+      },
+      mediaQueries: () => {
+        return [
+          window.matchMedia("(-moz-mac-graphite-theme: 1)").matches,
+          window.matchMedia("(-moz-os-version: windows-xp)").matches,
+          window.matchMedia("(-moz-os-version: windows-vista)").matches,
+          window.matchMedia("(-moz-os-version: windows-win7)").matches,
+          window.matchMedia("(-moz-os-version: windows-win8)").matches,
+          window.matchMedia("(-moz-os-version: windows-win10)").matches
+        ]
       }
     },
     geolocation: {
@@ -727,16 +676,6 @@ const fpCollect = (function () {
           }
         }
         return locale;
-      },
-      info: () => {
-        return new Promise((resolve, reject) => {
-          const url = "http://localhost:3000/ip_geo";
-          get(url).then((response) => {
-            resolve(response);
-          }, function(error) {
-            reject(error);
-          })
-        });
       }
     }
   };
@@ -768,8 +707,8 @@ const fpCollect = (function () {
     defaultAttributeToFunction[category][name] = f;
   };
 
+  // TODO maybe hashing can be generalized, not only to 2 levels of depth
   const generateFingerprint = function (options) {
-    // TODO maybe if a function returns an object such as geolocation.info, unroll returned object and add its properties to object above in hierarchy?
     return new Promise((resolve, reject) => {
       let attributeOptions;
       if(typeof options !== "object") {
@@ -779,14 +718,6 @@ const fpCollect = (function () {
       if (options.name === "default"){
         attributeOptions = DEFAULT_OPTIONS;
         if(Object.keys(options.params).length > 0) {
-          if(typeof options.params.geolocationURL === "string") {
-            attributeOptions.geolocation.info.params = options.params.geolocationURL;
-          } else {
-            // We remove call to geolocation function since URL is mandatory
-            console.log("Call to geolocation removed");
-            delete attributeOptions["geolocation"];
-          }
-
           if(typeof options.params.httHeadersURL === "string") {
             attributeOptions.browser.httpHeaders.params = options.params.httpHeadersURL;
           } else {
@@ -794,9 +725,7 @@ const fpCollect = (function () {
             delete attributeOptions["httpHeadersURL"];
           }
         } else {
-          console.log("Call to geolocation removed");
           console.log("Call to HTTP Headers removed");
-          delete attributeOptions.geolocation.info;
           delete attributeOptions.browser.httpHeaders;
         }
       }
@@ -819,9 +748,23 @@ const fpCollect = (function () {
                     // Flatten returned object to add its properties directly in category
                     Object.keys(val).forEach((retProp) => {
                       fingerprint[attribute][retProp] = val[retProp];
+                      if(attributeOptions[attribute][subPropertyName].hash) {
+                        fingerprint[attribute][retProp + HASH_SUFFIX] = hash.x64hash128(val[retProp].toString(), SEED);
+                      }
                     });
                   } else {
                     fingerprint[attribute][subPropertyName] = val;
+                    if(attributeOptions[attribute][subPropertyName].hash) {
+                      let hashStr = "";
+                      if(typeof val === "object") {
+                        Object.keys(val).forEach((prop) => {
+                          hashStr += val[prop].toString();
+                        });
+                      } else{
+                        hashStr = val.toString();
+                      }
+                      fingerprint[attribute][subPropertyName + HASH_SUFFIX] = hash.x64hash128(hashStr, SEED);
+                    }
                   }
                   return resolve();
                 });
@@ -831,9 +774,23 @@ const fpCollect = (function () {
               if(typeof returnVal === "object" && attributeOptions[attribute][subPropertyName].unpack) {
                 Object.keys(returnVal).forEach((retProp) => {
                   fingerprint[attribute][retProp] = returnVal[retProp];
+                  if(attributeOptions[attribute][subPropertyName].hash) {
+                    fingerprint[attribute][retProp + HASH_SUFFIX] = hash.x64hash128(val[retProp].toString(), SEED);
+                  }
                 });
               } else {
                 fingerprint[attribute][subPropertyName] = returnVal;
+                if(attributeOptions[attribute][subPropertyName].hash) {
+                  let hashStr = "";
+                  if(typeof returnVal === "object") {
+                    Object.keys(returnVal).forEach((prop) => {
+                      hashStr += returnVal[prop].toString();
+                    });
+                  }else {
+                    hashStr = returnVal.toString();
+                  }
+                  fingerprint[attribute][subPropertyName + HASH_SUFFIX] = hash.x64hash128(hashStr, SEED);
+                }
               }
             }
           });
@@ -841,20 +798,40 @@ const fpCollect = (function () {
       });
 
       return Promise.all(promises).then(() => {
-        // Don't do hashing here since we need complete values for scanner
+        let hashStr = "";
+        Object.keys(fingerprint).forEach((prop) => {
+          // prop needs to be an object !
+          if(prop !== "scanner") {
+            // We remove scanner attributes from hash since their implementation may not be stable
+            Object.keys(fingerprint[prop]).forEach((val) => {
+              hashStr += fingerprint[prop][val];
+            });
+          }
+        });
+
+        fingerprint.hash = hash.x64hash128(hashStr);
         return resolve(fingerprint);
       });
     });
   };
 
-  const filterFingerprint = function() {
-    // TODO add save field to options
-    // hash attributes
+  const filterToSave = function(fingerprint) {
+    const fpFiltered = JSON.parse(JSON.stringify(fingerprint));
+    Object.keys(fpFiltered).forEach((prop) => {
+      // prop needs to be an object !
+      Object.keys(fpFiltered[prop]).forEach((val) => {
+        if(fpFiltered[prop].hasOwnProperty(val + HASH_SUFFIX)) {
+          delete fpFiltered[prop][val];
+        }
+      });
+    });
+    return fpFiltered;
   };
 
   return {
     addCustomFunction: addCustomFunction,
     generateFingerprint: generateFingerprint,
+    filterToSave: filterToSave
   };
 
 })();
