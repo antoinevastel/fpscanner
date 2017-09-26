@@ -29,3 +29,17 @@ tmp
 
 # Users Environment Variables
 .lock-wscript
+
+\.idea/dictionaries/avastel\.xml
+
+\.idea/fpscanner\.iml
+
+\.idea/workspace\.xml
+
+\.idea/vcs\.xml
+
+\.idea/modules\.xml
+
+\.idea/misc\.xml
+
+\.idea/jsLibraryMappings\.xml
