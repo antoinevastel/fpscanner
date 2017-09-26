@@ -161,7 +161,6 @@ const scan = (function () {
 
   const areFontsConsistentOs = function(fp) {
     const osFamily = OS_TO_OS_FAMILY[fp.os.name];
-    console.log(fp);
 
     let nbWrongFonts = 0;
     let nbRightFonts = 0;
@@ -188,22 +187,22 @@ const scan = (function () {
   const isWebGlConsistentOs = function(fp) {
     // TODO When we'll have more info, detect fake mobile devices
     // using vendor, and particularly Qualcomm value
-    var osFamily = OS_TO_OS_FAMILY[fp.os.name];
-    var consistent = true;
-    var data = {};
+    const osFamily = OS_TO_OS_FAMILY[fp.os.name];
+    let consistent = true;
+    const data = {};
     if (osFamily === WINDOWS ||
       osFamily === LINUX ||
       osFamily === MAC_OS) {
-      var forbiddenExtensions = ["ANGLE", "OpenGL", "Mesa", "Gallium", "Qualcomm"];
-      if (osFamily == WINDOWS) {
+      let forbiddenExtensions = ["ANGLE", "OpenGL", "Mesa", "Gallium", "Qualcomm"];
+      if (osFamily === WINDOWS) {
         forbiddenExtensions = ["OpenGL", "Mesa", "Gallium", "Qualcomm"];
-      } else if (osFamily == MAC_OS) {
+      } else if (osFamily === MAC_OS) {
         forbiddenExtensions = ["ANGLE", "Mesa", "Gallium", "Qualcomm"];
-      } else if (osFamily == LINUX) {
+      } else if (osFamily === LINUX) {
         forbiddenExtensions = ["ANGLE", "OpenGL", "Qualcomm"];
       }
-      for (var extension in forbiddenExtensions) {
-        if (fp.os.videoCard.indexOf(forbiddenExtensions[extension]) != -1) {
+      for (let extension in forbiddenExtensions) {
+        if (fp.os.videoCard.indexOf(forbiddenExtensions[extension]) !== -1) {
           consistent = false;
           data.forbiddenExtensionWebGL = forbiddenExtensions[extension];
           break;
@@ -214,18 +213,344 @@ const scan = (function () {
     return analysisResult(webGlConsistentOs, consistent, data);
   };
 
+  /*
+      Analysis name: PluginsConsistentOs
+      Checks if plugins filename extension is consistent with the OS
+      On Linux it should be .so
+      On Mac .plugin
+      On Windows .dll
+      Some OSes shouldn't have plugins such as Android or iOS
+  */
+  const arePluginsConsistentOs = function(fp) {
+    let forbiddenExtensions = [".so", ".dll", ".plugin"];
+    const osFamily = OS_TO_OS_FAMILY[fp.os.name];
+    // Case of mobile devices
+    if (fp.os.platform.indexOf("arm") !== -1) {
+      forbiddenExtensions = [".so", ".plugin"];
+    } else if (osFamily === WINDOWS) {
+      forbiddenExtensions = [".so", ".plugin"];
+    } else if (osFamily === MAC_OS) {
+      forbiddenExtensions = [".so", ".dll"];
+    } else if (osFamily === LINUX) {
+      forbiddenExtensions = [".dll", ".plugin"];
+    }
+
+    let forbiddenExtensionFound = false;
+    const data = {};
+    for (let extension in forbiddenExtensions) {
+      if (fp.browser.plugins.indexOf(forbiddenExtensions[extension]) !== -1) {
+        forbiddenExtensionFound = true;
+        data.forbiddenExtension = forbiddenExtensions[extension];
+      }
+    }
+    const consistent = !forbiddenExtensionFound;
+    return analysisResult(arePluginsConsistent, consistent, data);
+  };
+
+  /*
+	  Analysis name: MqOsConsistentOs
+		Check if media queries about OS are consistent
+		with the OS displayed in the user agent
+		It also detects inconsistency with the browser (Firefox)
+	*/
+  const areMqOSConsistent = function(fp) {
+    let consistent = true;
+    const data = {};
+    // we test if one one the media query is true and the browser is not firefox
+    let found = false;
+    for (let mq in fp.scanner.mediaQueries) {
+      if (fp.scanner.mediaQueries[mq]) {
+        found = true;
+      }
+    }
+
+    if (found && fp.browser.name !== FIREFOX) {
+      data.notFirefox = true;
+      consistent = false;
+    }
+
+    //mq_os[0] tests mac OS X special theme
+    if (fp.scanner.mediaQueries[0] && fp.os.name !== MAC_OS) {
+      data.mqFailed = MAC_OS;
+      consistent = false;
+    }
+
+    //mq_os[i] tests every Windows
+    // Warning: there might be problem with windows 8.1
+    for (let i = 1; i < 6; i++) {
+      if (consistent && (
+          (
+            fp.scanner.mediaQueries[i] && fp.os.name !== mqToOS[i]
+          ) || (
+            !fp.scanner.mediaQueries[i] && fp.os.name === mqToOS[i] && (
+              fp.browser.name === FIREFOX || found
+            )
+          )
+        )) {
+        data.mqFailed = mqToOS[i];
+        consistent = false;
+      } else if (i === 4) {//For windows 8
+        if (consistent && (
+            (
+              fp.scanner.mediaQueries[i] && fp.os.name.indexOf(WINDOWS_8) === -1
+            ) || (
+              !fp.scanner.mediaQueries[i] && fp.os.name.indexOf(WINDOWS_8) > -1 && (
+                fp.browser.name === FIREFOX || found
+              )
+            )
+          )) {
+          data.mqFailed = mqToOS[i];
+          consistent = false;
+        }
+      }
+    }
+    return analysisResult(mqOsConsistent, consistent, data);
+  };
+
+  /*
+      Analysis name: PlatformOsRefConsistent
+      Checks if navigator platform attribute is consistent with OS
+      using user agent
+  */
+  const isPlatformOsRefConsistent = function(fp) {
+    let consistent = false;
+    const osFamily = OS_TO_OS_FAMILY[fp.os.name];
+    let data;
+    for (let value in OSFamilyToPlatforms[osFamily]) {
+      if (fp.os.platform === OSFamilyToPlatforms[osFamily][value]) {
+        consistent = true;
+        data = {"os": fp.os.name, "platformInconsistent": fp.os.platform};
+        break;
+      }
+    }
+    return analysisResult(platformOsRefConsistent, consistent, data);
+  };
+
+  /*
+       Analysis name: UasIdentical
+      Checks if ua http and ua navigator are the same
+  */
+  const areUasIdentical = function(fp) {
+    let consistent = true;
+    if(typeof fp.browser.httpHeaders !== "undefined") {
+      consistent = fp.browser.userAgent === fp.browser.httpHeaders["user-agent"];
+    }
+    return analysisResult(uasIdentical, consistent, {});
+  };
+
+  /*
+      Analysis name: TimezoneOverwritten
+      Returns True if Date.getTimezoneOffset method has been
+      overwritten, else False
+  */
+  const isTimezoneOverwritten = function(fp) {
+    const consistent = fp.scanner.timezoneOffsetDesc.indexOf("native code") !== -1;
+    return analysisResult(timezone, consistent, {});
+  };
+
+  /*
+		Analysis name: NAVIGATOR_OVERWRITTEN
+		Checks if there exists at least 1 methods or attributes
+		of navigator object that has been overwritten
+	*/
+  const isNavigatorOverwritten = function(fp) {
+    let consistent = true;
+    const overwrittenProperties = [];
+    const navProto = fp.scanner.navigatorPrototype.split(";;;");
+
+    for (let propName in navProto) {
+      let value = navProto[propName].split("~~~");
+      if (value[1] !== "" && value[1].indexOf("native") === -1) {
+        consistent = false;
+        overwrittenProperties.push(value[0]);
+      }
+    }
+    const data = {"propertiesOverwritten": overwrittenProperties.join("~~")};
+    return analysisResult(navigatorOverwritten, consistent, data);
+  };
+
+  /*
+		Analysis name: CanvasOverwritten
+		Checks if a property/method used to generate a
+		canvas has been overwritten
+	*/
+  const isCanvasOverwritten = function(fp) {
+    // TODO add analysis of pixels
+    const consistent = fp.scanner.canvasDesc.indexOf("native code") != -1;
+    return analysisResult(canvas, consistent, {});
+  }
+
+  /*
+        Analysis name: ScreenOverwritten
+        Returns True if screen object has been overwritten,
+        else False
+    */
+  const isScreenOverwritten = function(fp) {
+    const consistent = fp.scanner.screenDesc.indexOf("native code") !== -1;
+    return analysisResult(screen, consistent, {});
+  };
+
+  const isHistoryOverwritten = function(fp) {
+    var consistent = fp.scanner.historyDesc.indexOf("native code") !== -1;
+    return analysisResult(history, consistent, {});
+  }
+
+  const isBindOverwritten = function(fp) {
+    const consistent = (fp.scanner.bindDesc.indexOf("native code") !== -1);
+    return analysisResult(bind, consistent, {});
+  };
+
+  /*
+		Analysis name: ScreenSizeConsistent
+		For the moment test only in case the device claims to be an iPhone if its screen size
+		belongs to a defined list of allowed screen resolution
+	*/
+  const isScreenSizeConsistent = function(fp) {
+    let consistent = true;
+    const data = {};
+    if (fp.os.name === "iOS") {
+      consistent = false;
+      const subRes = fp.os.resolution.split(",");
+      const subResStr = subRes[0]+","+subRes[1];
+      const allowedIphoneResolutions = ["320,568", "568,320", "375,667", "667,375", "768,1024", "1024,768", "2048,1536", "1536,2048"];
+      for (let i in allowedIphoneResolutions) {
+        if (allowedIphoneResolutions[i] === subResStr) {
+          consistent = true;
+          break;
+        }
+      }
+
+      if(!consistent) {
+        data.screenSize = fp.os.resolution;
+      }
+    }
+    return analysisResult(screenSizeConsistent, consistent, data);
+  };
+
+  /*
+		Analysis name: ACCELEROMETER
+		Returns True if accelerometer is consistent with the
+		class of device, i.e mobile device and accelerometer is True,
+		or computer device and accelerometer is False
+	*/
+  const isAccelerometerConsistent = function(fp) {
+    const isMobileDevice = (fp.os.name === ANDROID || fp.os.name === IOS || fp.os.name === WINDOWS_PHONE);
+    let consistent = true;
+    if ((isMobileDevice && !fp.os.accelerometer) || (!isMobileDevice && fp.os.accelerometer)) {
+      consistent = false;
+    }
+    return analysisResult(accelerometerConsistent, consistent, {});
+  };
+
+  /*
+		Analysis name: ProductSubConsistent
+		Returns True if productSub is "20030107" on
+		Chrome, Safari and Opera
+	*/
+  const isProductSubConsistent = function(fp) {
+    let consistent = true;
+    const data = {};
+    if ((fp.browser.name.indexOf(CHROME) > -1 ||
+        fp.browser.name.indexOf(SAFARI) > -1 ||
+        fp.browser.name.indexOf(OPERA) > -1) &&
+      fp.scanner.productSub !== "20030107") {
+      consistent = false;
+    }
+    else if (fp.browser.name !== OTHER && fp.browser.name.indexOf(CHROME) === -1 &&
+      fp.browser.name.indexOf(SAFARI) === -1 && fp.browser.name.indexOf(OPERA) === -1 &&
+      fp.scanner.productSub === "20030107") {
+      consistent = false;
+    }
+
+    if (!consistent) {
+      data.productSub = fp.scanner.productSub;
+    }
+    return analysisResult(productSubConsistent, consistent, data);
+  };
+
+  /*
+      Analysis name: EtslConsistentBrowser
+      Checks if eval.toString().length is equals to:
+      - 37 for Safari and Firefox
+      - 39 for IE and Edge
+      - 33 for Chrome, Opera
+  */
+
+  const isEtslConsistentBrowser = function(fp) {
+    const browserToEvalLength = {};
+    browserToEvalLength[SAFARI] = 37;
+    browserToEvalLength[FIREFOX] = 37;
+    browserToEvalLength[INTERNET_EXPLORER] = 39;
+    browserToEvalLength[EDGE] = 39;
+    browserToEvalLength[CHROME] = 33;
+    browserToEvalLength[OPERA] = 33;
+
+    let consistent = true;
+    const data = {};
+    if ((fp.browser.name in browserToEvalLength) && (browserToEvalLength[fp.browser.name] !== fp.scanner.etsl)) {
+      consistent = false;
+      data.etsl = fp.scanner.etsl;
+    }
+    return analysisResult(etslConsistentBrowser, consistent, data);
+  };
+
+  /*
+      Analysis name: TouchSupportConsistent
+      Checks if touch support is active only on Android, iOS, or
+      Windows Phone devices
+  */
+  const isTouchSupportConsistent = function(fp){
+    let consistent = true;
+    const data = {};
+    if ((fp.os.name === ANDROID || fp.os.name === IOS || fp.os.name === WINDOWS_PHONE) &&
+      fp.os.touchScreen === "0;false;false") {
+      consistent = false;
+      data.touchSupport = fp.os.touchScreen;
+    }
+    return analysisResult(touchSupportConsistent, consistent, data);
+  };
+
+  const isConsistent = function(analysisResults) {
+    let consistent = true;
+    Object.keys(analysisResults).forEach((res) => {
+      if(!analysisResults[res].consistent) {
+        consistent = false;
+      }
+    });
+    return consistent;
+  };
+
+  // TODO add a mode where it stops as soon as a test fails
   const scanFingerprint = function(fp) {
     const inconstencyResults = {
       errorsConsistentBrowser: areErrorsConsistentBrowser(fp),
       fontsConsistentOs: areFontsConsistentOs(fp),
       webGlConsistentOs: isWebGlConsistentOs(fp),
+      pluginsConsistentOs: arePluginsConsistentOs(fp),
+      mqOSConsistent: areMqOSConsistent(fp),
+      platformOsRefConsistent: isPlatformOsRefConsistent(fp),
+      uasIdentical: areUasIdentical(fp),
+      timezoneOverwritten: isTimezoneOverwritten(fp),
+      navigatorOverwritten: isNavigatorOverwritten(fp),
+      canvasOverwritten: isCanvasOverwritten(fp),
+      screenOverwritten: isScreenOverwritten(fp),
+      historyOverwritten: isHistoryOverwritten(fp),
+      bindOverwritten: isBindOverwritten(fp),
+      screenSizeConsistent: isScreenSizeConsistent(fp),
+      accelerometerConsistent: isAccelerometerConsistent(fp),
+      productSubConsistent: isProductSubConsistent(fp),
+      etslConsistentBrowser: isEtslConsistentBrowser(fp),
+      touchSupportConsistent: isTouchSupportConsistent(fp)
     };
 
+    inconstencyResults.consistency = analysisResult("consistent", isConsistent(inconstencyResults), {});
     return inconstencyResults;
   };
 
+
+
   return {
-    scanFingerprint: scanFingerprint
+    analyse: scanFingerprint
   }
 })();
 
