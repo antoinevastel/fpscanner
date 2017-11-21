@@ -112,7 +112,7 @@ const scan = (function () {
     //its is only available on Firefox based browsers
     //works also for firefox mobile
     if ((fp.scanner.errorsGenerated[1] !== undefined && fp.browser.name.indexOf(FIREFOX) === -1) ||
-      (fp.scanner.errorsGenerated[1] !== undefined && fp.browser.name.indexOf(FIREFOX) > -1)) {
+      (fp.scanner.errorsGenerated[1] === undefined && fp.browser.name.indexOf(FIREFOX) > -1)) {
       consistent = false;
       errorFailed.push("Firefox filename");
     }
@@ -376,9 +376,9 @@ const scan = (function () {
 	*/
   const isCanvasOverwritten = function(fp) {
     // TODO add analysis of pixels
-    const consistent = fp.scanner.canvasDesc.indexOf("native code") != -1;
+    const consistent =  fp.scanner.canvasDesc.indexOf("native code") !== -1;
     return analysisResult(canvas, consistent, {});
-  }
+  };
 
   /*
         Analysis name: ScreenOverwritten
