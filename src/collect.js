@@ -217,21 +217,25 @@ const fpCollect = (function () {
         return domLocalStorage;
       },
       canvas: () => {
-        const canvas = document.createElement("canvas");
-        canvas.height = 60;
-        canvas.width = 400;
-        const canvasContext = canvas.getContext("2d");
-        canvas.style.display = "inline";
-        canvasContext.textBaseline = "alphabetic";
-        canvasContext.fillStyle = "#f60";
-        canvasContext.fillRect(125, 1, 62, 20);
-        canvasContext.fillStyle = "#069";
-        canvasContext.font = "11pt no-real-font-123";
-        canvasContext.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 2, 15);
-        canvasContext.fillStyle = "rgba(102, 204, 0, 0.7)";
-        canvasContext.font = "18pt Arial";
-        canvasContext.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 4, 45);
-        return canvas.toDataURL();
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.height = 60;
+          canvas.width = 400;
+          const canvasContext = canvas.getContext("2d");
+          canvas.style.display = "inline";
+          canvasContext.textBaseline = "alphabetic";
+          canvasContext.fillStyle = "#f60";
+          canvasContext.fillRect(125, 1, 62, 20);
+          canvasContext.fillStyle = "#069";
+          canvasContext.font = "11pt no-real-font-123";
+          canvasContext.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 2, 15);
+          canvasContext.fillStyle = "rgba(102, 204, 0, 0.7)";
+          canvasContext.font = "18pt Arial";
+          canvasContext.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 4, 45);
+          return canvas.toDataURL();
+        } catch(e) {
+          return "blocked";
+        }
       },
       audio: getAudio,
       dnt: () => {
@@ -309,39 +313,41 @@ const fpCollect = (function () {
           for (; i--;) {
             {
               if ((gl = test_canvas.getContext(cur = names[i])) && "function" === typeof gl.getParameter) {
-                return [turnObjToArray({
-                  contextName: cur,
-                  glVersion: gl.getParameter(gl.VERSION),
-                  shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
-                  vendor: gl.getParameter(gl.VENDOR),
-                  renderer: gl.getParameter(gl.RENDERER),
-                  antialias: gl.getContextAttributes().antialias ? "Available" : "Not available",
-                  angle: getAngle(gl),
-                  redBits: gl.getParameter(gl.RED_BITS),
-                  greenBits: gl.getParameter(gl.GREEN_BITS),
-                  blueBits: gl.getParameter(gl.BLUE_BITS),
-                  alphaBits: gl.getParameter(gl.ALPHA_BITS),
-                  depthBits: gl.getParameter(gl.DEPTH_BITS),
-                  stencilBits: gl.getParameter(gl.STENCIL_BITS),
-                  maxRenderBufferSize: gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
-                  maxCombinedTextureImageUnits: gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS),
-                  maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
-                  maxFragmentUniformVectors: gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS),
-                  maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
-                  maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
-                  maxVaryingVectors: gl.getParameter(gl.MAX_VARYING_VECTORS),
-                  maxVertexAttributes: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
-                  maxVertexTextureImageUnits: gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS),
-                  maxVertexUniformVectors: gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS),
-                  aliasedLineWidthRange: describeRange(gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE)),
-                  aliasedPointSizeRange: describeRange(gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE)),
-                  maxViewportDimensions: describeRange(gl.getParameter(gl.MAX_VIEWPORT_DIMS)),
-                  maxAnisotropy: getMaxAnisotropy(gl),
-                  extensions: gl.getSupportedExtensions().sort().toString(),
-                  vertexShaderBestPrecision: turnObjToArray(getShader(gl.VERTEX_SHADER, gl)),
-                  fragmentShaderBestPrecision: turnObjToArray(getShader(gl.FRAGMENT_SHADER, gl)),
-                  fragmentShaderFloatIntPrecision: getFloatIntPrecision(gl)
-                }), gl.getSupportedExtensions().indexOf("WEBGL_debug_renderer_info") !== -1 ? gl.getParameter(gl.getExtension("WEBGL_debug_renderer_info").UNMASKED_VENDOR_WEBGL) + " " + gl.getParameter(gl.getExtension("WEBGL_debug_renderer_info").UNMASKED_RENDERER_WEBGL) : init].join(",");
+                try {
+                  return [turnObjToArray({
+                    contextName: cur,
+                    glVersion: gl.getParameter(gl.VERSION),
+                    shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
+                    vendor: gl.getParameter(gl.VENDOR),
+                    renderer: gl.getParameter(gl.RENDERER),
+                    antialias: gl.getContextAttributes().antialias ? "Available" : "Not available",
+                    angle: getAngle(gl),
+                    redBits: gl.getParameter(gl.RED_BITS),
+                    greenBits: gl.getParameter(gl.GREEN_BITS),
+                    blueBits: gl.getParameter(gl.BLUE_BITS),
+                    alphaBits: gl.getParameter(gl.ALPHA_BITS),
+                    depthBits: gl.getParameter(gl.DEPTH_BITS),
+                    stencilBits: gl.getParameter(gl.STENCIL_BITS),
+                    maxRenderBufferSize: gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
+                    maxCombinedTextureImageUnits: gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS),
+                    maxCubeMapTextureSize: gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
+                    maxFragmentUniformVectors: gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS),
+                    maxTextureImageUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),
+                    maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+                    maxVaryingVectors: gl.getParameter(gl.MAX_VARYING_VECTORS),
+                    maxVertexAttributes: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
+                    maxVertexTextureImageUnits: gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS),
+                    maxVertexUniformVectors: gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS),
+                    aliasedLineWidthRange: describeRange(gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE)),
+                    aliasedPointSizeRange: describeRange(gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE)),
+                    maxViewportDimensions: describeRange(gl.getParameter(gl.MAX_VIEWPORT_DIMS)),
+                    maxAnisotropy: getMaxAnisotropy(gl),
+                    extensions: gl.getSupportedExtensions().sort().toString(),
+                    vertexShaderBestPrecision: turnObjToArray(getShader(gl.VERTEX_SHADER, gl)),
+                    fragmentShaderBestPrecision: turnObjToArray(getShader(gl.FRAGMENT_SHADER, gl)),
+                    fragmentShaderFloatIntPrecision: getFloatIntPrecision(gl)
+                  }), gl.getSupportedExtensions().indexOf("WEBGL_debug_renderer_info") !== -1 ? gl.getParameter(gl.getExtension("WEBGL_debug_renderer_info").UNMASKED_VENDOR_WEBGL) + " " + gl.getParameter(gl.getExtension("WEBGL_debug_renderer_info").UNMASKED_RENDERER_WEBGL) : init].join(",");
+                } catch(_) { return "WebGL not supported";}
               }
             }
           }
@@ -432,17 +438,21 @@ const fpCollect = (function () {
         return [maxTouchPoints, touchEvent, touchStart].join(";");
       },
       videoCard: () => {
-        const canvas = document.createElement('canvas');
-        var ctx = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-        let webGLVendor, webGLRenderer;
-        if (ctx.getSupportedExtensions().indexOf("WEBGL_debug_renderer_info") >= 0) {
-          webGLVendor = ctx.getParameter(ctx.getExtension('WEBGL_debug_renderer_info').UNMASKED_VENDOR_WEBGL);
-          webGLRenderer = ctx.getParameter(ctx.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL);
-        } else {
-          webGLVendor = "Not supported";
-          webGLRenderer = "Not supported";
+        try {
+          const canvas = document.createElement('canvas');
+          var ctx = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+          let webGLVendor, webGLRenderer;
+          if (ctx.getSupportedExtensions().indexOf("WEBGL_debug_renderer_info") >= 0) {
+            webGLVendor = ctx.getParameter(ctx.getExtension('WEBGL_debug_renderer_info').UNMASKED_VENDOR_WEBGL);
+            webGLRenderer = ctx.getParameter(ctx.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL);
+          } else {
+            webGLVendor = "Not supported";
+            webGLRenderer = "Not supported";
+          }
+          return [webGLVendor, webGLRenderer].join(";;;");
+        } catch(e) {
+          return "Not supported;;;Not supported";
         }
-        return [webGLVendor, webGLRenderer].join(";;;");
       },
       multimediaDevices: () => {
         return new Promise((resolve) => {
@@ -452,7 +462,9 @@ const fpCollect = (function () {
             "videoinput": 0
           };
 
-          if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+          if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices
+            && navigator.mediaDevices.enumerateDevices.name !== "bound reportBlock") {
+            // bound reportBlock occurs with Brave
             navigator.mediaDevices.enumerateDevices().then((devices) => {
               let name;
               for (let i = 0; i < devices.length; i++) {
@@ -465,7 +477,12 @@ const fpCollect = (function () {
                 webcams: deviceToCount.videoinput
               });
             });
-          } else {
+          } else if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices
+            && navigator.mediaDevices.enumerateDevices.name === "bound reportBlock") {
+            resolve({
+              'devicesBlockedByBrave': true
+            });
+          } else{
             resolve({
               speakers: 0,
               micros: 0,
@@ -764,6 +781,7 @@ const fpCollect = (function () {
                           hashStr += val[prop].toString();
                         });
                       } else{
+                        console.log(subPropertyName);
                         hashStr = val.toString();
                       }
                       fingerprint[attribute][subPropertyName + HASH_SUFFIX] = hash.x64hash128(hashStr, SEED);
@@ -790,7 +808,11 @@ const fpCollect = (function () {
                       hashStr += returnVal[prop].toString();
                     });
                   }else {
-                    hashStr = returnVal.toString();
+                    try {
+                      hashStr = returnVal.toString();
+                    } catch (e) {
+                      hashStr = "blocked";
+                    }
                   }
                   fingerprint[attribute][subPropertyName + HASH_SUFFIX] = hash.x64hash128(hashStr, SEED);
                 }
