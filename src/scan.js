@@ -19,7 +19,7 @@ const scan = (function () {
   const etslConsistentBrowser = "EtslConsistentBrowser";
   const touchSupportConsistent = "TouchSupportConsistent";
 
-  const INTERNET_EXPLORER = "Internet Explorer";
+  const INTERNET_EXPLORER = "IE";
   const EDGE = "Edge";
   const FIREFOX = "Firefox";
   const CHROME = "Chrome";
@@ -37,6 +37,7 @@ const scan = (function () {
   const WINDOWS_VISTA = "Windows Vista";
   const WINDOWS_7 = "Windows 7";
   const WINDOWS_8 = "Windows 8";
+  const WINDOWS_8_1 = "Windows 8.1";
   const WINDOWS_10	= "Windows 10";
   const FEDORA = "Fedora";
   const UBUNTU = "Ubuntu";
@@ -55,6 +56,7 @@ const scan = (function () {
   OS_TO_OS_FAMILY[WINDOWS_VISTA] = WINDOWS;
   OS_TO_OS_FAMILY[WINDOWS_7] = WINDOWS;
   OS_TO_OS_FAMILY[WINDOWS_8] = WINDOWS;
+  OS_TO_OS_FAMILY[WINDOWS_8_1] = WINDOWS;
   OS_TO_OS_FAMILY[WINDOWS_10] = WINDOWS;
   OS_TO_OS_FAMILY[FEDORA] = LINUX;
   OS_TO_OS_FAMILY[UBUNTU] = LINUX;
@@ -99,7 +101,7 @@ const scan = (function () {
     //it is only available on IE browsers
     if ((
         (fp.scanner.errorsGenerated[3] !== undefined || fp.scanner.errorsGenerated[4] !== undefined) &&
-        (fp.browser.name !== INTERNET_EXPLORER || fp.browser.name !== EDGE)
+        fp.browser.name !== INTERNET_EXPLORER && fp.browser.name !== EDGE
       ) || (
         (fp.scanner.errorsGenerated[3] === undefined || fp.scanner.errorsGenerated[4] === undefined) &&
         (fp.browser.name === INTERNET_EXPLORER || fp.browser.name === EDGE)
@@ -278,7 +280,7 @@ const scan = (function () {
     //mq_os[i] tests every Windows
     // Warning: there might be problem with windows 8.1
     for (let i = 1; i < 6; i++) {
-      if (consistent && (
+      if (i != 4 && consistent && (
           (
             fp.scanner.mediaQueries[i] && fp.os.name !== mqToOS[i]
           ) || (
@@ -356,13 +358,16 @@ const scan = (function () {
   const isNavigatorOverwritten = function(fp) {
     let consistent = true;
     const overwrittenProperties = [];
-    const navProto = fp.scanner.navigatorPrototype.split(";;;");
 
-    for (let propName in navProto) {
-      let value = navProto[propName].split("~~~");
-      if (value[1] !== "" && value[1].indexOf("native") === -1) {
-        consistent = false;
-        overwrittenProperties.push(value[0]);
+    if (fp.browser.name !== INTERNET_EXPLORER) {
+      const navProto = fp.scanner.navigatorPrototype.split(";;;");
+
+      for (let propName in navProto) {
+        let value = navProto[propName].split("~~~");
+        if (value[1] !== "" && value[1].indexOf("native") === -1) {
+          consistent = false;
+          overwrittenProperties.push(value[0]);
+        }
       }
     }
     const data = {"propertiesOverwritten": overwrittenProperties.join("~~")};
@@ -391,7 +396,12 @@ const scan = (function () {
   };
 
   const isHistoryOverwritten = function(fp) {
-    var consistent = fp.scanner.historyDesc.indexOf("native code") !== -1;
+    var consistent;
+    if(fp.browser.name === INTERNET_EXPLORER) {
+      consistent = fp.scanner.historyDesc.indexOf("object History") !== -1;
+    } else {
+      consistent = fp.scanner.historyDesc.indexOf("native code") !== -1;
+    }
     return analysisResult(history, consistent, {});
   }
 
