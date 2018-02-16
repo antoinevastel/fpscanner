@@ -4,9 +4,9 @@
   "description": "Detect fingerprinting countermeasures",
   "main": "dist/fpscanner.js",
   "scripts": {
-    "start": "webpack --watch",
-    "build": "webpack -p",
-    "test": "mocha --recursive test"
+    "start": "./node_modules/bin/webpack --watch",
+    "build": "./node_modules/bin/webpack -p",
+    "test": "./node_modules/bin/mocha --recursive test"
   },
   "repository": {
     "type": "git",
