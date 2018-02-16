@@ -46,4 +46,15 @@ describe('First tests with puppeteer:', function () {
 
         expect(platform).to.not.be.null;
     });
+
+    it('ETSL should be 33', async () => {
+
+        const etsl = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.scanner.etsl;
+        });
+        expect(etsl).to.equal(33);
+    });
+
+
 });
