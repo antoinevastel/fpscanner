@@ -3,32 +3,25 @@ const fpCollect = (function () {
   const uaParser = new parser.UAParser();
   uaParser.setUA(navigator.userAgent);
 
-  const getAudio = require('./audio.js');
   const getFonts = require('./fonts.js');
   const hash = require('./hash.js');
 
-  const UNKNOWN = "unknown";
-
-  // TODO needs to be a parameter later
-  // use "" if you want to override original value
-  const HASH_SUFFIX = "Hashed";
+  const UNKNOWN = 'unknown';
+  const ERROR ='error';
+  const HASH_SUFFIX = 'Hashed';
   const SEED = 42;
   // Fingerprints can be either a list of attributes or attributes
   // structured by categories
   // It is only possible to have at most one level of category
   const option = function(hash, isAsync, unpack) {
-    //save parameters usefull only if hash is set to true
+    //save parameters useful only if hash is set to true
     return {hash: hash, isAsync: isAsync, unpack: unpack};
   };
 
-  let HTTP_HEADERS_URL;
 
-  // TODO add geolocation
   const DEFAULT_OPTIONS = {
     browser: {
-      //"canvasBis", // Can be seen as custom canvas function
       canvas: option(true, false, false),
-      // audio: option(true, true, false),
       fonts: option(true, true, false),
       plugins: option(true, false, false),
       mimeTypes: option(true, false, false),
@@ -40,8 +33,8 @@ const fpCollect = (function () {
       name: option(false, false, false),
       version: option(false, false, false),
       maths: option(true, false, false),
-      localStorage: option(false, false, false),
-      httpHeaders: option(false, true, true, {httpHeadersURL: ''})
+      localStorage: option(false, false, false)
+      // httpHeaders: option(false, true, true, {httpHeadersURL: ''})
     },
     os: {
       name: option(false, false, false),
@@ -49,9 +42,7 @@ const fpCollect = (function () {
       languages: option(false, false, false),
       processors: option(false, false, false),
       hardwareConcurrency: option(false, false, false),
-      resolution: option(false, false, false),
-      colorDepth: option(false, false, false),
-      screenDensity: option(false, false, false),
+      screen: option(false, false, false),
       oscpu: option(false, false, false),
       touchScreen: option(false, false, false),
       videoCard: option(false, false, false),
@@ -109,7 +100,7 @@ const fpCollect = (function () {
           mimeTypes = mimeTypes.join(",");
           pluginsRes.push(pluginStr + "__" + mimeTypes);
         }
-        return pluginsRes.join(";;;");
+        return pluginsRes;
       },
       name: () => {
         return uaParser.getBrowser().name;
@@ -237,7 +228,6 @@ const fpCollect = (function () {
           return "blocked";
         }
       },
-      audio: getAudio,
       dnt: () => {
         return navigator.doNotTrack ? navigator.doNotTrack : UNKNOWN;
       },
@@ -247,7 +237,7 @@ const fpCollect = (function () {
           let mt = navigator.mimeTypes[i];
           mimeTypes.push([mt.description, mt.type, mt.suffixes].join("~~"));
         }
-        return mimeTypes.join(";;");
+        return mimeTypes;
       },
       fonts: getFonts,
       webGL: () => {
@@ -355,30 +345,30 @@ const fpCollect = (function () {
         }
         return "WebGL not supported";
       },
-      httpHeaders: () => {
-        // TODO needs to pass a parameter
-        return new Promise(function(resolve, reject){
-          get(HTTP_HEADERS_URL).then((response) => {
-            const httpHeaders = JSON.parse(response);
-            const res = {};
-            res.connectionHttp = httpHeaders.connection;
-            res.userAgentHttp = httpHeaders["user-agent"];
-            res.pragmaHttp = httpHeaders.pragma;
-            res.acceptHttp = httpHeaders.accept;
-            res.languageHttp = httpHeaders["accept-language"];
-
-            resolve(res);
-          }, (error) => {
-            reject(error);
-          })
-        });
-      }
+      //   httpHeaders: () => {
+      //     // TODO needs to pass a parameter
+      //     return new Promise(function(resolve, reject){
+      //       get(HTTP_HEADERS_URL).then((response) => {
+      //         const httpHeaders = JSON.parse(response);
+      //         const res = {};
+      //         res.connectionHttp = httpHeaders.connection;
+      //         res.userAgentHttp = httpHeaders["user-agent"];
+      //         res.pragmaHttp = httpHeaders.pragma;
+      //         res.acceptHttp = httpHeaders.accept;
+      //         res.languageHttp = httpHeaders["accept-language"];
+      //
+      //         resolve(res);
+      //       }, (error) => {
+      //         reject(error);
+      //       })
+      //     });
+      //   }
     },
     os : {
       name: () => {
         let value = uaParser.getOS();
         if (value.name === "Windows") {
-          return value.name + " " + value.version;
+          return [value.name, value.version];
         }
         return value.name;
       },
@@ -390,7 +380,7 @@ const fpCollect = (function () {
       },
       languages: () => {
         if (navigator.languages) {
-          return navigator.languages.join("~~");
+          return navigator.languages;
         }
         return UNKNOWN;
       },
@@ -406,14 +396,32 @@ const fpCollect = (function () {
         }
         return UNKNOWN;
       },
-      resolution: () => {
-        return [screen.width, screen.height, screen.availWidth, screen.availHeight].join(",");
-      },
-      colorDepth: () => {
-        return screen.colorDepth || -1;
-      },
-      screenDensity: () => {
-        return (window.devicePixelRatio || "") + (window.screen.deviceXDPI ? window.screen.deviceXDPI + "x" + window.screen.deviceYDPI : "");
+      screen: () => {
+        const wInnerWidth = window.innerWidth;
+        const wInnerHeight = window.innerHeight;
+        const wOuterWidth = window.outerWidth;
+        const wScreenX = window.screenX;
+        const wScreenY = window.screenY;
+        const wPageXOffset = window.pageXOffset;
+        const wPageYOffset = window.pageYOffset;
+        const wAvailWidth = window.screen.availWidth;
+        const wAvailHeight = window.screen.availHeight;
+        const wScreenWidth = window.screen.width;
+        const wScreenHeight = window.screen.height;
+        const bClientWidth = document.body.clientWidth;
+        const bClientHeight = document.body.clientHeight;
+
+        return {
+          inner : wInnerWidth !== undefined ? [wInnerWidth, wInnerHeight] : UNKNOWN,
+          outer : wOuterWidth !== undefined ? [wOuterWidth, wInnerHeight] : UNKNOWN,
+          screen : wScreenX !== undefined ? [wScreenX, wScreenY] : UNKNOWN,
+          pageOffset : wPageXOffset !== undefined ? [wPageXOffset, wPageYOffset] : UNKNOWN,
+          avail : wAvailWidth !== undefined ? [wAvailWidth, wAvailHeight] : UNKNOWN,
+          size : wScreenWidth !== undefined ? [wScreenWidth, wScreenHeight] : UNKNOWN,
+          client : document.body ? [bClientWidth, bClientHeight] : UNKNOWN,
+          colorDepth : window.screen.colorDepth,
+          pixelDepth : window.screen.pixelDepth
+        };
       },
       oscpu: () => {
         if (navigator.oscpu) {
@@ -435,7 +443,7 @@ const fpCollect = (function () {
         } catch (_) {}
 
         const touchStart = "ontouchstart" in window;
-        return [maxTouchPoints, touchEvent, touchStart].join(";");
+        return [maxTouchPoints, touchEvent, touchStart];
       },
       videoCard: () => {
         try {
@@ -449,7 +457,7 @@ const fpCollect = (function () {
             webGLVendor = "Not supported";
             webGLRenderer = "Not supported";
           }
-          return [webGLVendor, webGLRenderer].join(";;;");
+          return [webGLVendor, webGLRenderer];
         } catch(e) {
           return "Not supported;;;Not supported";
         }
@@ -519,7 +527,7 @@ const fpCollect = (function () {
           }
           finalProto.push(prop + "~~~" + res);
         });
-        return finalProto.join(";;;");
+        return finalProto;
       },
       etsl: () => {
         return eval.toString().length;
@@ -543,57 +551,57 @@ const fpCollect = (function () {
         try {
           return Object.getOwnPropertyDescriptor(Date.prototype, "getTimezoneOffset").value.toString();
         } catch (e) {
-          return "Error";
+          return ERROR;
         }
       },
       screenDesc: () => {
         try {
           return Object.getOwnPropertyDescriptor(Object.getPrototypeOf(screen), "width").get.toString();
         } catch (e) {
-          return "Error";
+          return ERROR;
         }
       },
       historyDesc: () => {
         try {
           return Object.getOwnPropertyDescriptor(window, "History").value.toString()
         } catch (e) {
-          return "Error";
+          return ERROR;
         }
       },
       bindDesc: () => {
         try {
           return Object.getOwnPropertyDescriptor(Function.prototype, "bind").value.toString();
         } catch (e) {
-          return "Error";
+          return ERROR;
         }
       },
       canvasDesc: () => {
         try {
           return Object.getOwnPropertyDescriptor(window.HTMLCanvasElement.prototype, "toDataURL").value.toString();
         } catch (e) {
-          return "Error";
+          return ERROR;
         }
       },
       awesomium: () => {
-        return !!window.awesomium;
+        return!window.awesomium;
       },
       ghostJS: () => {
-        return !!window.fmget_targets;
+        return !window.fmget_targets;
       },
       nightmareJS: () => {
-        return !!window.__nightmare;
+        return !window.__nightmare;
       },
       fmget: () => {
-        return !!window.fmget_targets;
+        return !window.fmget_targets;
       },
       webDriver: () => {
-        return "webdriver" in window || "true" === document.getElementsByTagName("html")[0].getAttribute("webdriver");
+        return 'webdriver' in window || 'true' === document.getElementsByTagName('html')[0].getAttribute('webdriver');
       },
       seleniumIDE: () => {
-        return !!window._Selenium_IDE_Recorder;
+        return !window._Selenium_IDE_Recorder;
       },
       domAutomation: () => {
-        return "domAutomation" in window || "domAutomationController" in window;
+        return 'domAutomation' in window || 'domAutomationController' in window;
       },
       errorsGenerated: () => {
         const errors = [];
@@ -614,7 +622,7 @@ const fpCollect = (function () {
         }
 
         try {
-          new WebSocket("itsgonnafail");
+          new WebSocket('itsgonnafail');
         } catch (e) {
           errors.push(e.toString());
         }
@@ -639,19 +647,19 @@ const fpCollect = (function () {
         return [depth, errorName, errorMessage];
       },
       emoji: () => {
-        const canvas = document.createElement("canvas");
+        const canvas = document.createElement('canvas');
         canvas.height = 60;
         canvas.width = 60;
-        const canvasContext = canvas.getContext("2d");
-        canvas.style.display = "inline";
-        canvasContext.textBaseline = "alphabetic";
-        canvasContext.font = "40pt no-real-font-123";
+        const canvasContext = canvas.getContext('2d');
+        canvas.style.display = 'inline';
+        canvasContext.textBaseline = 'alphabetic';
+        canvasContext.font = '40pt no-real-font-123';
         canvasContext.fillText("\uD83E\uDD84", -5, 50);
         return canvas.toDataURL();
       },
       accelerometerUsed: () => {
         return new Promise((resolve) => {
-          window.ondevicemotion = function (event) {
+          window.ondevicemotion = event => {
             if (event.accelerationIncludingGravity.x !== null) {
               return resolve(true);
             }
@@ -678,7 +686,6 @@ const fpCollect = (function () {
         return new Date().getTimezoneOffset();
       },
       timezoneLocale: () => {
-        // TODO maybe remove beginning of the function to keep only the part related to the timezone
         const d = new Date();
         let skip = d.getTimezoneOffset();
         d.setTime(0);
@@ -722,34 +729,14 @@ const fpCollect = (function () {
   }
 
   const addCustomFunction = function(category, name, options, f) {
-    // TODO probably don't use default options
     DEFAULT_OPTIONS[category][name] = options;
     defaultAttributeToFunction[category][name] = f;
   };
 
-  // TODO maybe hashing can be generalized, not only to 2 levels of depth
-  const generateFingerprint = function (options) {
-    return new Promise((resolve, reject) => {
+  const generateFingerprint = function () {
+    return new Promise((resolve) => {
       let attributeOptions;
-      if(typeof options !== "object") {
-        reject("options parameter needs to be an object");
-      }
-
-      if (options.name === "default"){
-        attributeOptions = DEFAULT_OPTIONS;
-        if(Object.keys(options.params).length > 0) {
-          if(typeof options.params.httpHeadersURL === "string") {
-            HTTP_HEADERS_URL = options.params.httpHeadersURL;
-          } else {
-            console.log("Call to HTTP Headers removed");
-            delete attributeOptions["httpHeadersURL"];
-          }
-        } else {
-          console.log("Call to HTTP Headers removed");
-          delete attributeOptions.browser.httpHeaders;
-        }
-      }
-
+      attributeOptions = DEFAULT_OPTIONS;
       const promises = [];
       const fingerprint = {};
 
