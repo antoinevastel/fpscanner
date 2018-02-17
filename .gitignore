@@ -1,3 +1,6 @@
+.idea/
+dist/
+
 # Logs
 logs
 *.log
