@@ -169,7 +169,7 @@ const fpCollect = (function () {
           sinh(1),
           cosh(10),
           tanh(1)
-        ].join(";");
+        ];
       },
       adBlock: () => {
         const ads = document.createElement("div");
