@@ -28,6 +28,100 @@ describe('Fingerprinting on Chrome Headless', function () {
         await browser.close();
     });
 
+    it('multimediaDevices should be [0, false, false]', async () => {
+        const multimediaDevices = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return {
+                speakers: fingerprint.os.speakers,
+                micros: fingerprint.os.micros,
+                webcams: fingerprint.os.webcams
+            }
+        });
+        expect(multimediaDevices).to.deep.equal({
+            speakers: 2,
+            micros: 2,
+            webcams: 1
+        });
+    });
+
+    it('videoCard should be [ \'Google Inc.\', \'Google SwiftShader\' ]', async () => {
+        const videoCard = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.os.videoCard;
+        });
+        expect(videoCard).to.deep.equal(['Google Inc.', 'Google SwiftShader']);
+    });
+
+    it('touchScreen should be [0, false, false]', async () => {
+        const touchScreen = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.os.touchScreen;
+        });
+        expect(touchScreen).to.deep.equal([0, false, false]);
+    });
+
+    it('oscpu should be unknown', async () => {
+        const oscpu = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.os.oscpu;
+        });
+        expect(oscpu).to.equal('unknown');
+    });
+
+    it('screen should have 9 properties', async () => {
+        const screen = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.os.screen;
+        });
+        const isScreenValid = screen !== undefined && Object.keys(screen).length === 9;
+        expect(isScreenValid).to.be.true;
+    });
+
+    it('hardware Concurrency should be a number', async () => {
+        const hardwareConcurrency = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.os.hardwareConcurrency;
+        });
+        expect(typeof hardwareConcurrency).to.equal('number');
+    });
+
+    it('Processors should not be null', async () => {
+        const processors = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.os.processors;
+        });
+        expect(processors).to.not.be.null;
+    });
+
+    it('Languages should be en-US', async () => {
+        const languages = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.os.languages;
+        });
+
+        const areLanguagesValid = typeof languages === 'object' &&
+            languages.length === 1 &&
+            languages[0] == 'en-US';
+
+        expect(areLanguagesValid).to.be.true;
+    });
+
+    it('Platform should not be null', async () => {
+        const platform = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.os.platform;
+        });
+        expect(platform).to.not.be.null;
+    });
+
+    it('OS should not be null', async () => {
+        const os = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.os.name;
+        });
+        expect(os).to.not.be.null;
+    });
+
     it('Local storage should be true', async () => {
         const localStorage = await page.evaluate(async () => {
             const fingerprint = await fpScanner.collect.generateFingerprint();
@@ -98,14 +192,6 @@ describe('Fingerprinting on Chrome Headless', function () {
             return fingerprint.browser.name;
         });
         expect(browserName).to.equal(CHROME_HEADLESS);
-    });
-
-    it('Platform should not be null', async () => {
-        const platform = await page.evaluate(async () => {
-            const fingerprint = await fpScanner.collect.generateFingerprint();
-            return fingerprint.os.platform;
-        });
-        expect(platform).to.not.be.null;
     });
 
     it('Canvas should not be an image', async () => {
