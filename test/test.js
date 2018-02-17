@@ -56,6 +56,22 @@ describe('Fingerprinting on Chrome Headless', function () {
         expect(isImageB64).to.be.true;
     });
 
+    it('Fonts should not be null', async () => {
+        const fonts = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.browser.fonts;
+        });
+
+        let areFontsValids = fonts !== undefined && fonts.length > 0;
+        if (areFontsValids) {
+            areFontsValids = fonts.filter((font) => {
+                return /\w+--(false|true)/.test(font);
+            }).length > 0;
+        }
+
+        expect(areFontsValids).to.be.true;
+    });
+
     it('ETSL should be 33', async () => {
 
         const etsl = await page.evaluate(async () => {
