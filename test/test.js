@@ -4,8 +4,7 @@ const path = require('path');
 
 const CHROME_HEADLESS = 'Chrome Headless';
 
-describe('First tests with puppeteer:', function () {
-    // Define global variables
+describe('Fingerprinting on Chrome Headless', function () {
     let browser;
     let page;
 
@@ -45,6 +44,16 @@ describe('First tests with puppeteer:', function () {
         });
 
         expect(platform).to.not.be.null;
+    });
+
+    it('Canvas should not be an image', async () => {
+        const canvas = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.browser.canvas;
+        });
+
+        const isImageB64 = canvas.indexOf('data:image/png;base64') > -1;
+        expect(isImageB64).to.be.true;
     });
 
     it('ETSL should be 33', async () => {
