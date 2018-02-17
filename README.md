@@ -1,4 +1,5 @@
 # Fingerprint Scanner
+[![Build Status](https://travis-ci.org/antoinevastel/fpscanner.svg?branch=master)](https://travis-ci.org/antoinevastel/fpscanner)
 
 Library to collect and analyze browser fingerprints.
 It aims at detecting the presence of inconsistencies in the fingerprint to reveal the presence 
