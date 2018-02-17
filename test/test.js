@@ -28,6 +28,16 @@ describe('Fingerprinting on Chrome Headless', function () {
         await browser.close();
     });
 
+    it('MimeTypes should not be null', async () => {
+
+        const mimeTypes = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.browser.mimeTypes;
+        });
+
+        expect(mimeTypes).to.not.be.null;
+    });
+
     it('Plugins should not be null', async () => {
 
         const plugins = await page.evaluate(async () => {
