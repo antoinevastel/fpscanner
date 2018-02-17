@@ -106,7 +106,7 @@ var fonts = (function () {
       // remove spans from DOM
       h.removeChild(fontsDiv);
       h.removeChild(baseFontsDiv);
-      return resolve(available.join(";;"));
+      return resolve(available);
     });
   }
   return runFontsEnum;
