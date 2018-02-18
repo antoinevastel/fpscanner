@@ -585,7 +585,7 @@ const fpCollect = (function () {
           'webdriver' in navigator;
       },
       seleniumIDE: () => {
-        return !window._Selenium_IDE_Recorder;
+        return !!window._Selenium_IDE_Recorder;
       },
       domAutomation: () => {
         return 'domAutomation' in window || 'domAutomationController' in window;
