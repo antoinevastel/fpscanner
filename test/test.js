@@ -28,6 +28,22 @@ describe('Fingerprinting on Chrome Headless', function () {
         await browser.close();
     });
 
+    it('TimezoneLocale should not be null', async () => {
+        const timezoneLocale = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.geolocation.timezoneLocale;
+        });
+        expect(timezoneLocale).to.not.be.null;
+    });
+
+    it('Timezone should be a number', async () => {
+        const timezone = await page.evaluate(async () => {
+            const fingerprint = await fpScanner.collect.generateFingerprint();
+            return fingerprint.geolocation.timezone;
+        });
+        expect(typeof timezone).to.equal('number');
+    });
+
     it('multimediaDevices should not be null', async () => {
         const multimediaDevices = await page.evaluate(async () => {
             const fingerprint = await fpScanner.collect.generateFingerprint();
