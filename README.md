@@ -34,7 +34,7 @@ of countermeasures.
 - videoCard
 - multimediaDevices
 
-## Readme
+## Geolocation
 - timezone
 - timezoneLocale
 
