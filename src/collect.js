@@ -34,7 +34,6 @@ const fpCollect = (function () {
       version: option(false, false, false),
       maths: option(true, false, false),
       localStorage: option(false, false, false)
-      // httpHeaders: option(false, true, true, {httpHeadersURL: ''})
     },
     os: {
       name: option(false, false, false),
@@ -344,25 +343,7 @@ const fpCollect = (function () {
           return "Supported. Disabled";
         }
         return "WebGL not supported";
-      },
-      //   httpHeaders: () => {
-      //     // TODO needs to pass a parameter
-      //     return new Promise(function(resolve, reject){
-      //       get(HTTP_HEADERS_URL).then((response) => {
-      //         const httpHeaders = JSON.parse(response);
-      //         const res = {};
-      //         res.connectionHttp = httpHeaders.connection;
-      //         res.userAgentHttp = httpHeaders["user-agent"];
-      //         res.pragmaHttp = httpHeaders.pragma;
-      //         res.acceptHttp = httpHeaders.accept;
-      //         res.languageHttp = httpHeaders["accept-language"];
-      //
-      //         resolve(res);
-      //       }, (error) => {
-      //         reject(error);
-      //       })
-      //     });
-      //   }
+      }
     },
     os : {
       name: () => {
@@ -706,27 +687,6 @@ const fpCollect = (function () {
       }
     }
   };
-
-  function get(url) {
-    return new Promise(function(resolve, reject) {
-      var req = new XMLHttpRequest();
-      req.open('GET', url);
-      req.onload = function() {
-        if (req.status == 200) {
-          resolve(req.response);
-        }
-        else {
-          reject(Error(req.statusText));
-        }
-      };
-
-      req.onerror = function(e) {
-        reject(Error("Network Error"));
-      };
-
-      req.send();
-    });
-  }
 
   const addCustomFunction = function(category, name, options, f) {
     DEFAULT_OPTIONS[category][name] = options;
