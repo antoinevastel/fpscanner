@@ -7,13 +7,13 @@ const fpCollect = (function () {
   const hash = require('./hash.js');
 
   const UNKNOWN = 'unknown';
-  const ERROR ='error';
+  const ERROR = 'error';
   const HASH_SUFFIX = 'Hashed';
   const SEED = 42;
   // Fingerprints can be either a list of attributes or attributes
   // structured by categories
   // It is only possible to have at most one level of category
-  const option = function(hash, isAsync, unpack) {
+  const option = function (hash, isAsync, unpack) {
     //save parameters useful only if hash is set to true
     return {hash: hash, isAsync: isAsync, unpack: unpack};
   };
@@ -89,7 +89,7 @@ const fpCollect = (function () {
       },
       plugins: () => {
         const pluginsRes = [];
-        for(let i = 0; i < navigator.plugins.length; i++) {
+        for (let i = 0; i < navigator.plugins.length; i++) {
           const plugin = navigator.plugins[i];
           const pluginStr = [plugin.name, plugin.description, plugin.filename, plugin.version].join("::");
           let mimeTypes = [];
@@ -192,7 +192,8 @@ const fpCollect = (function () {
         let domLocalStorage;
         try {
           localStorage.fp = "test";
-        } catch (ex) {}
+        } catch (ex) {
+        }
 
         try {
           domLocalStorage = "";
@@ -223,14 +224,14 @@ const fpCollect = (function () {
           canvasContext.font = "18pt Arial";
           canvasContext.fillText("Cwm fjordbank glyphs vext quiz, \ud83d\ude03", 4, 45);
           return canvas.toDataURL();
-        } catch(e) {
+        } catch (e) {
           return "blocked";
         }
       },
       dnt: () => {
         return navigator.doNotTrack ? navigator.doNotTrack : UNKNOWN;
       },
-      mimeTypes : () => {
+      mimeTypes: () => {
         const mimeTypes = [];
         for (let i = 0; i < navigator.mimeTypes.length; i++) {
           let mt = navigator.mimeTypes[i];
@@ -336,7 +337,9 @@ const fpCollect = (function () {
                     fragmentShaderBestPrecision: turnObjToArray(getShader(gl.FRAGMENT_SHADER, gl)),
                     fragmentShaderFloatIntPrecision: getFloatIntPrecision(gl)
                   }), gl.getSupportedExtensions().indexOf("WEBGL_debug_renderer_info") !== -1 ? gl.getParameter(gl.getExtension("WEBGL_debug_renderer_info").UNMASKED_VENDOR_WEBGL) + " " + gl.getParameter(gl.getExtension("WEBGL_debug_renderer_info").UNMASKED_RENDERER_WEBGL) : init].join(",");
-                } catch(_) { return "WebGL not supported";}
+                } catch (_) {
+                  return "WebGL not supported";
+                }
               }
             }
           }
@@ -345,7 +348,7 @@ const fpCollect = (function () {
         return "WebGL not supported";
       }
     },
-    os : {
+    os: {
       name: () => {
         let value = uaParser.getOS();
         if (value.name === "Windows") {
@@ -393,15 +396,15 @@ const fpCollect = (function () {
         const bClientHeight = document.body.clientHeight;
 
         return {
-          inner : wInnerWidth !== undefined ? [wInnerWidth, wInnerHeight] : UNKNOWN,
-          outer : wOuterWidth !== undefined ? [wOuterWidth, wInnerHeight] : UNKNOWN,
-          screen : wScreenX !== undefined ? [wScreenX, wScreenY] : UNKNOWN,
-          pageOffset : wPageXOffset !== undefined ? [wPageXOffset, wPageYOffset] : UNKNOWN,
-          avail : wAvailWidth !== undefined ? [wAvailWidth, wAvailHeight] : UNKNOWN,
-          size : wScreenWidth !== undefined ? [wScreenWidth, wScreenHeight] : UNKNOWN,
-          client : document.body ? [bClientWidth, bClientHeight] : UNKNOWN,
-          colorDepth : window.screen.colorDepth,
-          pixelDepth : window.screen.pixelDepth
+          inner: wInnerWidth !== undefined ? [wInnerWidth, wInnerHeight] : UNKNOWN,
+          outer: wOuterWidth !== undefined ? [wOuterWidth, wInnerHeight] : UNKNOWN,
+          screen: wScreenX !== undefined ? [wScreenX, wScreenY] : UNKNOWN,
+          pageOffset: wPageXOffset !== undefined ? [wPageXOffset, wPageYOffset] : UNKNOWN,
+          avail: wAvailWidth !== undefined ? [wAvailWidth, wAvailHeight] : UNKNOWN,
+          size: wScreenWidth !== undefined ? [wScreenWidth, wScreenHeight] : UNKNOWN,
+          client: document.body ? [bClientWidth, bClientHeight] : UNKNOWN,
+          colorDepth: window.screen.colorDepth,
+          pixelDepth: window.screen.pixelDepth
         };
       },
       oscpu: () => {
@@ -421,7 +424,8 @@ const fpCollect = (function () {
         try {
           document.createEvent("TouchEvent");
           touchEvent = true;
-        } catch (_) {}
+        } catch (_) {
+        }
 
         const touchStart = "ontouchstart" in window;
         return [maxTouchPoints, touchEvent, touchStart];
@@ -439,7 +443,7 @@ const fpCollect = (function () {
             webGLRenderer = "Not supported";
           }
           return [webGLVendor, webGLRenderer];
-        } catch(e) {
+        } catch (e) {
           return "Not supported;;;Not supported";
         }
       },
@@ -471,7 +475,7 @@ const fpCollect = (function () {
             resolve({
               'devicesBlockedByBrave': true
             });
-          } else{
+          } else {
             resolve({
               speakers: 0,
               micros: 0,
@@ -564,19 +568,21 @@ const fpCollect = (function () {
         }
       },
       awesomium: () => {
-        return!window.awesomium;
+        return !!window.awesomium;
       },
       ghostJS: () => {
-        return !window.fmget_targets;
+        return !!window.fmget_targets;
       },
       nightmareJS: () => {
-        return !window.__nightmare;
+        return !!window.__nightmare;
       },
       fmget: () => {
-        return !window.fmget_targets;
+        return !!window.fmget_targets;
       },
       webDriver: () => {
-        return 'webdriver' in window || 'true' === document.getElementsByTagName('html')[0].getAttribute('webdriver');
+        return 'webdriver' in window ||
+          'true' === document.getElementsByTagName('html')[0].getAttribute('webdriver') ||
+          'webdriver' in navigator;
       },
       seleniumIDE: () => {
         return !window._Selenium_IDE_Recorder;
@@ -688,7 +694,7 @@ const fpCollect = (function () {
     }
   };
 
-  const addCustomFunction = function(category, name, options, f) {
+  const addCustomFunction = function (category, name, options, f) {
     DEFAULT_OPTIONS[category][name] = options;
     defaultAttributeToFunction[category][name] = f;
   };
@@ -711,23 +717,23 @@ const fpCollect = (function () {
             if (attributeOptions[attribute][subPropertyName].isAsync) {
               promises.push(new Promise((resolve) => {
                 defaultAttributeToFunction[attribute][subPropertyName]().then((val) => {
-                  if(typeof val === "object" && attributeOptions[attribute][subPropertyName].unpack) {
+                  if (typeof val === "object" && attributeOptions[attribute][subPropertyName].unpack) {
                     // Flatten returned object to add its properties directly in category
                     Object.keys(val).forEach((retProp) => {
                       fingerprint[attribute][retProp] = val[retProp];
-                      if(attributeOptions[attribute][subPropertyName].hash) {
+                      if (attributeOptions[attribute][subPropertyName].hash) {
                         fingerprint[attribute][retProp + HASH_SUFFIX] = hash.x64hash128(val[retProp].toString(), SEED);
                       }
                     });
                   } else {
                     fingerprint[attribute][subPropertyName] = val;
-                    if(attributeOptions[attribute][subPropertyName].hash) {
+                    if (attributeOptions[attribute][subPropertyName].hash) {
                       let hashStr = "";
-                      if(typeof val === "object") {
+                      if (typeof val === "object") {
                         Object.keys(val).forEach((prop) => {
                           hashStr += val[prop].toString();
                         });
-                      } else{
+                      } else {
                         console.log(subPropertyName);
                         hashStr = val.toString();
                       }
@@ -739,22 +745,22 @@ const fpCollect = (function () {
               }))
             } else {
               let returnVal = defaultAttributeToFunction[attribute][subPropertyName]();
-              if(typeof returnVal === "object" && attributeOptions[attribute][subPropertyName].unpack) {
+              if (typeof returnVal === "object" && attributeOptions[attribute][subPropertyName].unpack) {
                 Object.keys(returnVal).forEach((retProp) => {
                   fingerprint[attribute][retProp] = returnVal[retProp];
-                  if(attributeOptions[attribute][subPropertyName].hash) {
+                  if (attributeOptions[attribute][subPropertyName].hash) {
                     fingerprint[attribute][retProp + HASH_SUFFIX] = hash.x64hash128(val[retProp].toString(), SEED);
                   }
                 });
               } else {
                 fingerprint[attribute][subPropertyName] = returnVal;
-                if(attributeOptions[attribute][subPropertyName].hash) {
+                if (attributeOptions[attribute][subPropertyName].hash) {
                   let hashStr = "";
-                  if(typeof returnVal === "object") {
+                  if (typeof returnVal === "object") {
                     Object.keys(returnVal).forEach((prop) => {
                       hashStr += returnVal[prop].toString();
                     });
-                  }else {
+                  } else {
                     try {
                       hashStr = returnVal.toString();
                     } catch (e) {
@@ -773,7 +779,7 @@ const fpCollect = (function () {
         let hashStr = "";
         Object.keys(fingerprint).forEach((prop) => {
           // prop needs to be an object !
-          if(prop !== "scanner") {
+          if (prop !== "scanner") {
             // We remove scanner attributes from hash since their implementation may not be stable
             Object.keys(fingerprint[prop]).forEach((val) => {
               hashStr += fingerprint[prop][val];
@@ -787,12 +793,12 @@ const fpCollect = (function () {
     });
   };
 
-  const filterToSave = function(fingerprint) {
+  const filterToSave = function (fingerprint) {
     const fpFiltered = JSON.parse(JSON.stringify(fingerprint));
     Object.keys(fpFiltered).forEach((prop) => {
       // prop needs to be an object !
       Object.keys(fpFiltered[prop]).forEach((val) => {
-        if(fpFiltered[prop].hasOwnProperty(val + HASH_SUFFIX)) {
+        if (fpFiltered[prop].hasOwnProperty(val + HASH_SUFFIX)) {
           delete fpFiltered[prop][val];
         }
       });
