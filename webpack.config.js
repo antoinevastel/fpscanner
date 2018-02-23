@@ -3,12 +3,12 @@ const webpack = require('webpack');
 const path = require('path');
 
 const config = {
-    context: path.resolve(__dirname, 'src'),
-    entry: './fpscanner.js',
+    context: path.resolve(__dirname, 'src/collect'),
+    entry: './fpCollect.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js',
-        library: 'fpScanner'
+        library: 'fpCollect'
     },
     module: {
         rules: [{

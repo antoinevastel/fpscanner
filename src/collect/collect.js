@@ -3,16 +3,11 @@ const fpCollect = (function () {
   const uaParser = new parser.UAParser();
   uaParser.setUA(navigator.userAgent);
 
-  const getFonts = require('./fonts.js');
-  const hash = require('./hash.js');
-
   const UNKNOWN = 'unknown';
   const ERROR = 'error';
   const HASH_SUFFIX = 'Hashed';
   const SEED = 42;
-  // Fingerprints can be either a list of attributes or attributes
-  // structured by categories
-  // It is only possible to have at most one level of category
+
   const option = function (hash, isAsync, unpack) {
     //save parameters useful only if hash is set to true
     return {hash: hash, isAsync: isAsync, unpack: unpack};
@@ -47,10 +42,6 @@ const fpCollect = (function () {
       videoCard: option(false, false, false),
       multimediaDevices: option(false, true, true),
     },
-    geolocation: {
-      timezone: option(false, false, false),
-      timezoneLocale: option(true, false, false),
-    },
     scanner: {
       productSub: option(false, false, false),
       navigatorPrototype: option(false, false, false),
@@ -76,7 +67,6 @@ const fpCollect = (function () {
 
       errorsGenerated: option(false, false, false),
       resOverflow: option(false, false, false),
-      emoji: option(false, false, false),
       accelerometerUsed: option(false, true, false),
       mediaQueries: option(false, false, false)
     }

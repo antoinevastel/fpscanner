@@ -3,13 +3,7 @@
 // TODO add canvas bis in auxiliary function
 const fpscanner = (function () {
 
-  const fpCollect = require('./collect.js');
-  const scan = require('./scan.js');
-
-  return {
-    collect: fpCollect,
-    scan: scan,
- };
+  return require('./scan.js');
 
 })();
 

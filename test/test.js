@@ -30,7 +30,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('mediaQueries should be an array', async () => {
     const mediaQueries = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.mediaQueries;
     });
     const expectedResult = [ false, false, false, false, false, false ];
@@ -39,7 +39,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('accelerometerUsed should be false', async () => {
     const accelerometerUsed = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.accelerometerUsed;
     });
     expect(accelerometerUsed).to.be.false;
@@ -47,7 +47,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('emoji should be an image', async () => {
     const emoji = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.emoji;
     });
     const isImageB64 = emoji.indexOf('data:image/png;base64') > -1;
@@ -56,16 +56,16 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('resOverflow should be false', async () => {
     const resOverflow = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.resOverflow;
     });
-    const expectedResult = ['RangeError', 'Maximum call stack size exceeded']
+    const expectedResult = ['RangeError', 'Maximum call stack size exceeded'];
     expect(resOverflow.slice(1, 3)).to.deep.equal(expectedResult);
   });
 
   it('errorsGenerated should be an array', async () => {
     const errorsGenerated = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.errorsGenerated;
     });
     const expectedResult = [ 'azeaze is not defined',
@@ -82,7 +82,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('domAutomation should be false', async () => {
     const domAutomation = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.domAutomation;
     });
     expect(domAutomation).to.be.false;
@@ -90,7 +90,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('seleniumIDE should be false', async () => {
     const seleniumIDE = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.seleniumIDE;
     });
     expect(seleniumIDE).to.be.false;
@@ -98,7 +98,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('webDriver should be true', async () => {
     const webDriver = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.webDriver;
     });
     expect(webDriver).to.be.true;
@@ -106,7 +106,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('fmget should be false', async () => {
     const fmget = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.fmget;
     });
     expect(fmget).to.be.false;
@@ -114,7 +114,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('nightmareJS should be false', async () => {
     const nightmareJS = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.nightmareJS;
     });
     expect(nightmareJS).to.be.false;
@@ -122,7 +122,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('ghostJS should be false', async () => {
     const ghostJS = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.ghostJS;
     });
     expect(ghostJS).to.be.false;
@@ -130,7 +130,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('awesomium should be false', async () => {
     const awesomium = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.awesomium;
     });
     expect(awesomium).to.be.false;
@@ -138,7 +138,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('canvasDesc should be \'function toDataURL() { [native code] }\'', async () => {
     const canvasDesc = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.canvasDesc;
     });
     expect(canvasDesc).to.equal('function toDataURL() { [native code] }');
@@ -146,7 +146,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('bindDesc should be \'function bind() { [native code] }\'', async () => {
     const bindDesc = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.bindDesc;
     });
     expect(bindDesc).to.equal('function bind() { [native code] }');
@@ -154,7 +154,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('historyDesc should be \'function History() { [native code] }\'', async () => {
     const historyDesc = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.historyDesc;
     });
     expect(historyDesc).to.equal('function History() { [native code] }');
@@ -162,7 +162,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('screenDesc should be \'function () { [native code] }\'', async () => {
     const screenDesc = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.screenDesc;
     });
     expect(screenDesc).to.equal('function () { [native code] }');
@@ -170,7 +170,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('timezoneOffsetDesc should be \'function getTimezoneOffset() { [native code] }\'', async () => {
     const timezoneOffsetDesc = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.timezoneOffsetDesc;
     });
     expect(timezoneOffsetDesc).to.equal('function getTimezoneOffset() { [native code] }');
@@ -178,7 +178,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('buffer should be false', async () => {
     const buffer = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.buffer;
     });
     expect(buffer).to.be.false;
@@ -186,7 +186,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('emit should be false', async () => {
     const emit = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.emit;
     });
     expect(emit).to.be.false;
@@ -194,7 +194,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('spawn should be false', async () => {
     const spawn = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.spawn;
     });
     expect(spawn).to.be.false;
@@ -202,7 +202,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('sendBeacon should be true', async () => {
     const sendBeacon = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.sendBeacon;
     });
     expect(sendBeacon).to.be.true;
@@ -210,7 +210,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('showModal should be false', async () => {
     const showModal = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.showModal;
     });
     expect(showModal).to.be.false;
@@ -218,7 +218,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('ETSL should be 33', async () => {
     const etsl = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.etsl;
     });
     expect(etsl).to.equal(33);
@@ -226,7 +226,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Navigator prototype should be an object', async () => {
     const navigatorPrototype = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.navigatorPrototype;
     });
     expect(typeof navigatorPrototype).to.equal('object');
@@ -234,7 +234,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('productSub should be equal to 20030107', async () => {
     const productSub = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.scanner.productSub;
     });
 
@@ -243,7 +243,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('TimezoneLocale should not be null', async () => {
     const timezoneLocale = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.geolocation.timezoneLocale;
     });
     expect(timezoneLocale).to.not.be.null;
@@ -251,7 +251,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Timezone should be a number', async () => {
     const timezone = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.geolocation.timezone;
     });
     expect(typeof timezone).to.equal('number');
@@ -259,7 +259,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('multimediaDevices should not be null', async () => {
     const multimediaDevices = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return {
         speakers: fingerprint.os.speakers,
         micros: fingerprint.os.micros,
@@ -281,7 +281,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('videoCard should be [ \'Google Inc.\', \'Google SwiftShader\' ]', async () => {
     const videoCard = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.os.videoCard;
     });
     expect(videoCard).to.deep.equal(['Google Inc.', 'Google SwiftShader']);
@@ -289,7 +289,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('touchScreen should be [0, false, false]', async () => {
     const touchScreen = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.os.touchScreen;
     });
     expect(touchScreen).to.deep.equal([0, false, false]);
@@ -297,7 +297,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('oscpu should be unknown', async () => {
     const oscpu = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.os.oscpu;
     });
     expect(oscpu).to.equal('unknown');
@@ -305,7 +305,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('screen should have 9 properties', async () => {
     const screen = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.os.screen;
     });
     const isScreenValid = screen !== undefined && Object.keys(screen).length === 9;
@@ -314,7 +314,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('hardware Concurrency should be a number', async () => {
     const hardwareConcurrency = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.os.hardwareConcurrency;
     });
     expect(typeof hardwareConcurrency).to.equal('number');
@@ -322,7 +322,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Processors should not be null', async () => {
     const processors = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.os.processors;
     });
     expect(processors).to.not.be.null;
@@ -330,7 +330,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Languages should be en-US', async () => {
     const languages = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.os.languages;
     });
 
@@ -343,7 +343,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Platform should not be null', async () => {
     const platform = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.os.platform;
     });
     expect(platform).to.not.be.null;
@@ -351,7 +351,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('OS should not be null', async () => {
     const os = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.os.name;
     });
     expect(os).to.not.be.null;
@@ -359,7 +359,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Local storage should be true', async () => {
     const localStorage = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.localStorage;
     });
     expect(localStorage).to.equal('yes');
@@ -367,7 +367,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Maths should have 9 elements', async () => {
     const maths = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.maths;
     });
     expect(maths.length).to.equal(9);
@@ -375,7 +375,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Cookies should be true', async () => {
     const cookies = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.cookies;
     });
     expect(cookies).to.equal('yes');
@@ -383,7 +383,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Adblock should be false', async () => {
     const adblock = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.adBlock;
     });
     expect(adblock).to.be.false;
@@ -391,7 +391,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('DNT should not be null', async () => {
     const dnt = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.dnt;
     });
     expect(dnt).to.not.be.null;
@@ -399,7 +399,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('WebGL should not be null', async () => {
     const webGL = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.webGL;
     });
     expect(webGL).to.not.be.null;
@@ -407,7 +407,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('MimeTypes should not be null', async () => {
     const mimeTypes = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.mimeTypes;
     });
     expect(mimeTypes).to.not.be.null;
@@ -415,7 +415,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Plugins should not be null', async () => {
     const plugins = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.plugins;
     });
     expect(plugins).to.not.be.null;
@@ -423,7 +423,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Browser should be Chrome Headless', async () => {
     const browserName = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.name;
     });
     expect(browserName).to.equal(CHROME_HEADLESS);
@@ -431,7 +431,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Canvas should be an image', async () => {
     const canvas = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.canvas;
     });
 
@@ -441,7 +441,7 @@ describe('Fingerprinting on Chrome Headless', function () {
 
   it('Fonts should not be null', async () => {
     const fonts = await page.evaluate(async () => {
-      const fingerprint = await fpScanner.collect.generateFingerprint();
+      const fingerprint = await fpCollect.generateFingerprint();
       return fingerprint.browser.fonts;
     });
 
