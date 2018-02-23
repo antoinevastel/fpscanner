@@ -1,73 +1,14 @@
 # Fingerprint Scanner
 [![Build Status](https://travis-ci.org/antoinevastel/fpscanner.svg?branch=master)](https://travis-ci.org/antoinevastel/fpscanner)
 
-Library to collect and analyze browser fingerprints.
-It aims at detecting the presence of inconsistencies in the fingerprint to reveal the presence 
-of countermeasures.
+Library to detect bots and crawlers using fingerprinting.
 
 # Attributes collected
+Fingerprint Scanner relies on [Fp-Collect](https://github.com/antoinevastel/fp-collect) to collect fingerprints in the browser.
 
-## Browser
-- canvas
-- fonts
-- plugins
-- mimeTypes
-- webGL
-- userAgent
-- dnt
-- adBlock
-- cookies
-- name
-- version
-- maths
-- localStorage
-      
-## OS
-- name
-- platform
-- languages
-- processors
-- hardwareConcurrency
-- screen
-- oscpu
-- touchScreen
-- videoCard
-- multimediaDevices
-
-## Geolocation
-- timezone
-- timezoneLocale
-
-## Scanner
-- productSub
-- navigatorPrototype
-- etsl
-- showModal
-- sendBeacon
-- spawn
-- emit
-- buffer
-- timezoneOffsetDesc
-- screenDesc
-- historyDesc
-- bindDesc 
-- canvasDesc
-- awesomium
-- ghostJS
-- nightmareJS
-- fmget
-- webDriver
-- seleniumIDE 
-- domAutomation
-- errorsGenerated
-- resOverflow
-- emoji
-- accelerometerUsed
-- mediaQueries
-
-# TODOs
-Separate the scanner module from the collect module.
-Add detection of bots and tests for the scanner module.
+# Warning
+The library is still in its early phase, many changes may occur.
+More tests are coming soon.
 
 # Acknowledgements
 We would like to thank [CrossBrowserTesting](https://crossbrowsertesting.com) for providing us an easy way to test our scanner on different platforms to reduce false positives.
