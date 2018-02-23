@@ -7,7 +7,7 @@ of countermeasures.
 
 # Attributes collected
 
-## Browser
+## Browser
 - canvas
 - fonts
 - plugins
@@ -22,7 +22,7 @@ of countermeasures.
 - maths
 - localStorage
       
-## OS
+## OS
 - name
 - platform
 - languages
@@ -34,7 +34,7 @@ of countermeasures.
 - videoCard
 - multimediaDevices
 
-## Readme
+## Geolocation
 - timezone
 - timezoneLocale
 
