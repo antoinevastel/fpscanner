@@ -1,0 +1,131 @@
+const scan = (function () {
+  const TESTS = {
+    PHANTOM_UA: 'PHANTOM_UA',
+    PHANTOM_PROPERTIES: 'PHANTOM_PROPERTIES',
+    PHANTOM_ETSL: 'PHANTOM_ETSL',
+    PHANTOM_LANGUAGE: 'PHANTOM_LANGUAGE',
+    PHANTOM_WEBSOCKET: 'PHANTOM_WEBSOCKET',
+    MQ_SCREEN: 'MQ_SCREEN',
+    PHANTOM_OVERFLOW: 'PHANTOM_OVERFLOW',
+    PHANTOM_WINDOW_HEIGHT: 'PHANTOM_WINDOW_HEIGHT',
+    HEADCHR_UA: 'HEADCHR_UA',
+    WEBDRIVER: 'WEBDRIVER',
+    HEADCHR_CHROME_OBJ: 'HEADCHR_CHROME_OBJ',
+    HEADCHR_PERMISSIONS: 'HEADCHR_PERMISSIONS',
+    HEADCHR_PLUGINS: 'HEADCHR_PLUGINS',
+    HEADCHR_IFRAME: 'HEADCHR_IFRAME',
+    CHR_DEBUG_TOOLS: 'CHR_DEBUG_TOOLS'
+  };
+
+  const INCONSISTENT = 1;
+  const UNSURE = 2;
+  const CONSISTENT = 3;
+
+  const analysisResult = (name, consistent, data) => {
+    return {name: name, consistent: consistent, data: data};
+  };
+
+  const analyseFingerprint = (fingerprint) => {
+    const detectionTests = {};
+    const addTestResult = (fn) => {
+      let result = fn(fingerprint);
+      detectionTests[result.name] = result;
+    };
+
+    // Add tests below:
+    addTestResult(() => {
+      const testResult = /PhantomJS/.test(fingerprint.userAgent) ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.PHANTOM_UA, testResult, {userAgent: fingerprint.userAgent})
+    });
+
+    addTestResult(() => {
+      const testResult = fingerprint.phantomJS ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.PHANTOM_PROPERTIES, testResult, {})
+    });
+
+    addTestResult(() => {
+      let testResult = !/Firefox|AppleWebkit/.test(fingerprint.userAgent) &&
+        fingerprint.etsl === 37 ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.PHANTOM_ETSL, testResult, {etsl: fingerprint.etsl})
+    });
+
+    addTestResult(() => {
+      let testResult = !/Trident|MSIE|Edge/.test(fingerprint.userAgent) &&
+        fingerprint.languages === undefined ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.PHANTOM_LANGUAGE, testResult, {languages: fingerprint.languages})
+    });
+
+    addTestResult(() => {
+      let testResult = /SyntaxError: DOM Exception 12/.test(fingerprint.errorsGenerated[7]) ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.PHANTOM_WEBSOCKET, testResult, {error: fingerprint.errorsGenerated[7]})
+    });
+
+    addTestResult(() => {
+      let testResult = fingerprint.screenMediaQuery ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.MQ_SCREEN, testResult, {})
+    });
+
+    addTestResult(() => {
+      let testResult = fingerprint.resOverflow.errorName === 'RangeError' &&
+      fingerprint.resOverflow.errorMessage === 'Maximum call stack size exceeded.' &&
+      fingerprint.resOverflow.errorStacklength > 20*fingerprint.resOverflow.depth? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.PHANTOM_OVERFLOW, testResult, fingerprint.resOverflow)
+    });
+
+    addTestResult(() => {
+      let testResult = fingerprint.screen.wOuterHeight < fingerprint.screen.wInnerHeight ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.PHANTOM_WINDOW_HEIGHT, testResult, fingerprint.screen)
+    });
+
+    addTestResult(() => {
+      let testResult = /HeadlessChrome/.test(fingerprint.userAgent) ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.HEADCHR_UA, testResult, {userAgent: fingerprint.userAgent})
+    });
+
+    addTestResult(() => {
+      let testResult = fingerprint.webDriver ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.WEBDRIVER, testResult, {})
+    });
+
+    addTestResult(() => {
+      let testResult = !fingerprint.hasChrome && /Chrome/.test(fingerprint.userAgent) ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.HEADCHR_CHROME_OBJ, testResult, {})
+    });
+
+    addTestResult(() => {
+      let testResult = fingerprint.permissions.permission === 'denied' &&
+      fingerprint.permissions.state === 'prompt' ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.HEADCHR_PERMISSIONS, testResult, {})
+    });
+
+    addTestResult(() => {
+      let testResult = /Chrome/.test(fingerprint.userAgent) &&
+      fingerprint.plugins.length === 0 ? UNSURE : CONSISTENT;
+      return analysisResult(TESTS.HEADCHR_PLUGINS, testResult, {plugins: fingerprint.plugins})
+    });
+
+    addTestResult(() => {
+      let testResult = /Chrome/.test(fingerprint.userAgent) &&
+      fingerprint.iframeChrome === 'undefined' ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.HEADCHR_IFRAME, testResult, {})
+    });
+
+    addTestResult(() => {
+      let testResult = /Chrome/.test(fingerprint.userAgent) &&
+      fingerprint.debugTool ? UNSURE : CONSISTENT;
+      return analysisResult(TESTS.CHR_DEBUG_TOOLS, testResult, {})
+    });
+
+    return detectionTests;
+  };
+
+  return {
+    analyseFingerprint: analyseFingerprint,
+    CONSISTENT: CONSISTENT,
+    UNSURE: UNSURE,
+    INCONSISTENT: INCONSISTENT,
+    TESTS: TESTS
+  }
+})();
+
+module.exports = scan;
