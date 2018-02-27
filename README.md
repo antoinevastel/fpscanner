@@ -4,8 +4,7 @@
 Library to detect bots and crawlers using fingerprinting.
 
 # Warning
-The library is still in its early phase, many changes may occur.
-More tests are coming soon.
+The library is still in development, changes may occur.
 
 ## Attributes collected
 Fingerprint Scanner relies on [Fp-Collect](https://github.com/antoinevastel/fp-collect) to collect a browser fingerprint.
@@ -21,13 +20,12 @@ npm install fpscanner
 
 ```
 
-
 ### Detect bots
 
 In order to use Fingerprint-Scanner your need to pass a fingerprint
 collected using fp-collect.
 
-```
+```js
 const fingerprint = await fpCollect.generateFingerprint();
 
 //or
@@ -38,9 +36,9 @@ fpCollect.generateFingerprint().then((fingerprint) => {
 
 ```
 
-Once you have a fingerprint, you can pass it to the scanner.
+Then we can analyze the fingerprint with the scanner.
 
-```
+```js
 const scanner = require('fpScanner');
 //fingerprint is the fingerprint collected with fp-collect
 scannerResults = scanner.analyseFingerprint(fingerprint);
@@ -59,7 +57,11 @@ console.log(scannerResults[0].data);
 ```
 
 **analyseFingerprint** returns an array of analysisResult's objects.
-Each object contains information on the name of the test
+Each object contains the following information:
+- *name*: the name of the test;
+- *consistent*: the result of the test (CONSISTENT, UNSURE, INCONSISTENT)
+- *data*: data related to the test
+
 
 # Acknowledgements
 We would like to thank [CrossBrowserTesting](https://crossbrowsertesting.com) for providing us an easy way to test our scanner on different platforms to reduce false positives.
