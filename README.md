@@ -3,6 +3,10 @@
 
 Library to detect bots and crawlers using fingerprinting.
 
+# Warning
+The library is still in its early phase, many changes may occur.
+More tests are coming soon.
+
 ## Attributes collected
 Fingerprint Scanner relies on [Fp-Collect](https://github.com/antoinevastel/fp-collect) to collect a browser fingerprint.
 Since the purpose of the library is bot detection, it doesn't detect collect 
@@ -10,7 +14,7 @@ unecessary fingerprint attributes used for tracking.
 
 ## Usage
 
-### Installation
+### Installation
 
 ```
 npm install fpscanner
@@ -56,11 +60,6 @@ console.log(scannerResults[0].data);
 
 **analyseFingerprint** returns an array of analysisResult's objects.
 Each object contains information on the name of the test
-
-
-# Warning
-The library is still in its early phase, many changes may occur.
-More tests are coming soon.
 
 # Acknowledgements
 We would like to thank [CrossBrowserTesting](https://crossbrowsertesting.com) for providing us an easy way to test our scanner on different platforms to reduce false positives.
