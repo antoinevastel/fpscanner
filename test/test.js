@@ -85,4 +85,8 @@ describe('Bot scanner', async function () {
     expect(scannerResult[scanner.TESTS.CHR_DEBUG_TOOLS].consistent).to.equal(scanner.UNSURE);
   });
 
+  it('SELENIUM_DRIVER should be consistent', async () => {
+    expect(scannerResult[scanner.TESTS.SELENIUM_DRIVER].consistent).to.equal(scanner.CONSISTENT);
+  });
+
 });
