@@ -17,6 +17,8 @@ const fpscanner = (function () {
     CHR_DEBUG_TOOLS: 'CHR_DEBUG_TOOLS'
   };
 
+  // TODO adds test for memoryDevices > 8 except for  'ONEPLUS'
+
   const INCONSISTENT = 1;
   const UNSURE = 2;
   const CONSISTENT = 3;
@@ -39,7 +41,9 @@ const fpscanner = (function () {
     });
 
     addTestResult(() => {
-      const testResult = fingerprint.phantomJS ? INCONSISTENT : CONSISTENT;
+      const testResult = fingerprint.phantomJS.some((val) => {
+        return val;
+      }) ? INCONSISTENT : CONSISTENT;
       return analysisResult(TESTS.PHANTOM_PROPERTIES, testResult, {})
     });
 
