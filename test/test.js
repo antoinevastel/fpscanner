@@ -89,4 +89,12 @@ describe('Bot scanner', async function () {
     expect(scannerResult[scanner.TESTS.SELENIUM_DRIVER].consistent).to.equal(scanner.CONSISTENT);
   });
 
+  it('CHR_BATTERY should be consistent', async () => {
+    expect(scannerResult[scanner.TESTS.CHR_BATTERY].consistent).to.equal(scanner.CONSISTENT);
+  });
+
+  it('CHR_MEMORY should be inconsistent', async () => {
+    expect(scannerResult[scanner.TESTS.CHR_MEMORY].consistent).to.equal(scanner.INCONSISTENT);
+  });
+
 });

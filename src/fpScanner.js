@@ -1,3 +1,5 @@
+const parser = require('ua-parser-js');
+
 const fpscanner = (function () {
   const TESTS = {
     PHANTOM_UA: 'PHANTOM_UA',
@@ -15,7 +17,18 @@ const fpscanner = (function () {
     HEADCHR_PLUGINS: 'HEADCHR_PLUGINS',
     HEADCHR_IFRAME: 'HEADCHR_IFRAME',
     CHR_DEBUG_TOOLS: 'CHR_DEBUG_TOOLS',
-    SELENIUM_DRIVER: 'SELENIUM_DRIVER'
+    SELENIUM_DRIVER: 'SELENIUM_DRIVER',
+    CHR_BATTERY: 'CHR_BATTERY',
+    CHR_MEMORY: 'CHR_MEMORY'
+  };
+
+  const VENDORS = {
+    ONEPLUS: 'OnePlus'
+  };
+
+  const BROWSERS = {
+    CHROME: 'Chrome',
+    OPERA: 'Opera'
   };
 
   // TODO adds test for memoryDevices > 8 except for  'ONEPLUS'
@@ -30,6 +43,15 @@ const fpscanner = (function () {
 
   const analyseFingerprint = (fingerprint) => {
     const detectionTests = {};
+
+    const uaParsed = parser(fingerprint.userAgent);
+    const OS_REF = uaParsed.os.name;
+    const OS_VERSION_REF = uaParsed.os.version;
+    const BROWSER_REF = uaParsed.browser.name;
+    const BROWSER_VERSION_REF = uaParsed.browser.major;
+    const IS_MOBILE_REF = uaParsed.device.type === parser.DEVICE.MOBILE;
+    const VENDOR_REF = uaParsed.device.vendor;
+
     const addTestResult = (fn) => {
       let result = fn(fingerprint);
       detectionTests[result.name] = result;
@@ -126,6 +148,36 @@ const fpscanner = (function () {
         return val;
       }) ? INCONSISTENT : CONSISTENT;
       return analysisResult(TESTS.SELENIUM_DRIVER, testResult, {attributesFound: fingerprint.selenium});
+    });
+
+    addTestResult(() => {
+      let testResult = /Chrome/.test(fingerprint.userAgent) &&
+      BROWSER_VERSION_REF > 49 && !fingerprint.battery ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.CHR_BATTERY, testResult, {});
+    });
+
+    addTestResult(() => {
+      let testResult = CONSISTENT;
+
+      if (IS_MOBILE_REF && fingerprint.deviceMemory >= 8 &&
+        VENDOR_REF !== VENDORS.ONEPLUS) {
+        // Currently only onePlus has more than 8gb of RAM
+        testResult = INCONSISTENT;
+      }
+
+      if (fingerprint.deviceMemory !== 0 &&
+        !(BROWSER_REF === BROWSERS.CHROME && BROWSER_VERSION_REF >= 63) &&
+        !(BROWSER_REF === BROWSERS.OPERA && BROWSER_VERSION_REF >= 50)) {
+        // If deviceMemory != 0 and not recent Chrome or Opera
+        testResult = INCONSISTENT;
+      } else if (fingerprint.deviceMemory === 0 &&
+        (BROWSER_REF === BROWSERS.CHROME && BROWSER_VERSION_REF >= 63) ||
+        (BROWSER_REF === BROWSERS.OPERA && BROWSER_VERSION_REF >= 50)) {
+        // If deviceMemory = 0 and recent Chrome or Opera
+        testResult = INCONSISTENT;
+      }
+
+      return analysisResult(TESTS.CHR_MEMORY, testResult, {});
     });
 
     return detectionTests;
