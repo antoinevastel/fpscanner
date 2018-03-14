@@ -70,6 +70,7 @@ the documentation page (coming soon).
 - **SELENIUM_DRIVER:** Test the presence of Selenium drivers
 - **CHR_BATTERY:** Test the presence of *battery*
 - **CHR_MEMORY:** Verify if *navigator.deviceMemory* is consistent
+- **TRANSPARENT_PIXEL:** Verify if a canvas pixel is transparent
 
 # Acknowledgements
 We would like to thank [CrossBrowserTesting](https://crossbrowsertesting.com) for providing us an easy way to test our scanner on different platforms to reduce false positives.
