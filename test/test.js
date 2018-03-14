@@ -101,4 +101,8 @@ describe('Bot scanner', async function () {
     expect(scannerResult[scanner.TESTS.TRANSPARENT_PIXEL].consistent).to.equal(scanner.CONSISTENT);
   });
 
+  it('SEQUENTUM should be consistent', async () => {
+    expect(scannerResult[scanner.TESTS.SEQUENTUM].consistent).to.equal(scanner.CONSISTENT);
+  });
+
 });

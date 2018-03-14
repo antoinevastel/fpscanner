@@ -20,7 +20,8 @@ const fpscanner = (function () {
     SELENIUM_DRIVER: 'SELENIUM_DRIVER',
     CHR_BATTERY: 'CHR_BATTERY',
     CHR_MEMORY: 'CHR_MEMORY',
-    TRANSPARENT_PIXEL: 'TRANSPARENT_PIXEL'
+    TRANSPARENT_PIXEL: 'TRANSPARENT_PIXEL',
+    SEQUENTUM: 'SEQUENTUM'
   };
 
   const VENDORS = {
@@ -188,6 +189,11 @@ const fpscanner = (function () {
         fingerprint.tpCanvas[2] === 0 &&
         fingerprint.tpCanvas[3] === 0 ? CONSISTENT : UNSURE;
       return analysisResult(TESTS.TRANSPARENT_PIXEL, testResult, fingerprint.tpCanvas);
+    });
+
+    addTestResult(() => {
+      let testResult = fingerprint.sequentum ? INCONSISTENT : CONSISTENT;
+      return analysisResult(TESTS.SEQUENTUM, testResult, {});
     });
 
     return detectionTests;
