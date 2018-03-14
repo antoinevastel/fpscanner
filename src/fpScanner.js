@@ -19,7 +19,8 @@ const fpscanner = (function () {
     CHR_DEBUG_TOOLS: 'CHR_DEBUG_TOOLS',
     SELENIUM_DRIVER: 'SELENIUM_DRIVER',
     CHR_BATTERY: 'CHR_BATTERY',
-    CHR_MEMORY: 'CHR_MEMORY'
+    CHR_MEMORY: 'CHR_MEMORY',
+    TRANSPARENT_PIXEL: 'TRANSPARENT_PIXEL'
   };
 
   const VENDORS = {
@@ -178,6 +179,15 @@ const fpscanner = (function () {
       }
 
       return analysisResult(TESTS.CHR_MEMORY, testResult, {});
+    });
+
+    addTestResult(() => {
+      let testResult = fingerprint.tpCanvas !== 'error' &&
+        fingerprint.tpCanvas[0] === 0 &&
+        fingerprint.tpCanvas[1] === 0 &&
+        fingerprint.tpCanvas[2] === 0 &&
+        fingerprint.tpCanvas[3] === 0 ? CONSISTENT : UNSURE;
+      return analysisResult(TESTS.TRANSPARENT_PIXEL, testResult, fingerprint.tpCanvas);
     });
 
     return detectionTests;
