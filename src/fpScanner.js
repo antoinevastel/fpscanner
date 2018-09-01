@@ -21,7 +21,8 @@ const fpscanner = (function () {
     CHR_BATTERY: 'CHR_BATTERY',
     CHR_MEMORY: 'CHR_MEMORY',
     TRANSPARENT_PIXEL: 'TRANSPARENT_PIXEL',
-    SEQUENTUM: 'SEQUENTUM'
+    SEQUENTUM: 'SEQUENTUM',
+    VIDEO_CODECS: 'VIDEO_CODECS'
   };
 
   const VENDORS = {
@@ -30,6 +31,7 @@ const fpscanner = (function () {
 
   const BROWSERS = {
     CHROME: 'Chrome',
+    CHROMIUM: 'Chromium',
     OPERA: 'Opera'
   };
 
@@ -194,6 +196,14 @@ const fpscanner = (function () {
     addTestResult(() => {
       let testResult = fingerprint.sequentum ? INCONSISTENT : CONSISTENT;
       return analysisResult(TESTS.SEQUENTUM, testResult, {});
+    });
+
+
+    // TODO: do more tests on Windows and Mac OS to change UNSURE to INCONSISTENT
+    addTestResult(() => {
+      let testResult = (BROWSER_REF === BROWSERS.CHROME || BROWSER_REF ===  BROWSERS.CHROMIUM) &&
+      fingerprint.videoCodecs.h264 !== 'probably' ? UNSURE : CONSISTENT;
+      return analysisResult(TESTS.VIDEO_CODECS, testResult, {h264: fingerprint.videoCodecs.h264});
     });
 
     return detectionTests;

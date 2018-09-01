@@ -18,6 +18,7 @@ describe('Bot scanner', async function () {
     const fingerprint = await page.evaluate(async () => {
       return await fpCollect.generateFingerprint();
     });
+
     scannerResult = scanner.analyseFingerprint(fingerprint);
   });
 
@@ -103,6 +104,13 @@ describe('Bot scanner', async function () {
 
   it('SEQUENTUM should be consistent', async () => {
     expect(scannerResult[scanner.TESTS.SEQUENTUM].consistent).to.equal(scanner.CONSISTENT);
+  });
+
+  // It may seem counter intuitive to have this test consistent with Chrome headless
+  // The reason is that the the test will be inconsistent only when Chrome headless decides
+  // to spoof its identity by changing its user agent
+  it('VIDEO_CODECS should be consistent', async () => {
+    expect(scannerResult[scanner.TESTS.VIDEO_CODECS].consistent).to.equal(scanner.CONSISTENT);
   });
 
 });
