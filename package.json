@@ -1,6 +1,6 @@
 {
   "name": "fpscanner",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Detect bots using fingerprinting",
   "main": "src/fpScanner.js",
   "scripts": {
