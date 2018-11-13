@@ -4,7 +4,7 @@
   "description": "Detect bots using fingerprinting",
   "main": "src/fpScanner.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --recursive test"
+    "test": "./node_modules/.bin/mocha --timeout 5000 --recursive test"
   },
   "repository": {
     "type": "git",
