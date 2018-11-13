@@ -92,7 +92,7 @@ const fpscanner = (function () {
     });
 
     addTestResult(() => {
-      let testResult = fingerprint.screenMediaQuery ? INCONSISTENT : CONSISTENT;
+      let testResult = fingerprint.screenMediaQuery ? CONSISTENT : INCONSISTENT;
       return analysisResult(TESTS.MQ_SCREEN, testResult, {});
     });
 
