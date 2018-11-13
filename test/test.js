@@ -46,8 +46,8 @@ describe('Bot scanner', async function () {
     expect(scannerResult[scanner.TESTS.PHANTOM_WEBSOCKET].consistent).to.equal(scanner.CONSISTENT);
   });
 
-  it('MQ_SCREEN should not be consistent', async () => {
-    expect(scannerResult[scanner.TESTS.MQ_SCREEN].consistent).to.equal(scanner.INCONSISTENT);
+  it('MQ_SCREEN should be consistent', async () => {
+    expect(scannerResult[scanner.TESTS.MQ_SCREEN].consistent).to.equal(scanner.CONSISTENT);
   });
 
   it('PHANTOM_OVERFLOW should not be consistent', async () => {
