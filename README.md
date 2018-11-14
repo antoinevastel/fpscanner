@@ -3,6 +3,9 @@
 
 Library to detect bots and crawlers using browser fingerprinting.
 
+You can see it in action on [this page.](https://antoinevastel.com/bots/)
+
+
 ## Attributes collected
 Fingerprint Scanner relies on [Fp-Collect](https://github.com/antoinevastel/fp-collect) to collect a browser fingerprint.
 Since the purpose of the library is bot detection, it doesn't detect collect 
