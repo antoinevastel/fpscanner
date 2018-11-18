@@ -76,7 +76,7 @@ const fpscanner = (function () {
         });
 
         addTestResult(() => {
-            let testResult = !/Firefox|AppleWebKit/.test(fingerprint.userAgent) &&
+            let testResult = !/Firefox/.test(fingerprint.userAgent) && !BROWSER_REF.test('Safari') &&
             fingerprint.etsl === 37 ? INCONSISTENT : CONSISTENT;
             return analysisResult(TESTS.PHANTOM_ETSL, testResult, {etsl: fingerprint.etsl});
         });
