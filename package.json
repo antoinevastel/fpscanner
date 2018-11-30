@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "fpcollect": "^1.0.0",
+    "fpcollect": "^1.0.4",
     "mocha": "^5.2.0",
     "puppeteer": "^1.9.0"
   }
