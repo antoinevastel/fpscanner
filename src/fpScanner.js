@@ -183,7 +183,7 @@ const fpscanner = (function () {
                 testResult = INCONSISTENT;
             } else if (fingerprint.deviceMemory === 0 &&
                 ((BROWSER_REF === BROWSERS.CHROME && BROWSER_VERSION_REF >= 63) ||
-                    (BROWSER_REF === BROWSERS.OPERA && BROWSER_VERSION_REF >= 50))) {
+                    (/Opera/.test(BROWSER_REF) && BROWSER_VERSION_REF >= 50))) {
                 // If deviceMemory = 0 and recent Chrome or Opera
                 testResult = INCONSISTENT;
             }
