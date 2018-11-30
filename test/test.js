@@ -54,7 +54,7 @@ describe('Bot scanner', async function () {
         expect(scannerResult[scanner.TESTS.PHANTOM_OVERFLOW].consistent).to.equal(scanner.CONSISTENT);
     });
 
-    it('PHANTOM_WINDOW_HEIGHT should not be consistent', async () => {
+    it('PHANTOM_WINDOW_HEIGHT should be consistent', async () => {
         expect(scannerResult[scanner.TESTS.PHANTOM_WINDOW_HEIGHT].consistent).to.equal(scanner.CONSISTENT);
     });
 

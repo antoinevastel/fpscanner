@@ -104,11 +104,8 @@ const fpscanner = (function () {
         });
 
         addTestResult(() => {
-            if (/Safari/.test(BROWSER_REF)) {
-                return analysisResult(TESTS.PHANTOM_WINDOW_HEIGHT, CONSISTENT, fingerprint.screen);
-            }
-
-            let testResult = fingerprint.screen.wOuterHeight < fingerprint.screen.wInnerHeight ? INCONSISTENT : CONSISTENT;
+            let testResult = fingerprint.screen.sAvailWidth <= fingerprint.screen.sWidth &&
+            fingerprint.screen.sAvailHeight <= fingerprint.screen.sHeight ? CONSISTENT : INCONSISTENT;
             return analysisResult(TESTS.PHANTOM_WINDOW_HEIGHT, testResult, fingerprint.screen);
         });
 
@@ -181,7 +178,7 @@ const fpscanner = (function () {
 
             if (fingerprint.deviceMemory !== 0 &&
                 !(BROWSER_REF === BROWSERS.CHROME && BROWSER_VERSION_REF >= 63) &&
-                !(BROWSER_REF === BROWSERS.OPERA && BROWSER_VERSION_REF >= 50)) {
+                !(/Opera/.test(BROWSER_REF) && BROWSER_VERSION_REF >= 50)) {
                 // If deviceMemory != 0 and not recent Chrome or Opera
                 testResult = INCONSISTENT;
             } else if (fingerprint.deviceMemory === 0 &&
