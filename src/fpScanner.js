@@ -170,12 +170,6 @@ const fpscanner = (function () {
         addTestResult(() => {
             let testResult = CONSISTENT;
 
-            if (IS_MOBILE_REF && fingerprint.deviceMemory >= 8 &&
-                VENDOR_REF !== VENDORS.ONEPLUS) {
-                // Currently only onePlus has more than 8gb of RAM
-                testResult = INCONSISTENT;
-            }
-
             if (fingerprint.deviceMemory !== 0 &&
                 !(BROWSER_REF === BROWSERS.CHROME && BROWSER_VERSION_REF >= 63) &&
                 !(/Opera/.test(BROWSER_REF) && BROWSER_VERSION_REF >= 50)) {
