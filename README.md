@@ -74,8 +74,3 @@ the documentation page (coming soon).
 - **CHR_BATTERY:** Test the presence of *battery*
 - **CHR_MEMORY:** Verify if *navigator.deviceMemory* is consistent
 - **TRANSPARENT_PIXEL:** Verify if a canvas pixel is transparent
-
-# Acknowledgements
-We would like to thank [CrossBrowserTesting](https://crossbrowsertesting.com) for providing us an easy way to test our scanner on different platforms to reduce false positives.
-
-![Logo of CrossBrowserTesting](https://seeklogo.com/images/C/cross-browser-testing-logo-300E2AF44B-seeklogo.com.png)
