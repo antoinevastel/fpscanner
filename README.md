@@ -1,6 +1,11 @@
 # Fingerprint Scanner
 [![Build Status](https://travis-ci.org/antoinevastel/fpscanner.svg?branch=master)](https://travis-ci.org/antoinevastel/fpscanner)
 
+## News:
+I recently created a [website where you can see your browser fingerprint](https://deviceandbrowserinfo.com/info_device) and different fingerprinting-related signals like your IP address, your canvas fingerprint, your HTTP headers, etc. Some information is accessible both through a webpage and through APIs. Don't hesitate to bookmark it as I will add more signals and more content related to bots.
+
+------------
+
 Library to detect bots and crawlers using browser fingerprinting.
 
 You can see it in action on [this page.](https://antoinevastel.com/bots/)
