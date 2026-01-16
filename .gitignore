@@ -46,3 +46,6 @@ tmp
 \.idea/misc\.xml
 
 \.idea/jsLibraryMappings\.xml
+
+*.pyc
+__pycache__/*
