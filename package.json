@@ -2,9 +2,33 @@
   "name": "fpscanner",
   "version": "0.1.4",
   "description": "Detect bots using fingerprinting",
-  "main": "src/fpScanner.js",
+  "main": "dist/fpScanner.cjs.js",
+  "module": "dist/fpScanner.es.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "fpscanner": "./bin/cli.js"
+  },
+  "files": [
+    "dist",
+    "src",
+    "bin",
+    "scripts",
+    "vite.config.ts",
+    "tsconfig.json"
+  ],
   "scripts": {
-    "test": "./node_modules/.bin/mocha --timeout 5000 --recursive test"
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "build:vite": "vite build",
+    "build:dev": "node bin/cli.js build --key=dev-key --no-obfuscate",
+    "build:prod": "node bin/cli.js build",
+    "build:obfuscate": "node bin/cli.js build --key=dev-key",
+    "watch": "concurrently \"FP_ENCRYPTION_KEY=dev-key vite build --watch\" \"tsc --watch --emitDeclarationOnly\"",
+    "dev": "vite",
+    "dev:build": "npm run build:dev && vite",
+    "dev:obfuscate": "npm run build:obfuscate && vite",
+    "test:vitest": "vitest",
+    "test:playwright": "npm run build:obfuscate && npx playwright test",
+    "test:playwright:headed": "npm run build:obfuscate && npx playwright test --headed"
   },
   "repository": {
     "type": "git",
@@ -21,9 +45,17 @@
     "ua-parser-js": "^0.7.18"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@vitest/ui": "^4.0.16",
     "chai": "^4.2.0",
+    "concurrently": "^9.2.1",
     "fpcollect": "^1.0.4",
+    "javascript-obfuscator": "^5.1.0",
     "mocha": "^5.2.0",
-    "puppeteer": "^1.9.0"
+    "puppeteer": "^1.9.0",
+    "terser": "^5.46.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0",
+    "vitest": "^4.0.16"
   }
 }

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprint Scanner Test</title>
+</head>
+<body>
+    <h1>Fingerprint Scanner Test</h1>
+    <p>Open the browser console to see the fingerprint results.</p>
+    
+    <script type="module">
+        // Import from source - Vite transpiles TypeScript on the fly
+        import FingerprintScanner from './src/index.ts';
+        
+        async function testFingerprint() {
+            const scanner = new FingerprintScanner();
+            const result = await scanner.collectFingerprint();
+            console.log('Fingerprint result:', result);
+        }
+        
+        testFingerprint().catch(console.error);
+    </script>
+</body>
+</html>
+
