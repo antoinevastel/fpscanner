@@ -1,5 +1,5 @@
 import { Fingerprint } from "../types";
 
 export function hasCDP(fingerprint: Fingerprint) {
-    return fingerprint.signals.cdp === true;
+    return fingerprint.signals.automation.cdp === true;
 }

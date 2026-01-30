@@ -9,116 +9,198 @@ The `fsid` is a JA4-inspired, locality-preserving fingerprint identifier. Unlike
 ### Format
 
 ```
-FS1_<bot>_<env>_<hw>_<gl>_<gpu>_<scr>_<loc>_<ifr>_<wrk>
+FS1_<det>_<auto>_<dev>_<brw>_<gfx>_<cod>_<loc>_<ctx>
 ```
 
 ### Example
 
 ```
-FS1_00000_a7f3b2_c08m16_e4a1c9_b82f0d_1920x1080hf3a2_en2hc8b1_0ha3f2e1_0hb7c4d2
+FS1_00000100000000_10010h3f2a_1728x1117c14m08b01011h4e7a9f_f1101011001e00000000p1100h2c8b1e_0h9d3f7a_1h6a2e4c_en4h1b2c_0000h3e9f
 ```
 
 ### Section Breakdown
 
 | # | Section | Format | Example | Description |
 |---|---------|--------|---------|-------------|
-| 1 | **Version** | `FS1` | `FS1` | Fingerprint Scanner version 1 |
-| 2 | **Bot** | `<count><w><c><p>` | `05110` | Detection count (2 digits) + flags: webdriver, cdp, playwright |
-| 3 | **Environment** | 6-char hash | `a7f3b2` | Hash of: userAgent, platform, chrome, brave, etsl |
-| 4 | **Hardware** | `c<cpu>m<mem>` | `c08m16` | CPU count + memory in GB (human-readable) |
-| 5 | **WebGL** | 6-char hash | `e4a1c9` | Hash of: WebGL vendor + renderer |
-| 6 | **WebGPU** | 6-char hash | `b82f0d` | Hash of: WebGPU vendor, architecture, device, description |
-| 7 | **Screen** | `<w>x<h>h<hash>` | `1920x1080hf3a2` | Width × Height + 4-char hash of other screen attributes |
-| 8 | **Locale** | `<lang><n>h<hash>` | `en2hc8b1` | Primary language (2 chars) + language count + 4-char hash |
-| 9 | **Iframe** | `<m>h<hash>` | `0ha3f2e1` | Mismatch flag (0/1) + 6-char hash of iframe signals |
-| 10 | **Worker** | `<m>h<hash>` | `0hb7c4d2` | Mismatch flag (0/1) + 6-char hash of web worker signals |
+| 1 | **Version** | `FS1` | `FS1` | Fingerprint Scanner version 2 |
+| 2 | **Detection** | 14-bit bitmask | `00000100000000` | All fastBotDetectionDetails booleans |
+| 3 | **Automation** | `<5-bit>h<hash>` | `10010h3f2a` | Automation booleans + hash |
+| 4 | **Device** | `<W>x<H>c<cpu>m<mem>b<5-bit>h<hash>` | `1728x1117c14m08b01011h4e7a9f` | Screen, cpu, memory, device booleans + hash |
+| 5 | **Browser** | `f<10-bit>e<8-bit>p<4-bit>h<hash>` | `f1101011001e00000000p1100h2c8b1e` | Features + extensions + plugins bitmasks + hash |
+| 6 | **Graphics** | `<1-bit>h<hash>` | `0h9d3f7a` | hasModifiedCanvas + hash |
+| 7 | **Codecs** | `<1-bit>h<hash>` | `1h6a2e4c` | hasMediaSource + hash |
+| 8 | **Locale** | `<lang><n>h<hash>` | `en4h1b2c` | Language code + count + hash |
+| 9 | **Contexts** | `<4-bit>h<hash>` | `0000h3e9f` | Mismatch + webdriver flags + hash |
 
-### Detailed Section Descriptions
+### Bitmask Design (Extensibility)
 
-#### Bot Section (`<count><w><c><p>`)
+Each section uses the pattern `<bitmask>h<hash>` where applicable. **Bitmasks are extensible** — adding a new boolean field appends a bit without breaking existing positions.
 
-- **count**: 2-digit count of triggered detection tests (00-12)
-- **w**: `1` if `navigator.webdriver` is true, `0` otherwise
-- **c**: `1` if CDP (Chrome DevTools Protocol) detected, `0` otherwise
-- **p**: `1` if Playwright detected, `0` otherwise
+#### Detection Bitmask (14 bits)
 
-Examples:
-- `00000` — No detections, clean browser
-- `07110` — 7 detections triggered, webdriver=true, cdp=true, playwright=false
-- `12111` — All 12 detections triggered, all bot signals true
-
-#### Hardware Section (`c<cpu>m<mem>`)
-
-Human-readable hardware specs:
-- `c08m16` — 8 CPU cores, 16 GB memory
-- `c02m04` — 128 CPU cores, 4 GB memory (suspiciously high number of CPU cores, could be a bot running from a server)
-
-#### Screen Section (`<w>x<h>h<hash>`)
-
-- Width and height are human-readable
-- The 4-char hash includes: pixelDepth, colorDepth, availableWidth, availableHeight, innerWidth, innerHeight, hasMultipleDisplays
+Position-to-field mapping (in order):
+```
+Bit 0:  headlessChromeScreenResolution
+Bit 1:  hasWebdriver
+Bit 2:  hasWebdriverWritable
+Bit 3:  hasSeleniumProperty
+Bit 4:  hasCDP
+Bit 5:  hasPlaywright
+Bit 6:  hasImpossibleDeviceMemory
+Bit 7:  hasHighCPUCount
+Bit 8:  hasMissingChromeObject
+Bit 9:  hasWebdriverIframe
+Bit 10: hasWebdriverWorker
+Bit 11: hasMismatchWebGLInWorker
+Bit 12: hasMismatchPlatformIframe
+Bit 13: hasMismatchPlatformWorker
+```
 
 Examples:
-- `1920x1080hf3a2` — Full HD display
-- `800x600ha1b2` —  Headless Chrome resolution
+- `00000000000000` — No detections, clean browser
+- `01001100000000` — hasWebdriver + hasCDP + hasPlaywright detected
 
-#### Locale Section (`<lang><n>h<hash>`)
+#### Automation Bitmask (5 bits)
 
-- Primary language code (2 chars, lowercase)
-- Number of languages configured
-- Hash of: timezone, localeLanguage, all languages
+```
+Bit 0: webdriver
+Bit 1: webdriverWritable
+Bit 2: selenium
+Bit 3: cdp
+Bit 4: playwright
+```
 
-Examples:
-- `en3hc8b1` — English primary, 3 languages configured
-- `fr1h0000` — French only, single language
+#### Device Bitmask (5 bits)
 
-#### Iframe/Worker Sections (`<m>h<hash>`)
+```
+Bit 0: hasMultipleDisplays
+Bit 1: prefersReducedMotion
+Bit 2: prefersReducedTransparency
+Bit 3: hover
+Bit 4: anyHover
+```
 
-- **m**: Mismatch flag — `1` if signals from iframe/worker differ from main context (indicates potential spoofing)
-- **hash**: 6-char hash of all signals collected from that context
+#### Browser Section Bitmasks
 
-Examples:
-- `0ha3f2e1` — No mismatch, consistent fingerprint
-- `1hffffff` — Mismatch detected! Iframe/worker signals differ from main context
+The browser section uses three bitmasks:
+
+**Features bitmask (`f` prefix, 10 bits)** — from `browser.features.bitmask`:
+```
+Bit 0: chrome
+Bit 1: brave
+Bit 2: applePaySupport
+Bit 3: opera
+Bit 4: serial
+Bit 5: attachShadow
+Bit 6: caches
+Bit 7: webAssembly
+Bit 8: buffer
+Bit 9: showModalDialog
+```
+
+**Extensions bitmask (`e` prefix, 8 bits)** — from `browser.extensions.bitmask`:
+```
+Bit 0: grammarly
+Bit 1: metamask
+Bit 2: couponBirds
+Bit 3: deepL
+Bit 4: monicaAI
+Bit 5: siderAI
+Bit 6: requestly
+Bit 7: veepn
+```
+
+**Plugins bitmask (`p` prefix, 4 bits)**:
+```
+Bit 0: isValidPluginArray
+Bit 1: pluginConsistency1
+Bit 2: pluginOverflow
+Bit 3: hasToSource
+```
+
+#### Contexts Bitmask (4 bits)
+
+```
+Bit 0: iframe mismatch (signals differ from main context)
+Bit 1: worker mismatch (signals differ from main context)
+Bit 2: iframe.webdriver
+Bit 3: webWorker.webdriver
+```
 
 ### Why This Format?
 
 Inspired by [JA4+](https://github.com/FoxIO-LLC/ja4), this format enables:
 
-1. **Partial Matching**: Compare specific sections across fingerprints
-   - Same GPU but different screen? Compare sections 5-6 vs 7
-   - Find all bots with same environment hash
+1. **Extensibility**: Adding a new boolean check just appends a bit — existing bit positions remain stable
+   - Add a new browser feature? The first 10 bits stay the same
+   - Add a new extension detection? Previous extensions keep their positions
 
-2. **Human Readability**: Key values visible at a glance
-   - `c08m16` immediately tells you 8 cores, 16GB RAM
-   - `1920x1080` shows screen resolution
-   - `07110` shows 7 detections and which bot signals fired
+2. **Partial Matching**: Compare specific sections across fingerprints
+   - Same GPU but different screen? Compare `gfx` vs `dev` sections
+   - Find all bots with same automation signals
 
-3. **Similarity Detection**: Two different fsid values may share sections
-   - Same device with different browser window sizes will match on hardware/GPU sections
-   - Bots from the same framework will often share environment hashes
+3. **Human Readability**: Key values visible at a glance
+   - `1728x1117c14m08` — Screen 1728×1117, 14 cores, 8GB RAM
+   - `f1101011001` — Browser features: chrome=true, brave=true, applePaySupport=false, opera=true, etc.
+   - First 14 bits show exactly which bot detections triggered
+
+4. **Similarity Detection**: Two different fsid values may share sections
+   - Same device with different browser window sizes will match on `gfx` and `cod` sections
+   - Bots from the same framework will often share automation/browser hashes
 
 ### Signals Included
 
-All 41 fingerprint signals are captured in the fsid:
+All fingerprint signals are captured in the fsid:
 
 | Section | Signals |
 |---------|---------|
-| Bot | webdriver, cdp, playwright + all 12 detection test results |
-| Environment | userAgent, platform, chrome, brave, etsl |
-| Hardware | cpuCount, memory |
-| WebGL | webGL.vendor, webGL.renderer |
-| WebGPU | webgpu.vendor, webgpu.architecture, webgpu.device, webgpu.description |
-| Screen | width, height, pixelDepth, colorDepth, availableWidth, availableHeight, innerWidth, innerHeight, hasMultipleDisplays |
-| Locale | timezone, localeLanguage, languages[], language |
-| Iframe | iframe.webdriver, iframe.userAgent, iframe.platform, iframe.memory, iframe.cpuCount, iframe.language |
-| Worker | webworker.webdriver, webworker.userAgent, webworker.platform, webworker.memory, webworker.cpuCount, webworker.language, webworker.vendor, webworker.renderer |
+| Detection | All 14 fastBotDetectionDetails booleans |
+| Automation | webdriver, webdriverWritable, selenium, cdp, playwright, navigatorPropertyDescriptors |
+| Device | cpuCount, memory, platform, screenResolution.*, multimediaDevices.*, mediaQueries.* |
+| Browser | userAgent, etsl, maths, features.*, extensions.*, plugins.*, highEntropyValues.*, toSourceError.* |
+| Graphics | webGL.*, webgpu.*, canvas.* |
+| Codecs | audioCanPlayTypeHash, videoCanPlayTypeHash, audioMediaSourceHash, videoMediaSourceHash, rtcAudioCapabilitiesHash, rtcVideoCapabilitiesHash, hasMediaSource |
+| Locale | internationalization.*, languages.* |
+| Contexts | iframe.*, webWorker.* |
 
 ---
 
 ## Server-Side Decryption
 
-The fingerprint payload returned by `collectFingerprint()` is encrypted on the client side. To read it on your server, you need to decrypt it using the **same key** that was used when building the library.
+`collectFingerprint()` supports **two modes**:
+
+- **Encrypted payload (default)**: returns an encrypted Base64 string (recommended if you rely on client-side tamper resistance)
+- **Raw payload**: returns the plain `Fingerprint` object (recommended if you want to encrypt/sign/encode the payload yourself)
+
+### Client API
+
+```javascript
+import FingerprintScanner from 'fpscanner';
+
+const scanner = new FingerprintScanner();
+
+// 1) Default: returns an encrypted base64 string
+const encryptedPayload = await scanner.collectFingerprint();
+
+// 2) With options: explicitly enable/disable encryption
+const encryptedPayload = await scanner.collectFingerprint({ encrypt: true });
+
+// 3) Raw: returns the Fingerprint object (no library encryption)
+const fingerprint = await scanner.collectFingerprint({ encrypt: false });
+```
+
+### If you use encryption (`encrypt: true`, default)
+
+The payload returned by `collectFingerprint()` or `collectFingerprint({ encrypt: true })` is encrypted on the client side. To read it on your server, decrypt it using the **same key** that was used when building the library.
+
+> ⚠️ **Important**: You must use the **exact same key** on your server that you used when running `npx fpscanner build --key=YOUR_KEY`. If the keys don't match, decryption will fail or produce garbage. See `CONFIGURATION.md` for the build-time key injection workflow.
+
+### If you disable encryption (`encrypt: false`)
+
+If you call `collectFingerprint({ encrypt: false })`, the library returns the raw `Fingerprint` object. In that case:
+
+- You should **encrypt/sign/encode the payload yourself** before sending it to your backend (in addition to using TLS)
+- You can choose a stronger scheme (e.g. authenticated encryption, request signing, etc.) appropriate for your threat model
 
 ### Why Encryption?
 
@@ -132,8 +214,6 @@ The fingerprint is encrypted for several security reasons:
    - Each customer has their own unique key
    - The key is not visible in plain text (obfuscated + minified)
    - Only your server (which knows the key) can decrypt the payload
-
-> ⚠️ **Important**: You must use the **exact same key** on your server that you used when running `npx fpscanner build --key=YOUR_KEY`. If the keys don't match, decryption will fail or produce garbage.
 
 ### Decryption Algorithm
 

@@ -21,11 +21,13 @@
     "build:vite": "vite build",
     "build:dev": "node bin/cli.js build --key=dev-key --no-obfuscate",
     "build:prod": "node bin/cli.js build",
+    "build:prod:plain": "node bin/cli.js build --no-obfuscate",
     "build:obfuscate": "node bin/cli.js build --key=dev-key",
     "watch": "concurrently \"FP_ENCRYPTION_KEY=dev-key vite build --watch\" \"tsc --watch --emitDeclarationOnly\"",
     "dev": "vite",
     "dev:build": "npm run build:dev && vite",
     "dev:obfuscate": "npm run build:obfuscate && vite",
+    "test": "npm run test:playwright",
     "test:vitest": "vitest",
     "test:playwright": "npm run build:obfuscate && npx playwright test",
     "test:playwright:headed": "npm run build:obfuscate && npx playwright test --headed"

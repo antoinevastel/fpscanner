@@ -18,8 +18,9 @@
             const result = await scanner.collectFingerprint();
             console.log('Fingerprint result:', result);
         }
-        
-        testFingerprint().catch(console.error);
+        setTimeout(() => {
+            testFingerprint().catch(console.error);
+        }, 1000);
     </script>
 </body>
 </html>

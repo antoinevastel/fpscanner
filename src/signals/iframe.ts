@@ -1,4 +1,4 @@
-import { ERROR, INIT, NA } from './utils';
+import { ERROR, INIT, NA, setObjectValues } from './utils';
 
 export function iframe() {
     const iframeData = {
@@ -25,13 +25,7 @@ export function iframe() {
         iframeData.cpuCount = iframeWindowNavigator.hardwareConcurrency ?? NA;
         iframeData.language = iframeWindowNavigator.language ?? NA;
     } catch (e) {
-        console.error('Error collecting iframe signals', e);
-        iframeData.webdriver = ERROR;
-        iframeData.userAgent = ERROR;
-        iframeData.platform = ERROR;
-        iframeData.memory = ERROR;
-        iframeData.cpuCount = ERROR;
-        iframeData.language = ERROR;
+        setObjectValues(iframeData, ERROR);
     } finally {
         document.body.removeChild(iframe);
     }

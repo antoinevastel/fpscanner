@@ -2,9 +2,9 @@ import { Fingerprint } from "../types";
 import { ERROR, NA } from "../signals/utils";
 
 export function hasMismatchPlatformWorker(fingerprint: Fingerprint) {
-    if (fingerprint.signals.webworker.platform === NA || fingerprint.signals.webworker.platform === ERROR) {
+    if (fingerprint.signals.contexts.webWorker.platform === NA || fingerprint.signals.contexts.webWorker.platform === ERROR) {
         return false;
     }
 
-    return fingerprint.signals.platform !== fingerprint.signals.webworker.platform;
+    return fingerprint.signals.device.platform !== fingerprint.signals.contexts.webWorker.platform;
 }

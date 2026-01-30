@@ -1,4 +1,4 @@
-import { ERROR, INIT } from './utils';
+import { ERROR, INIT, setObjectValues } from './utils';
 
 export async function worker() {
     return new Promise((resolve) => {
@@ -62,24 +62,12 @@ export async function worker() {
 
                     return resolve(workerData);
                 } catch (_) {
-                    workerData.vendor = ERROR;
-                    workerData.renderer = ERROR;
-                    workerData.userAgent = ERROR;
-                    workerData.language = ERROR;
-                    workerData.platform = ERROR;
-                    workerData.memory = ERROR;
-                    workerData.cpuCount = ERROR;
+                    setObjectValues(workerData, ERROR);
                     return resolve(workerData);
                 }
             }
         } catch (e) {
-            workerData.vendor = ERROR;
-            workerData.renderer = ERROR;
-            workerData.userAgent = ERROR;
-            workerData.language = ERROR;
-            workerData.platform = ERROR;
-            workerData.memory = ERROR;
-            workerData.cpuCount = ERROR;
+            setObjectValues(workerData, ERROR);
 
             return resolve(workerData);
         }

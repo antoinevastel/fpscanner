@@ -1,4 +1,4 @@
-import { INIT, NA } from "./utils";
+import { ERROR, INIT, NA, setObjectValues } from "./utils";
 
 export async function webgpu() {
     const webGPUData = {
@@ -18,16 +18,10 @@ export async function webgpu() {
                 webGPUData.description = adapter.info.description;
             }
         } catch (e) {
-            webGPUData.vendor = NA;
-            webGPUData.architecture = NA;
-            webGPUData.device = NA;
-            webGPUData.description = NA;
+            setObjectValues(webGPUData, ERROR);
         }
     } else {
-        webGPUData.vendor = NA;
-        webGPUData.architecture = NA;
-        webGPUData.device = NA;
-        webGPUData.description = NA;
+        setObjectValues(webGPUData, NA);
     }
 
     return webGPUData;

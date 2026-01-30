@@ -2,9 +2,12 @@ import { Fingerprint } from "../types";
 import { ERROR, NA } from "../signals/utils";
 
 export function hasMismatchWebGLInWorker(fingerprint: Fingerprint) {
-    if (fingerprint.signals.webworker.vendor === ERROR || fingerprint.signals.webworker.renderer === ERROR || fingerprint.signals.webGL.vendor === NA || fingerprint.signals.webGL.renderer === NA) {
+    const worker = fingerprint.signals.contexts.webWorker;
+    const webGL = fingerprint.signals.graphics.webGL;
+    
+    if (worker.vendor === ERROR || worker.renderer === ERROR || webGL.vendor === NA || webGL.renderer === NA) {
         return false;
     }
 
-    return fingerprint.signals.webworker.vendor !== fingerprint.signals.webGL.vendor || fingerprint.signals.webworker.renderer !== fingerprint.signals.webGL.renderer;
+    return worker.vendor !== webGL.vendor || worker.renderer !== webGL.renderer;
 }

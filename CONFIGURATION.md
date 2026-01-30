@@ -60,15 +60,30 @@ This will:
 2. Obfuscate the output to protect the key
 3. Overwrite the files in `node_modules/fpscanner/dist/`
 
-After this, you can import normally:
+After this, you can import normally (encrypted payload mode):
 
 ```javascript
 import FingerprintScanner from 'fpscanner';
 
 const scanner = new FingerprintScanner();
-const fingerprint = await scanner.collectFingerprint();
-// fingerprint is encrypted with YOUR key
+// Default: returns an encrypted base64 string (encrypted with YOUR key)
+const encryptedPayload = await scanner.collectFingerprint(true);
 ```
+
+### Optional: Disable Library Encryption
+
+If you prefer to handle payload protection yourself (encrypt/sign/encode on your side), you can disable the library encryption and get the raw fingerprint object:
+
+```javascript
+import FingerprintScanner from 'fpscanner';
+
+const scanner = new FingerprintScanner();
+const fingerprint = await scanner.collectFingerprint(false); // returns Fingerprint (raw)
+```
+
+If you disable library encryption:
+- You should **encrypt/sign/encode the payload yourself** before sending it to your backend (in addition to using TLS)
+- You may not need the build-time key injection flow, since the built-in key is not used when `encryptFingerprint=false`
 
 ---
 
@@ -167,15 +182,82 @@ Then `npm install` will automatically build with that key.
 
 ## Build Options
 
-### Skip Obfuscation (Development)
+### Obfuscation Control
 
-For faster builds during development, skip the obfuscation step:
+Obfuscation is **enabled by default**. You can disable it using either:
+
+1. **CLI flag**: `--no-obfuscate`
+2. **Environment variable**: `FINGERPRINT_OBFUSCATE=false`
+
+The environment variable is particularly useful for `postinstall` scripts where you can't pass CLI flags.
+
+#### When to Use Obfuscation
+
+| Scenario | Obfuscation | Reason |
+|----------|-------------|--------|
+| Production (default) | ✅ Yes | Defense-in-depth against fingerprint forgery |
+| Development | ❌ No | Faster builds, easier debugging |
+| CI/CD with tight time constraints | ❌ Optional | Trade-off between speed and security |
+| High-security applications | ✅ Yes | Make reverse-engineering harder |
+
+#### Skip Obfuscation via CLI
 
 ```bash
-npx fpscanner build --key=dev-key --no-obfuscate
+npx fpscanner build --key=my-key --no-obfuscate
 ```
 
-> ⚠️ **Never use `--no-obfuscate` in production.** The key will be visible in plain text.
+#### Skip Obfuscation via Environment Variable
+
+```bash
+# Inline
+FINGERPRINT_OBFUSCATE=false npx fpscanner build
+
+# Or export
+export FINGERPRINT_OBFUSCATE=false
+npx fpscanner build
+```
+
+#### In `.env` File
+
+You can also set it in your `.env` file:
+
+```
+FINGERPRINT_KEY=your-secret-key
+FINGERPRINT_OBFUSCATE=false
+```
+
+> **Note**: Accepted values for disabling obfuscation: `false`, `0`, `no` (case-insensitive)
+
+#### Postinstall with Obfuscation Control
+
+Control obfuscation during `npm install` via environment variables:
+
+```bash
+# With obfuscation (default)
+FINGERPRINT_KEY=my-key npm install
+
+# Without obfuscation
+FINGERPRINT_KEY=my-key FINGERPRINT_OBFUSCATE=false npm install
+```
+
+**CI/CD example (GitHub Actions):**
+
+```yaml
+env:
+  FINGERPRINT_KEY: ${{ secrets.FINGERPRINT_KEY }}
+  FINGERPRINT_OBFUSCATE: "false"  # Optional: skip obfuscation
+
+steps:
+  - run: npm install
+```
+
+### Security Considerations
+
+> ⚠️ **Without obfuscation, the encryption key is visible in the source code.** This means:
+> - Anyone can read your key from `dist/fpScanner.es.js`
+> - Attackers can craft fake fingerprint payloads
+> 
+> If you skip obfuscation, ensure your security relies primarily on **server-side validation** rather than client-side protection.
 
 ### Full CLI Help
 
@@ -214,10 +296,11 @@ The package includes several npm scripts for different development scenarios:
 
 | Script | Key | Obfuscation | Use Case |
 |--------|-----|-------------|----------|
-| `npm run build` | `my-shared-secret` | ❌ No | Quick build for development |
+| `npm run build` | Default | ❌ No | Quick build for development |
 | `npm run build:dev` | `dev-key` | ❌ No | Fast iteration, custom dev key |
 | `npm run build:obfuscate` | `dev-key` | ✅ Yes | Test obfuscation locally |
-| `npm run build:prod` | From `.env` or env var | ✅ Yes | Production-like build |
+| `npm run build:prod` | From `.env` or env var | ✅ Yes | Production (recommended) |
+| `npm run build:prod:plain` | From `.env` or env var | ❌ No | Production without obfuscation |
 
 ### Development Workflow
 
@@ -290,8 +373,9 @@ npm run watch          # Rebuild on changes
 npm run build:obfuscate  # Build with dev-key + obfuscation
 npm run dev:obfuscate    # Build obfuscated + serve
 
-# Production-like
-npm run build:prod     # Build with key from .env/env var + obfuscation
+# Production
+npm run build:prod        # Build with key from .env/env var + obfuscation
+npm run build:prod:plain  # Build with key from .env/env var, NO obfuscation
 ```
 
 ---

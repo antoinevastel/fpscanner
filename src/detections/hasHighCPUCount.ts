@@ -1,9 +1,9 @@
 import { Fingerprint } from "../types";
 
 export function hasHighCPUCount(fingerprint: Fingerprint) {
-    if (typeof fingerprint.signals.cpuCount !== 'number') {
+    if (typeof fingerprint.signals.device.cpuCount !== 'number') {
         return false;
     }
 
-    return fingerprint.signals.cpuCount > 70;
+    return fingerprint.signals.device.cpuCount > 70;
 }

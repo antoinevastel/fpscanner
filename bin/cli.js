@@ -86,12 +86,21 @@ Usage:
 Options:
   --key=KEY           Use KEY as the encryption key (highest priority)
   --env-file=FILE     Load FINGERPRINT_KEY from FILE (default: .env)
-  --no-obfuscate      Skip obfuscation step (faster builds for development)
+  --no-obfuscate      Skip obfuscation step (faster builds, readable output)
+
+Environment Variables:
+  FINGERPRINT_KEY         The encryption key (if not using --key)
+  FINGERPRINT_OBFUSCATE   Set to "false" to skip obfuscation (default: true)
 
 Key Resolution (in order of priority):
   1. --key=xxx argument
   2. FINGERPRINT_KEY environment variable
   3. FINGERPRINT_KEY in .env file (or custom file via --env-file)
+
+Obfuscation Control:
+  1. --no-obfuscate flag (highest priority)
+  2. FINGERPRINT_OBFUSCATE=false environment variable
+  3. Default: obfuscation enabled
 
 Examples:
   # Using command line argument
@@ -108,8 +117,14 @@ Examples:
   # Using custom env file
   npx fpscanner build --env-file=.env.production
 
-  # Development build (no obfuscation)
-  npx fpscanner build --key=dev-key --no-obfuscate
+  # Skip obfuscation (CLI flag)
+  npx fpscanner build --key=my-key --no-obfuscate
+
+  # Skip obfuscation (environment variable)
+  FINGERPRINT_OBFUSCATE=false npx fpscanner build
+
+  # Production without obfuscation (postinstall compatible)
+  FINGERPRINT_KEY=xxx FINGERPRINT_OBFUSCATE=false npm install
 
 Setup (add to your package.json):
   {
@@ -117,6 +132,10 @@ Setup (add to your package.json):
       "postinstall": "fpscanner build"
     }
   }
+
+  Then install with your chosen options:
+    FINGERPRINT_KEY=xxx npm install                         # With obfuscation
+    FINGERPRINT_KEY=xxx FINGERPRINT_OBFUSCATE=false npm install  # Without obfuscation
 `);
 }
 
@@ -158,8 +177,16 @@ Run 'npx fpscanner --help' for more information.
     process.exit(1);
   }
   
-  // Check for --no-obfuscate flag
-  const skipObfuscation = args.includes('--no-obfuscate');
+  // Check for --no-obfuscate flag OR FINGERPRINT_OBFUSCATE=false environment variable
+  // Priority: CLI flag > environment variable > default (obfuscate)
+  let skipObfuscation = args.includes('--no-obfuscate');
+  if (!skipObfuscation && process.env.FINGERPRINT_OBFUSCATE !== undefined) {
+    const envValue = process.env.FINGERPRINT_OBFUSCATE.toLowerCase();
+    skipObfuscation = envValue === 'false' || envValue === '0' || envValue === 'no';
+    if (skipObfuscation) {
+      console.log('⚙️  Obfuscation disabled via FINGERPRINT_OBFUSCATE environment variable');
+    }
+  }
   
   // Run the build script
   const packageDir = path.dirname(__dirname);
