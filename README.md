@@ -4,16 +4,9 @@
 
 ## Sponsor
 
-<p align="center">
-  <a href="https://castle.io/" aria-label="Castle">
-    <svg xmlns="http://www.w3.org/2000/svg" width="240" height="64" viewBox="0 0 602 158" fill="currentColor">
-      <path fill-rule="evenodd" d="M79 158c43.63 0 79-35.37 79-79S122.63 0 79 0 0 35.37 0 79s35.37 79 79 79ZM31 57h24v12h12V57h24v12h12V57h24v24c-6.627 0-12 5.373-12 12v12H43V93c0-6.627-5.373-12-12-12V57Z" clip-rule="evenodd"></path>
-      <path d="M251.26 113.948c-14.09 0-24.534-10.268-24.534-24.18 0-13.91 10.444-24.179 24.534-24.179 7.791 0 14.421 2.816 19.063 7.618V53.003c-5.968-3.478-13.096-5.466-20.721-5.466C225.4 47.537 207 66.252 207 89.77S225.4 132 249.602 132c7.625 0 14.753-1.987 20.721-5.465V106.33c-4.642 4.803-11.272 7.618-19.063 7.618Zm90.51-64.258v7.122c-6.465-5.797-14.754-9.275-24.037-9.275-23.207 0-40.944 18.715-40.944 42.232S294.526 132 317.733 132c9.283 0 17.572-3.478 24.037-9.274v7.121h17.902V49.69H341.77Zm-22.379 64.258c-13.095 0-22.876-10.268-22.876-24.18 0-13.91 9.781-24.179 22.876-24.179 13.096 0 22.876 10.268 22.876 24.18 0 13.911-9.78 24.179-22.876 24.179ZM400.347 132c16.08 0 28.181-11.096 28.181-25.173 0-11.262-6.631-19.708-18.566-24.51l-12.101-4.804c-4.144-1.656-5.47-3.478-5.47-6.459 0-3.974 3.315-6.624 7.459-6.624 3.647 0 6.797 2.318 7.791 5.63l17.737-6.624c-3.647-9.274-13.593-15.899-25.528-15.899-15.25 0-27.02 10.434-27.02 23.849 0 11.758 7.46 19.21 16.908 23.02l12.764 5.134c4.973 1.987 6.465 4.306 6.465 7.618 0 4.472-3.481 7.949-8.62 7.949-4.807 0-8.951-3.146-10.111-7.618l-18.732 3.313C373.659 122.891 385.76 132 400.347 132Zm46.106-2.153h19.063V65.423h17.405V49.69h-17.405V19.217h-19.063V49.69h-14.919v15.734h14.919v64.423ZM491.634 1v128.847h19.064V1h-19.064ZM602 89.769c0-24.014-16.742-42.232-39.618-42.232-22.71 0-39.784 18.218-39.784 42.232 0 23.682 17.903 42.231 41.773 42.231 15.416 0 28.512-7.949 35.64-19.874l-15.251-9.771c-3.812 6.956-11.106 11.593-19.726 11.593-11.935 0-21.218-7.618-22.71-18.383h59.344c.166-1.822.332-3.809.332-5.796Zm-39.452-25.505c10.609 0 18.4 7.287 19.726 17.224h-39.95c1.492-9.937 9.614-17.224 20.224-17.224Z"></path>
-    </svg>
-  </a>
-</p>
+This project is sponsored by <a href="https://castle.io/?utm_source=github&utm_medium=oss&utm_campaign=fpscanner">Castle</a>
 
-This project is sponsored by **[Castle](https://castle.io/?utm_source=github&utm_medium=oss&utm_campaign=fpscanner)**.
+<a href="https://castle.io/?utm_source=github&utm_medium=oss&utm_campaign=fpscanner"><img src="assets/castle-logo.png" alt="Castle" height="48" style="vertical-align: middle;"></a>.
 
 This library focuses on self-hosted fingerprinting and bot detection primitives. In real-world fraud and bot prevention, teams often need additional capabilities such as traffic observability, historical analysis, rule iteration, and correlation across device, network, and behavioral signals.
 
