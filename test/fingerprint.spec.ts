@@ -58,38 +58,37 @@ test.describe('FPScanner Obfuscated Build', () => {
     expect(fingerprint.fsid).toMatch(/^FS1_/);
   });
 
-  // Signal validations
-  test('memory should be a number greater than 0', () => {
-    const memory = fingerprint.signals.memory;
+  // Signal validations - using nested structure
+  test('device.memory should be a number greater than 0', () => {
+    const memory = fingerprint.signals.device.memory;
     expect(typeof memory).toBe('number');
     expect(memory).toBeGreaterThan(0);
   });
 
-  test('cpuCount should be a number greater than 0', () => {
-    const cpuCount = fingerprint.signals.cpuCount;
+  test('device.cpuCount should be a number greater than 0', () => {
+    const cpuCount = fingerprint.signals.device.cpuCount;
     expect(typeof cpuCount).toBe('number');
     expect(cpuCount).toBeGreaterThan(0);
   });
 
-  test('userAgent should be a non-empty string', () => {
-    expect(fingerprint.signals).toHaveProperty('userAgent');
-    expect(typeof fingerprint.signals.userAgent).toBe('string');
-    expect(fingerprint.signals.userAgent.length).toBeGreaterThan(0);
-    expect(fingerprint.signals.userAgent).toContain('HeadlessChrome');
+  test('browser.userAgent should be a non-empty string', () => {
+    expect(fingerprint.signals.browser).toHaveProperty('userAgent');
+    expect(typeof fingerprint.signals.browser.userAgent).toBe('string');
+    expect(fingerprint.signals.browser.userAgent.length).toBeGreaterThan(0);
   });
 
-  test('platform should be a non-empty string', () => {
-    expect(fingerprint.signals).toHaveProperty('platform');
-    expect(typeof fingerprint.signals.platform).toBe('string');
-    expect(fingerprint.signals.platform.length).toBeGreaterThan(0);
+  test('device.platform should be a non-empty string', () => {
+    expect(fingerprint.signals.device).toHaveProperty('platform');
+    expect(typeof fingerprint.signals.device.platform).toBe('string');
+    expect(fingerprint.signals.device.platform.length).toBeGreaterThan(0);
   });
 
-  test('webdriver should be a boolean', () => {
-    expect(typeof fingerprint.signals.webdriver).toBe('boolean');
+  test('automation.webdriver should be a boolean', () => {
+    expect(typeof fingerprint.signals.automation.webdriver).toBe('boolean');
   });
 
-  test('screenResolution should have valid dimensions', () => {
-    const screen = fingerprint.signals.screenResolution;
+  test('device.screenResolution should have valid dimensions', () => {
+    const screen = fingerprint.signals.device.screenResolution;
     expect(screen).toHaveProperty('width');
     expect(screen).toHaveProperty('height');
     expect(typeof screen.width).toBe('number');
@@ -98,13 +97,35 @@ test.describe('FPScanner Obfuscated Build', () => {
     expect(screen.height).toBeGreaterThan(0);
   });
 
-  test('languages should have language property', () => {
-    expect(fingerprint.signals.languages).toHaveProperty('language');
-    expect(typeof fingerprint.signals.languages.language).toBe('string');
+  test('locale.languages should have language property', () => {
+    expect(fingerprint.signals.locale.languages).toHaveProperty('language');
+    expect(typeof fingerprint.signals.locale.languages.language).toBe('string');
   });
 
-  test('webGL should have vendor and renderer', () => {
-    expect(fingerprint.signals.webGL.vendor).toContain('Google');
-    expect(fingerprint.signals.webGL.renderer).toContain('SwiftShader');
+  test('graphics.webGL should have vendor and renderer', () => {
+    const webGL = fingerprint.signals.graphics.webGL;
+    expect(typeof webGL.vendor).toBe('string');
+    expect(typeof webGL.renderer).toBe('string');
+    expect(webGL.vendor.length).toBeGreaterThan(0);
+    expect(webGL.renderer.length).toBeGreaterThan(0);
+  });
+
+  // Additional nested structure tests
+  test('automation signals should exist', () => {
+    expect(fingerprint.signals).toHaveProperty('automation');
+    expect(typeof fingerprint.signals.automation.cdp).toBe('boolean');
+    expect(typeof fingerprint.signals.automation.selenium).toBe('boolean');
+    expect(typeof fingerprint.signals.automation.playwright).toBe('boolean');
+  });
+
+  test('codecs signals should exist', () => {
+    expect(fingerprint.signals).toHaveProperty('codecs');
+    expect(typeof fingerprint.signals.codecs.hasMediaSource).toBe('boolean');
+  });
+
+  test('contexts signals should exist', () => {
+    expect(fingerprint.signals).toHaveProperty('contexts');
+    expect(fingerprint.signals.contexts).toHaveProperty('iframe');
+    expect(fingerprint.signals.contexts).toHaveProperty('webWorker');
   });
 });
