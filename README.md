@@ -1,5 +1,7 @@
 # Fingerprint Scanner
 
+[![CI](https://github.com/antoinevastel/fpscanner/actions/workflows/ci.yml/badge.svg)](https://github.com/antoinevastel/fpscanner/actions/workflows/ci.yml)
+
 A browser fingerprinting library for bot detection.
 
 ## Fingerprint Scanner ID (fsid) Format
@@ -22,7 +24,7 @@ FS1_00000100000000_10010h3f2a_1728x1117c14m08b01011h4e7a9f_f1101011001e00000000p
 
 | # | Section | Format | Example | Description |
 |---|---------|--------|---------|-------------|
-| 1 | **Version** | `FS1` | `FS1` | Fingerprint Scanner version 2 |
+| 1 | **Version** | `FS1` | `FS1` | Fingerprint Scanner version 1 |
 | 2 | **Detection** | 14-bit bitmask | `00000100000000` | All fastBotDetectionDetails booleans |
 | 3 | **Automation** | `<5-bit>h<hash>` | `10010h3f2a` | Automation booleans + hash |
 | 4 | **Device** | `<W>x<H>c<cpu>m<mem>b<5-bit>h<hash>` | `1728x1117c14m08b01011h4e7a9f` | Screen, cpu, memory, device booleans + hash |
