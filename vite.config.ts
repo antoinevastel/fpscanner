@@ -10,7 +10,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: '/test.html',
+    open: '/test/dev-source.html',
   },
   build: {
     lib: {

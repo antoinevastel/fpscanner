@@ -11,11 +11,11 @@
     
     <script type="module">
         // Import from source - Vite transpiles TypeScript on the fly
-        import FingerprintScanner from './src/index.ts';
+        import FingerprintScanner from '../src/index.ts';
         
         async function testFingerprint() {
             const scanner = new FingerprintScanner();
-            const result = await scanner.collectFingerprint();
+            const result = await scanner.collectFingerprint({ encrypt: false });
             console.log('Fingerprint result:', result);
         }
         setTimeout(() => {
@@ -24,4 +24,3 @@
     </script>
 </body>
 </html>
-

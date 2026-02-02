@@ -13,11 +13,11 @@
     
     <script type="module">
         // Import from dist - the pre-built, potentially obfuscated version
-        import FingerprintScanner from './dist/fpScanner.es.js';
+        import FingerprintScanner from '/dist/fpScanner.es.js';
         
         async function testFingerprint() {
             const scanner = new FingerprintScanner();
-            const result = await scanner.collectFingerprint();
+            const result = await scanner.collectFingerprint({ encrypt: false });
             console.log('Fingerprint result:', result);
         }
         
