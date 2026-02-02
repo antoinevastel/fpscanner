@@ -606,7 +606,6 @@ class FingerprintScanner {
 
         // Generate fsid after all signals and detections are collected
         this.fingerprint.fsid = this.generateFingerprintScannerId();
-        console.log(this.fingerprint);
 
         if (encrypt) {
             const encryptedFingerprint = await this.encryptFingerprint(JSON.stringify(this.fingerprint));

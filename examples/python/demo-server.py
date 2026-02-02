@@ -91,11 +91,11 @@ class FingerprintHandler(SimpleHTTPRequestHandler):
                 print(json.dumps(fingerprint, indent=2))
                 print('\n📊 Summary:')
                 print(f"   FSID: {fingerprint['fsid']}")
-                print(f"   Platform: {fingerprint['signals']['platform']}")
-                print(f"   User Agent: {fingerprint['signals']['userAgent'][:50]}...")
-                print(f"   CPU Count: {fingerprint['signals']['cpuCount']}")
-                print(f"   Memory: {fingerprint['signals']['memory']} GB")
-                screen = fingerprint['signals']['screenResolution']
+                print(f"   Platform: {fingerprint['signals']['device']['platform']}")
+                print(f"   User Agent: {fingerprint['signals']['browser']['userAgent'][:50]}...")
+                print(f"   CPU Count: {fingerprint['signals']['device']['cpuCount']}")
+                print(f"   Memory: {fingerprint['signals']['device']['memory']} GB")
+                screen = fingerprint['signals']['device']['screenResolution']
                 print(f"   Screen: {screen['width']}x{screen['height']}")
                 bot_status = '⚠️  SUSPICIOUS' if fingerprint['fastBotDetection'] else '✓ OK'
                 print(f'   Bot Detection: {bot_status}')

@@ -9,7 +9,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3010;
+const PORT = 3000;
 
 // The encryption key - must match the key used when building fpscanner
 // In production, this should come from environment variables
@@ -76,11 +76,11 @@ const server = http.createServer(async (req, res) => {
                 console.log(JSON.stringify(fingerprint, null, 2));
                 console.log('\n📊 Summary:');
                 console.log(`   FSID: ${fingerprint.fsid}`);
-                console.log(`   Platform: ${fingerprint.signals.platform}`);
-                console.log(`   User Agent: ${fingerprint.signals.userAgent.substring(0, 50)}...`);
-                console.log(`   CPU Count: ${fingerprint.signals.cpuCount}`);
-                console.log(`   Memory: ${fingerprint.signals.memory} GB`);
-                console.log(`   Screen: ${fingerprint.signals.screenResolution.width}x${fingerprint.signals.screenResolution.height}`);
+                console.log(`   Platform: ${fingerprint.signals.device.platform}`);
+                console.log(`   User Agent: ${fingerprint.signals.browser.userAgent.substring(0, 50)}...`);
+                console.log(`   CPU Count: ${fingerprint.signals.device.cpuCount}`);
+                console.log(`   Memory: ${fingerprint.signals.device.memory} GB`);
+                console.log(`   Screen: ${fingerprint.signals.device.screenResolution.width}x${fingerprint.signals.device.screenResolution.height}`);
                 console.log(`   Bot Detection: ${fingerprint.fastBotDetection ? '⚠️  SUSPICIOUS' : '✓ OK'}`);
                 console.log('='.repeat(60) + '\n');
                 
