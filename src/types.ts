@@ -1,6 +1,6 @@
-import { ERROR, INIT, NA } from './signals/utils';
+import { ERROR, INIT, NA, SKIPPED } from './signals/utils';
 
-export type SignalValue<T> = T | typeof ERROR | typeof INIT | typeof NA;
+export type SignalValue<T> = T | typeof ERROR | typeof INIT | typeof NA | typeof SKIPPED;
 
 export interface WebGLSignal {
     vendor: SignalValue<string>;
@@ -203,6 +203,8 @@ export interface FastBotDetectionDetails {
     hasMismatchWebGLInWorker: DetectionRuleResult;
     hasMismatchPlatformIframe: DetectionRuleResult;
     hasMismatchPlatformWorker: DetectionRuleResult;
+    hasSwiftshaderRenderer: DetectionRuleResult;
+    hasUTCTimezone: DetectionRuleResult;
 }
 export interface Fingerprint {
     signals: FingerprintSignals;
@@ -230,5 +232,6 @@ export interface DetectionRule {
 export interface CollectFingerprintOptions {
     encrypt?: boolean;
     timeout?: number;
+    skipWorker?: boolean;
 }
 

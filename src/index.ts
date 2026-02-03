@@ -50,7 +50,7 @@ import { hasWebdriverWritable } from './detections/hasWebdriverWritable';
 import { hasSwiftshaderRenderer } from './detections/hasSwiftshaderRenderer';
 import { hasUTCTimezone } from './detections/hasUTCTimezone';
 
-import { ERROR, HIGH, INIT, LOW, MEDIUM, hashCode } from './signals/utils';
+import { ERROR, HIGH, INIT, LOW, MEDIUM, SKIPPED, hashCode } from './signals/utils';
 import { encryptString } from './crypto-helpers';
 import { Fingerprint, FastBotDetectionDetails, DetectionRule, CollectFingerprintOptions } from './types';
 
@@ -227,6 +227,8 @@ class FingerprintScanner {
                 hasMismatchWebGLInWorker: { detected: false, severity: 'high' },
                 hasMismatchPlatformIframe: { detected: false, severity: 'high' },
                 hasMismatchPlatformWorker: { detected: false, severity: 'high' },
+                hasSwiftshaderRenderer: { detected: false, severity: 'low' },
+                hasUTCTimezone: { detected: false, severity: 'medium' },
             },
         };
     }
@@ -285,6 +287,9 @@ class FingerprintScanner {
                 det.hasMismatchWebGLInWorker.detected,
                 det.hasMismatchPlatformIframe.detected,
                 det.hasMismatchPlatformWorker.detected,
+                det.hasSwiftshaderRenderer.detected,
+                det.hasUTCTimezone.detected,
+                // Add other detection rules output here
             ].map(b => b ? '1' : '0').join('');
             const detSection = detBitmask;
 
@@ -384,11 +389,16 @@ class FingerprintScanner {
             const codHash = hashCode(codStr).slice(0, 6);
             const codSection = `${codBitmask}h${codHash}`;
 
-            // Section 8: Locale - language code + count + hash
+            // Section 8: Locale - language code + count + timezone + hash
             const primaryLang = typeof s.locale.languages.language === 'string'
                 ? s.locale.languages.language.slice(0, 2).toLowerCase()
                 : 'xx';
             const langCount = Array.isArray(s.locale.languages.languages) ? s.locale.languages.languages.length : 0;
+            // Sanitize timezone: replace / and spaces with - for fingerprint compatibility
+            const rawTimezone = typeof s.locale.internationalization.timezone === 'string'
+                ? s.locale.internationalization.timezone
+                : 'unknown';
+            const sanitizedTimezone = rawTimezone.replace(/[\/\s]/g, '-');
             const locStr = [
                 s.locale.internationalization.timezone,
                 s.locale.internationalization.localeLanguage,
@@ -396,7 +406,7 @@ class FingerprintScanner {
                 s.locale.languages.language,
             ].map(v => String(v)).join('|');
             const locHash = hashCode(locStr).slice(0, 4);
-            const locSection = `${primaryLang}${langCount}h${locHash}`;
+            const locSection = `${primaryLang}${langCount}t${sanitizedTimezone}_h${locHash}`;
 
             // Section 9: Contexts - mismatch bitmask + hash of all context signals
             const ctxBitmask = [
@@ -490,6 +500,8 @@ class FingerprintScanner {
             hasMismatchWebGLInWorker: { detected: false, severity: 'high' },
             hasMismatchPlatformIframe: { detected: false, severity: 'high' },
             hasMismatchPlatformWorker: { detected: false, severity: 'high' },
+            hasSwiftshaderRenderer: { detected: false, severity: 'low' },
+            hasUTCTimezone: { detected: false, severity: 'medium' },
         };
 
         for (const rule of rules) {
@@ -505,7 +517,7 @@ class FingerprintScanner {
     }
 
     async collectFingerprint(options: CollectFingerprintOptions = { encrypt: true }) {
-        const { encrypt = true } = options;
+        const { encrypt = true, skipWorker = false } = options;
         const s = this.fingerprint.signals;
 
         // Define all signal collection tasks to run in parallel
@@ -544,7 +556,18 @@ class FingerprintScanner {
             languages: this.collectSignal(languages),
             // Context signals
             iframe: this.collectSignal(iframe),
-            webWorker: this.collectSignal(worker),
+            webWorker: skipWorker
+                ? Promise.resolve({
+                    webdriver: SKIPPED,
+                    userAgent: SKIPPED,
+                    platform: SKIPPED,
+                    memory: SKIPPED,
+                    cpuCount: SKIPPED,
+                    language: SKIPPED,
+                    vendor: SKIPPED,
+                    renderer: SKIPPED,
+                })
+                : this.collectSignal(worker),
             // Meta signals
             nonce: this.collectSignal(nonce),
             time: this.collectSignal(time),

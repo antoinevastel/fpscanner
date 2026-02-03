@@ -4,9 +4,9 @@
 
 ## Sponsor
 
-This project is sponsored by <a href="https://castle.io/?utm_source=github&utm_medium=oss&utm_campaign=fpscanner">Castle</a>
+This project is sponsored by <a href="https://castle.io/?utm_source=github&utm_medium=oss&utm_campaign=fpscanner">Castle.</a>
 
-<a href="https://castle.io/?utm_source=github&utm_medium=oss&utm_campaign=fpscanner"><img src="assets/castle-logo.png" alt="Castle" height="48" style="vertical-align: middle;"></a>.
+<a href="https://castle.io/?utm_source=github&utm_medium=oss&utm_campaign=fpscanner"><img src="assets/castle-logo.png" alt="Castle" height="48" style="vertical-align: middle;"></a>
 
 This library focuses on self-hosted fingerprinting and bot detection primitives. In real-world fraud and bot prevention, teams often need additional capabilities such as traffic observability, historical analysis, rule iteration, and correlation across device, network, and behavioral signals.
 
@@ -183,6 +183,7 @@ const fingerprint = await scanner.collectFingerprint({ encrypt: false });
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `encrypt` | `boolean` | `true` | Whether to encrypt the payload |
+| `skipWorker` | `boolean` | `false` | Skip Web Worker signals (use if CSP blocks blob: URLs) |
 
 ### Fingerprint Object
 
@@ -258,7 +259,7 @@ FS1_<det>_<auto>_<dev>_<brw>_<gfx>_<cod>_<loc>_<ctx>
 ### Example
 
 ```
-FS1_00000100000000_10010h3f2a_1728x1117c14m08b01011h4e7a9f_f1101011001e00000000p1100h2c8b1e_0h9d3f7a_1h6a2e4c_en4h1b2c_0000h3e9f
+FS1_00000100000000_10010h3f2a_1728x1117c14m08b01011h4e7a9f_f1101011001e00000000p1100h2c8b1e_0h9d3f7a_1h6a2e4c_en4tEurope-Paris_hab12_0000h3e9f
 ```
 
 ### Section Breakdown
@@ -272,7 +273,7 @@ FS1_00000100000000_10010h3f2a_1728x1117c14m08b01011h4e7a9f_f1101011001e00000000p
 | 5 | **Browser** | `f<10-bit>e<8-bit>p<4-bit>h<hash>` | `f1101011001e00000000p1100h2c8b1e` | Features + extensions + plugins bitmasks + hash |
 | 6 | **Graphics** | `<1-bit>h<hash>` | `0h9d3f7a` | hasModifiedCanvas + hash |
 | 7 | **Codecs** | `<1-bit>h<hash>` | `1h6a2e4c` | hasMediaSource + hash |
-| 8 | **Locale** | `<lang><n>h<hash>` | `en4h1b2c` | Language code + count + hash |
+| 8 | **Locale** | `<lang><n>t<tz>_h<hash>` | `en4tEurope-Paris_hab12` | Language code + count + timezone + hash |
 | 9 | **Contexts** | `<4-bit>h<hash>` | `0000h3e9f` | Mismatch + webdriver flags + hash |
 
 ### Why This Format?
