@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprint Scanner Test (Obfuscated Build)</title>
+</head>
+<body>
+    <h1>Fingerprint Scanner Test (Obfuscated Build)</h1>
+    <p>This page uses the pre-built, obfuscated version from <code>dist/</code>.</p>
+    <p>Open the browser console to see the fingerprint results.</p>
+    <p><small>Build with: <code>npm run build:obfuscate</code> or <code>npm run build:prod</code></small></p>
+    
+    <script type="module">
+        // Import from dist - the pre-built, potentially obfuscated version
+        import FingerprintScanner from '/dist/fpScanner.es.js';
+        
+        async function testFingerprint() {
+            const scanner = new FingerprintScanner();
+            const result = await scanner.collectFingerprint({ encrypt: false });
+            console.log('Fingerprint result:', result);
+        }
+        
+        testFingerprint().catch(console.error);
+    </script>
+</body>
+</html>

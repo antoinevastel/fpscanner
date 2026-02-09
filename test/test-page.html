@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPScanner Test Page</title>
+</head>
+<body>
+    <h1>FPScanner Test Page</h1>
+    <p>This page is used for automated testing with Playwright.</p>
+    <div id="status">Loading...</div>
+
+    <script type="module">
+        import FingerprintScanner from '/dist/fpScanner.es.js';
+        
+        async function run() {
+            const statusEl = document.getElementById('status');
+            try {
+                const scanner = new FingerprintScanner();
+                const encryptedFingerprint = await scanner.collectFingerprint();
+                
+                // Store the encrypted fingerprint in a global variable for Playwright to access
+                window.__ENCRYPTED_FINGERPRINT__ = encryptedFingerprint;
+                window.__FINGERPRINT_READY__ = true;
+                
+                statusEl.textContent = 'Fingerprint collected successfully!';
+                console.log('Encrypted fingerprint collected');
+            } catch (error) {
+                window.__FINGERPRINT_ERROR__ = error.message;
+                window.__FINGERPRINT_READY__ = true;
+                statusEl.textContent = 'Error: ' + error.message;
+                console.error('Error collecting fingerprint:', error);
+            }
+        }
+        
+        run();
+    </script>
+</body>
+</html>
