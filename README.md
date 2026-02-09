@@ -124,7 +124,8 @@ fetch('/api/fingerprint', {
 
 ```javascript
 // Decrypt and validate the fingerprint
-const key = 'my-shared-secret'; // Default key, or your custom key
+// Use the same key you provided when building: npx fpscanner build --key=your-key
+const key = 'your-secret-key'; // Your custom key
 
 function decryptFingerprint(ciphertext, key) {
   const encrypted = Buffer.from(ciphertext, 'base64');
@@ -440,7 +441,7 @@ See the [`examples/`](./examples/) folder for complete Node.js and Python server
 
 ## Advanced: Custom Builds
 
-By default, fpscanner uses a placeholder key (`my-shared-secret`) and no obfuscation. This is fine for development, but for production you should use encryption and obfuscation to make it harder for attackers to forge payloads.
+By default, fpscanner uses a placeholder key that gets replaced when you run the build command. For production, you should use your own encryption key and enable obfuscation to make it harder for attackers to forge payloads.
 
 ### Bring Your Own Encryption/Obfuscation
 

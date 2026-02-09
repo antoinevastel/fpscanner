@@ -3,9 +3,9 @@ import { resolve } from 'path';
 
 export default defineConfig({
   define: {
-    // Inject encryption key from environment variable, fallback to default for development
+    // Inject encryption key from environment variable, fallback to sentinel for replacement
     __FP_ENCRYPTION_KEY__: JSON.stringify(
-      process.env.FP_ENCRYPTION_KEY || 'my-shared-secret'
+      process.env.FP_ENCRYPTION_KEY || '__DEFAULT_FPSCANNER_KEY__'
     ),
   },
   server: {
