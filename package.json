@@ -1,6 +1,6 @@
 {
   "name": "fpscanner",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "A lightweight browser fingerprinting and bot detection library with encryption, obfuscation, and cross-context validation",
   "main": "dist/fpScanner.cjs.js",
   "module": "dist/fpScanner.es.js",
@@ -28,7 +28,8 @@
     "test": "npm run test:playwright",
     "test:vitest": "vitest",
     "test:playwright": "npm run build:obfuscate && npx playwright test",
-    "test:playwright:headed": "npm run build:obfuscate && npx playwright test --headed"
+    "test:playwright:headed": "npm run build:obfuscate && npx playwright test --headed",
+    "prepublishOnly": "node scripts/verify-publish.js"
   },
   "repository": {
     "type": "git",
