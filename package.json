@@ -1,7 +1,7 @@
 {
   "name": "fpscanner",
-  "version": "1.0.0",
-  "description": "Detect bots using fingerprinting",
+  "version": "0.9.1",
+  "description": "A lightweight browser fingerprinting and bot detection library with encryption, obfuscation, and cross-context validation",
   "main": "dist/fpScanner.cjs.js",
   "module": "dist/fpScanner.es.js",
   "types": "dist/index.d.ts",
@@ -12,9 +12,7 @@
     "dist",
     "src",
     "bin",
-    "scripts",
-    "vite.config.ts",
-    "tsconfig.json"
+    "scripts"
   ],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly",
@@ -36,7 +34,22 @@
     "type": "git",
     "url": "https://github.com/antoinevastel/fpscanner.git"
   },
-  "keywords": [],
+  "keywords": [
+    "fingerprinting",
+    "browser-fingerprint",
+    "bot-detection",
+    "automation-detection",
+    "fraud-detection",
+    "selenium",
+    "puppeteer",
+    "playwright",
+    "webdriver",
+    "headless",
+    "anti-bot",
+    "device-fingerprint",
+    "browser-detection",
+    "security"
+  ],
   "author": "antoinevastel <antoine.vastel@gmail.com>",
   "license": "MIT",
   "bugs": {

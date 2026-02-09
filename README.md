@@ -1,5 +1,7 @@
 # Fingerprint Scanner
 
+> **News:** After more than 7 years without any updates, I'm releasing a completely new version of FPScanner! This version includes both the fingerprinting code and detection logic in a single library. Consider this a beta release — feel free to use it in your projects. The overall API should remain stable, but expect some small changes as we refine the library based on feedback.
+
 [![CI](https://github.com/antoinevastel/fpscanner/actions/workflows/ci.yml/badge.svg)](https://github.com/antoinevastel/fpscanner/actions/workflows/ci.yml)
 
 ## Sponsor
