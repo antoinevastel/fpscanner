@@ -39,13 +39,15 @@ module.exports = async function build(args) {
   console.log(`   Obfuscation: ${skipObfuscation ? 'disabled' : 'enabled'}`);
   console.log('');
   
-  // Check if dist files exist (consumer mode vs development mode)
-  const distExists = fs.existsSync(distDir) && 
-                     files.some(file => fs.existsSync(path.join(distDir, file)));
+  // Check if we can build from source (more reliable than string replacement)
+  const viteConfigPath = path.join(packageDir, 'vite.config.ts');
+  const canBuildFromSource = fs.existsSync(viteConfigPath);
   
-  if (!distExists) {
-    // Development mode: build from source first
-    console.log('📦 Step 0/5: Dist files not found, building from source...');
+  if (canBuildFromSource) {
+    // Preferred method: Build from source with key injected via environment variable
+    // This is more reliable as Vite's define properly replaces the key during the build
+    console.log('📦 Step 0/5: Building from source with injected key...');
+    console.log('   (This is more reliable than post-build string replacement)');
     try {
       execSync('npm run build:vite', {
         cwd: packageDir,
@@ -61,43 +63,59 @@ module.exports = async function build(args) {
         cwd: packageDir,
         stdio: 'inherit',
       });
+      console.log('');
+      console.log('📦 Step 1/5: Key injected during build ✓');
     } catch (err) {
-      throw new Error('Build from source failed');
+      throw new Error('Build from source failed. Make sure vite is installed (npm install)');
     }
-    console.log('');
-  }
-  
-  // Step 1: Inject encryption key into pre-built dist files
-  console.log('📦 Step 1/5: Injecting encryption key...');
-  
-  let keyInjected = false;
-  for (const file of files) {
-    const filePath = path.join(distDir, file);
+  } else {
+    // Fallback method: String replacement in pre-built dist files
+    // Used when vite.config.ts is not available (npm consumers without dev dependencies)
+    console.log('📦 Step 1/5: Injecting encryption key via string replacement...');
+    console.log('   (Fallback method - vite.config.ts not found)');
     
-    if (!fs.existsSync(filePath)) {
-      console.log(`   ⚠️  ${file} not found, skipping`);
-      continue;
+    let keyInjected = false;
+    for (const file of files) {
+      const filePath = path.join(distDir, file);
+      
+      if (!fs.existsSync(filePath)) {
+        console.log(`   ⚠️  ${file} not found, skipping`);
+        continue;
+      }
+      
+      let code = fs.readFileSync(filePath, 'utf8');
+      
+      // Check if sentinel exists
+      if (!code.includes(sentinel)) {
+        console.log(`   ⚠️  ${file} does not contain the default key sentinel`);
+        console.log(`       Key may have already been replaced, or dist needs to be rebuilt`);
+        continue;
+      }
+      
+      // Replace all occurrences of the sentinel with the actual key
+      const escapedSentinel = sentinel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const newCode = code.replace(new RegExp(`"${escapedSentinel}"`, 'g'), JSON.stringify(key));
+      
+      // Verify the replacement worked
+      if (newCode === code) {
+        console.log(`   ⚠️  ${file} - replacement had no effect`);
+        continue;
+      }
+      
+      if (newCode.includes(sentinel)) {
+        console.log(`   ⚠️  ${file} - sentinel still present after replacement`);
+        continue;
+      }
+      
+      fs.writeFileSync(filePath, newCode);
+      keyInjected = true;
+      console.log(`   ✓ ${file}`);
     }
     
-    let code = fs.readFileSync(filePath, 'utf8');
-    
-    // Check if sentinel exists
-    if (!code.includes(sentinel)) {
-      console.log(`   ⚠️  ${file} does not contain the default key sentinel, skipping`);
-      continue;
+    if (!keyInjected) {
+      console.log('   ⚠️  Warning: No files were updated');
+      console.log('       The key may have already been injected, or dist files may need rebuilding');
     }
-    
-    // Replace all occurrences of the sentinel with the actual key
-    const escapedSentinel = sentinel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    code = code.replace(new RegExp(`"${escapedSentinel}"`, 'g'), JSON.stringify(key));
-    
-    fs.writeFileSync(filePath, code);
-    keyInjected = true;
-    console.log(`   ✓ ${file}`);
-  }
-  
-  if (!keyInjected) {
-    console.log('   ℹ️  Key already injected during build step');
   }
   
   // Step 2: Skip TypeScript declarations (already generated)

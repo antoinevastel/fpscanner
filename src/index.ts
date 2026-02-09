@@ -453,6 +453,17 @@ class FingerprintScanner {
         // Key is injected at build time via Vite's define option
         // Customers run: npx fpscanner build --key=their-key
         const key = __FP_ENCRYPTION_KEY__;
+        
+        // Runtime safety check: warn if using the default sentinel key
+        // Use a dynamic check that prevents build-time optimization
+        if (key.length > 20 && key.indexOf('DEFAULT') > 0 && key.indexOf('FPSCANNER') > 0) {
+            console.warn(
+                '[fpscanner] WARNING: Using default encryption key! ' +
+                'Run "npx fpscanner build --key=your-secret-key" to inject your own key. ' +
+                'See: https://github.com/antoinevastel/fpscanner#advanced-custom-builds'
+            );
+        }
+        
         const enc = await encryptString(JSON.stringify(fingerprint), key);
 
         return enc;
