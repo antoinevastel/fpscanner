@@ -29,6 +29,8 @@ module.exports = async function build(args) {
     : path.dirname(__dirname);
   
   const distDir = path.join(packageDir, 'dist');
+  const files = ['fpScanner.es.js', 'fpScanner.cjs.js'];
+  const sentinel = '__DEFAULT_FPSCANNER_KEY__';
   
   console.log('');
   console.log('🔨 Building fpscanner with custom key...');
@@ -37,33 +39,70 @@ module.exports = async function build(args) {
   console.log(`   Obfuscation: ${skipObfuscation ? 'disabled' : 'enabled'}`);
   console.log('');
   
-  // Step 1: Run Vite build with the key
-  console.log('📦 Step 1/5: Running Vite build...');
-  try {
-    execSync('npm run build:vite', {
-      cwd: packageDir,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        FP_ENCRYPTION_KEY: key,
-      },
-    });
-  } catch (err) {
-    throw new Error('Vite build failed');
+  // Check if dist files exist (consumer mode vs development mode)
+  const distExists = fs.existsSync(distDir) && 
+                     files.some(file => fs.existsSync(path.join(distDir, file)));
+  
+  if (!distExists) {
+    // Development mode: build from source first
+    console.log('📦 Step 0/5: Dist files not found, building from source...');
+    try {
+      execSync('npm run build:vite', {
+        cwd: packageDir,
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          FP_ENCRYPTION_KEY: key,
+        },
+      });
+      console.log('');
+      console.log('📝 Generating TypeScript declarations...');
+      execSync('npx tsc --emitDeclarationOnly', {
+        cwd: packageDir,
+        stdio: 'inherit',
+      });
+    } catch (err) {
+      throw new Error('Build from source failed');
+    }
+    console.log('');
   }
   
-  // Step 2: Generate TypeScript declarations
-  console.log('');
-  console.log('📝 Step 2/5: Generating TypeScript declarations...');
-  try {
-    execSync('npx tsc --emitDeclarationOnly', {
-      cwd: packageDir,
-      stdio: 'inherit',
-    });
-  } catch (err) {
-    // Non-fatal, declarations might already exist
-    console.log('   (skipped or already generated)');
+  // Step 1: Inject encryption key into pre-built dist files
+  console.log('📦 Step 1/5: Injecting encryption key...');
+  
+  let keyInjected = false;
+  for (const file of files) {
+    const filePath = path.join(distDir, file);
+    
+    if (!fs.existsSync(filePath)) {
+      console.log(`   ⚠️  ${file} not found, skipping`);
+      continue;
+    }
+    
+    let code = fs.readFileSync(filePath, 'utf8');
+    
+    // Check if sentinel exists
+    if (!code.includes(sentinel)) {
+      console.log(`   ⚠️  ${file} does not contain the default key sentinel, skipping`);
+      continue;
+    }
+    
+    // Replace all occurrences of the sentinel with the actual key
+    const escapedSentinel = sentinel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    code = code.replace(new RegExp(`"${escapedSentinel}"`, 'g'), JSON.stringify(key));
+    
+    fs.writeFileSync(filePath, code);
+    keyInjected = true;
+    console.log(`   ✓ ${file}`);
   }
+  
+  if (!keyInjected) {
+    console.log('   ℹ️  Key already injected during build step');
+  }
+  
+  // Step 2: Skip TypeScript declarations (already generated)
+  console.log('');
+  console.log('⏭️  Step 2/5: TypeScript declarations already present, skipping...');
   
   // Step 3: Obfuscate (optional)
   if (!skipObfuscation) {
@@ -161,6 +200,9 @@ module.exports = async function build(args) {
       console.log('🗑️  Step 5/5: Removing source maps...');
       
       function deleteMapFiles(dir, prefix = '') {
+        if (!fs.existsSync(dir)) {
+          return;
+        }
         const files = fs.readdirSync(dir);
         for (const file of files) {
           const fullPath = path.join(dir, file);
