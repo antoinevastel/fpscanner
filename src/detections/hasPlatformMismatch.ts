@@ -6,40 +6,32 @@ export function hasPlatformMismatch(fingerprint: Fingerprint) {
     const userAgent = fingerprint.signals.browser.userAgent;
     const highEntropyPlatform = fingerprint.signals.browser.highEntropyValues.platform;
     
-    if (userAgent.includes('Mac') && !platform.includes('Mac')) {
+    if (userAgent.includes('Mac') && (platform.includes('Win') || platform.includes('Linux'))) {
         return true;
     }
 
-    if (userAgent.includes('Windows') && !platform.includes('Win')) {
+    if (userAgent.includes('Windows') &&  (platform.includes('Mac') || platform.includes('Linux'))) {
         return true;
     }
     
-    if (userAgent.includes('Linux') && !platform.includes('Linux')) {
+    if (userAgent.includes('Linux') && (platform.includes('Mac') || platform.includes('Win'))) {
         return true;
     }
 
 
     // Check applied only if highEntropyPlatform is not ERROR or NA
     if (highEntropyPlatform !== ERROR && highEntropyPlatform !== NA) {
-        if (highEntropyPlatform.includes('Mac') && !platform.includes('Mac')) {
+        if (highEntropyPlatform.includes('Mac') && (platform.includes('Win') || platform.includes('Linux'))) {
             return true;
         }
         
-        if (highEntropyPlatform.includes('Windows') && !platform.includes('Win')) {
+        if (highEntropyPlatform.includes('Windows') && (platform.includes('Mac') || platform.includes('Linux'))) {
             return true;
         }
 
-        if (highEntropyPlatform.includes('Linux') && !platform.includes('Linux')) {
+        if (highEntropyPlatform.includes('Linux') && (platform.includes('Mac') || platform.includes('Win'))) {
             return true;
         }
-
-        if (highEntropyPlatform.includes('Android') && !platform.includes('Android')) {
-            return true;
-        }
-
-        if (highEntropyPlatform.includes('iOS') && !platform.includes('iOS')) {
-            return true;
-        }  
     }
 
     return false;

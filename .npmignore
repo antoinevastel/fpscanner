@@ -1,0 +1,18 @@
+# Backup files created by custom build script
+dist/*.original
+
+# Test files
+test/
+test-results/
+playwright-report/
+.github/
+
+# Development files
+*.spec.ts
+*.test.ts
+vite.config.ts
+playwright.config.ts
+tsconfig.json
+
+# Examples
+examples/
