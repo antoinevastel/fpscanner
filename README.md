@@ -270,7 +270,7 @@ FS1_00000100000000_10010h3f2a_1728x1117c14m08b01011h4e7a9f_f1101011001e00000000p
 | # | Section | Format | Example | Description |
 |---|---------|--------|---------|-------------|
 | 1 | **Version** | `FS1` | `FS1` | Fingerprint Scanner version 1 |
-| 2 | **Detection** | 14-bit bitmask | `00000100000000` | All fastBotDetectionDetails booleans |
+| 2 | **Detection** | n-bit bitmask (21 bits in FS1) | `000001000000000000000` | All fastBotDetectionDetails booleans (extensible) |
 | 3 | **Automation** | `<5-bit>h<hash>` | `10010h3f2a` | Automation booleans + hash |
 | 4 | **Device** | `<W>x<H>c<cpu>m<mem>b<5-bit>h<hash>` | `1728x1117c14m08b01011h4e7a9f` | Screen, cpu, memory, device booleans + hash |
 | 5 | **Browser** | `f<10-bit>e<8-bit>p<4-bit>h<hash>` | `f1101011001e00000000p1100h2c8b1e` | Features + extensions + plugins bitmasks + hash |
@@ -291,7 +291,9 @@ Inspired by [JA4+](https://github.com/FoxIO-LLC/ja4), this format enables:
 <details>
 <summary><strong>Bitmask Reference</strong></summary>
 
-#### Detection Bitmask (14 bits)
+#### Detection Bitmask (21 bits in FS1, extensible)
+
+> ⚠️ **Note**: The number of detection bits increases as new bot detection checks are added. Always check the fingerprint version (FS1, FS2, etc.) to know the exact bit count and meaning. New checks are appended to maintain backward compatibility.
 
 ```
 Bit 0:  headlessChromeScreenResolution
@@ -308,6 +310,13 @@ Bit 10: hasWebdriverWorker
 Bit 11: hasMismatchWebGLInWorker
 Bit 12: hasMismatchPlatformIframe
 Bit 13: hasMismatchPlatformWorker
+Bit 14: hasSwiftshaderRenderer
+Bit 15: hasUTCTimezone
+Bit 16: hasMismatchLanguages
+Bit 17: hasInconsistentEtsl
+Bit 18: hasBotUserAgent
+Bit 19: hasGPUMismatch
+Bit 20: hasPlatformMismatch
 ```
 
 #### Automation Bitmask (5 bits)
@@ -330,19 +339,37 @@ Bit 3: hover
 Bit 4: anyHover
 ```
 
-#### Browser Features Bitmask (10 bits)
+#### Browser Features Bitmask (28 bits in FS1, extensible)
 
 ```
-Bit 0: chrome
-Bit 1: brave
-Bit 2: applePaySupport
-Bit 3: opera
-Bit 4: serial
-Bit 5: attachShadow
-Bit 6: caches
-Bit 7: webAssembly
-Bit 8: buffer
-Bit 9: showModalDialog
+Bit 0:  chrome
+Bit 1:  brave
+Bit 2:  applePaySupport
+Bit 3:  opera
+Bit 4:  serial
+Bit 5:  attachShadow
+Bit 6:  caches
+Bit 7:  webAssembly
+Bit 8:  buffer
+Bit 9:  showModalDialog
+Bit 10: safari
+Bit 11: webkitPrefixedFunction
+Bit 12: mozPrefixedFunction
+Bit 13: usb
+Bit 14: browserCapture
+Bit 15: paymentRequestUpdateEvent
+Bit 16: pressureObserver
+Bit 17: audioSession
+Bit 18: selectAudioOutput
+Bit 19: barcodeDetector
+Bit 20: battery
+Bit 21: devicePosture
+Bit 22: documentPictureInPicture
+Bit 23: eyeDropper
+Bit 24: editContext
+Bit 25: fencedFrame
+Bit 26: sanitizer
+Bit 27: otpCredential
 ```
 
 #### Browser Extensions Bitmask (8 bits)
