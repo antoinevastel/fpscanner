@@ -29,7 +29,9 @@
     "test:vitest": "vitest",
     "test:playwright": "npm run build:obfuscate && npx playwright test",
     "test:playwright:headed": "npm run build:obfuscate && npx playwright test --headed",
-    "prepublishOnly": "node scripts/verify-publish.js"
+    "prepublishOnly": "node scripts/verify-publish.js",
+    "publish:beta": "node scripts/safe-publish.js beta",
+    "publish:stable": "node scripts/safe-publish.js stable"
   },
   "repository": {
     "type": "git",
