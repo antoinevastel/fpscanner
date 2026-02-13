@@ -39,6 +39,35 @@ module.exports = async function build(args) {
   console.log(`   Obfuscation: ${skipObfuscation ? 'disabled' : 'enabled'}`);
   console.log('');
   
+  // Step 0: Backup/Restore mechanism to ensure idempotent builds
+  // This allows running the build multiple times without re-obfuscating already obfuscated code
+  console.log('🔄 Step 0/6: Ensuring clean build state...');
+  let restoredFromBackup = false;
+  
+  for (const file of files) {
+    const filePath = path.join(distDir, file);
+    const backupPath = filePath + '.original';
+    
+    if (!fs.existsSync(filePath)) {
+      continue;
+    }
+    
+    if (fs.existsSync(backupPath)) {
+      // Backup exists - restore from it to ensure clean state
+      fs.copyFileSync(backupPath, filePath);
+      restoredFromBackup = true;
+    } else {
+      // First run - create backup of pristine files
+      fs.copyFileSync(filePath, backupPath);
+      console.log(`   📦 Created backup: ${file}.original`);
+    }
+  }
+  
+  if (restoredFromBackup) {
+    console.log('   ✓ Restored files from backups (clean state for build)');
+  }
+  console.log('');
+  
   // Check if we can build from source (more reliable than string replacement)
   const viteConfigPath = path.join(packageDir, 'vite.config.ts');
   const canBuildFromSource = fs.existsSync(viteConfigPath);
@@ -46,7 +75,7 @@ module.exports = async function build(args) {
   if (canBuildFromSource) {
     // Preferred method: Build from source with key injected via environment variable
     // This is more reliable as Vite's define properly replaces the key during the build
-    console.log('📦 Step 0/5: Building from source with injected key...');
+    console.log('📦 Step 1/6: Building from source with injected key...');
     console.log('   (This is more reliable than post-build string replacement)');
     try {
       execSync('npm run build:vite', {
@@ -64,14 +93,14 @@ module.exports = async function build(args) {
         stdio: 'inherit',
       });
       console.log('');
-      console.log('📦 Step 1/5: Key injected during build ✓');
+      console.log('   ✓ Key injected during build');
     } catch (err) {
       throw new Error('Build from source failed. Make sure vite is installed (npm install)');
     }
   } else {
     // Fallback method: String replacement in pre-built dist files
     // Used when vite.config.ts is not available (npm consumers without dev dependencies)
-    console.log('📦 Step 1/5: Injecting encryption key via string replacement...');
+    console.log('📦 Step 1/6: Injecting encryption key via string replacement...');
     console.log('   (Fallback method - vite.config.ts not found)');
     
     let keyInjected = false;
@@ -120,12 +149,12 @@ module.exports = async function build(args) {
   
   // Step 2: Skip TypeScript declarations (already generated)
   console.log('');
-  console.log('⏭️  Step 2/5: TypeScript declarations already present, skipping...');
+  console.log('⏭️  Step 2/6: TypeScript declarations already present, skipping...');
   
   // Step 3: Obfuscate (optional)
   if (!skipObfuscation) {
     console.log('');
-    console.log('🔒 Step 3/5: Obfuscating output...');
+    console.log('🔒 Step 3/6: Obfuscating output...');
     
     let JavaScriptObfuscator;
     try {
@@ -171,7 +200,7 @@ module.exports = async function build(args) {
       
       // Step 4: Minify with Terser
       console.log('');
-      console.log('📦 Step 4/5: Minifying with Terser...');
+      console.log('📦 Step 4/6: Minifying with Terser...');
       
       let terser;
       try {
@@ -215,7 +244,7 @@ module.exports = async function build(args) {
       
       // Step 5: Delete all source map files so DevTools can't show original source
       console.log('');
-      console.log('🗑️  Step 5/5: Removing source maps...');
+      console.log('🗑️  Step 5/6: Removing source maps...');
       
       function deleteMapFiles(dir, prefix = '') {
         if (!fs.existsSync(dir)) {
@@ -239,8 +268,12 @@ module.exports = async function build(args) {
     }
   } else {
     console.log('');
-    console.log('⏭️  Steps 3-5/5: Skipping obfuscation, minification, and source map removal (--no-obfuscate)');
+    console.log('⏭️  Steps 3-5/6: Skipping obfuscation, minification, and source map removal (--no-obfuscate)');
   }
+  
+  // Step 6: Note about backups
+  console.log('');
+  console.log('💡 Note: Original files backed up as *.original for future rebuilds');
   
   console.log('');
   console.log('✅ Build complete!');

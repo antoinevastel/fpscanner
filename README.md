@@ -497,9 +497,12 @@ npx fpscanner build --key=your-secret-key-here
 ```
 
 This will:
-1. Rebuild the library with your key baked in
-2. Obfuscate the output to protect the key
-3. Overwrite the files in `node_modules/fpscanner/dist/`
+1. Create backups of original files (for idempotent rebuilds)
+2. Inject your encryption key into the library
+3. Obfuscate the output to protect the key
+4. Overwrite the files in `node_modules/fpscanner/dist/`
+
+> **Note**: The build command is idempotent - you can run it multiple times safely. Original files are backed up as `.original` and restored before each build, preventing issues with re-obfuscating already-obfuscated code. This makes the build safe to use in watch mode or repeated CI/CD runs.
 
 ### Key Injection Methods
 
@@ -648,6 +651,14 @@ Make sure you're using the **exact same key** on your server that you used when 
 ### Obfuscation is slow
 
 Use `--no-obfuscate` during development. Only enable obfuscation for production builds.
+
+### Build fails with "heap out of memory" in watch mode
+
+If you're running the build command repeatedly (e.g., in a watch task), this is now fixed. The build script automatically backs up and restores original files to prevent re-obfuscating already-obfuscated code. If you still encounter this issue:
+
+1. Update to the latest version of fpscanner
+2. Use `--no-obfuscate` for development/watch mode (recommended)
+3. Only enable obfuscation for production builds
 
 ### `postinstall` fails in CI
 
