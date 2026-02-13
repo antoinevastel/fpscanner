@@ -49,6 +49,11 @@ import { hasMismatchPlatformIframe } from './detections/hasMismatchPlatformIfram
 import { hasWebdriverWritable } from './detections/hasWebdriverWritable';
 import { hasSwiftshaderRenderer } from './detections/hasSwiftshaderRenderer';
 import { hasUTCTimezone } from './detections/hasUTCTimezone';
+import { hasMismatchLanguages } from './detections/hasMismatchLanguages';
+import { hasInconsistentEtsl } from './detections/hasInconsistentEtsl';
+import { hasBotUserAgent } from './detections/hasBotUserAgent';
+import { hasGPUMismatch } from './detections/hasGPUMismatch';
+import { hasPlatformMismatch } from './detections/hasPlatformMismatch';
 
 import { ERROR, HIGH, INIT, LOW, MEDIUM, SKIPPED, hashCode } from './signals/utils';
 import { encryptString } from './crypto-helpers';
@@ -118,6 +123,24 @@ class FingerprintScanner {
                         webAssembly: INIT,
                         buffer: INIT,
                         showModalDialog: INIT,
+                        safari: INIT,
+                        webkitPrefixedFunction: INIT,
+                        mozPrefixedFunction: INIT,
+                        usb: INIT,
+                        browserCapture: INIT,
+                        paymentRequestUpdateEvent: INIT,
+                        pressureObserver: INIT,
+                        audioSession: INIT,
+                        selectAudioOutput: INIT,
+                        barcodeDetector: INIT,
+                        battery: INIT,
+                        devicePosture: INIT,
+                        documentPictureInPicture: INIT,
+                        eyeDropper: INIT,
+                        editContext: INIT,
+                        fencedFrame: INIT,
+                        sanitizer: INIT,
+                        otpCredential: INIT,
                     },
                     plugins: {
                         isValidPluginArray: INIT,
@@ -229,6 +252,11 @@ class FingerprintScanner {
                 hasMismatchPlatformWorker: { detected: false, severity: 'high' },
                 hasSwiftshaderRenderer: { detected: false, severity: 'low' },
                 hasUTCTimezone: { detected: false, severity: 'medium' },
+                hasMismatchLanguages: { detected: false, severity: 'low' },
+                hasInconsistentEtsl: { detected: false, severity: 'high' },
+                hasBotUserAgent: { detected: false, severity: 'high' },
+                hasGPUMismatch: { detected: false, severity: 'high' },
+                hasPlatformMismatch: { detected: false, severity: 'high' },
             },
         };
     }
@@ -250,10 +278,11 @@ class FingerprintScanner {
      * Bitmasks are extensible - new boolean fields are appended without breaking existing positions.
      * 
      * Sections:
-     * - det:  fastBotDetectionDetails bitmask (14 bits: headlessChromeScreenResolution, hasWebdriver, 
+     * - det:  fastBotDetectionDetails bitmask (21 bits: headlessChromeScreenResolution, hasWebdriver, 
      *         hasWebdriverWritable, hasSeleniumProperty, hasCDP, hasPlaywright, hasImpossibleDeviceMemory,
      *         hasHighCPUCount, hasMissingChromeObject, hasWebdriverIframe, hasWebdriverWorker,
-     *         hasMismatchWebGLInWorker, hasMismatchPlatformIframe, hasMismatchPlatformWorker)
+     *         hasMismatchWebGLInWorker, hasMismatchPlatformIframe, hasMismatchPlatformWorker,
+     *         hasMismatchLanguages, hasInconsistentEtsl, hasBotUserAgent, hasGPUMismatch, hasPlatformMismatch)
      * - auto: automation bitmask (5 bits: webdriver, webdriverWritable, selenium, cdp, playwright) + hash
      * - dev:  WIDTHxHEIGHT + cpu + mem + device bitmask + hash of all device signals
      * - brw:  features.bitmask + extensions.bitmask + plugins bitmask (3 bits) + hash of browser signals
@@ -270,7 +299,7 @@ class FingerprintScanner {
             // Section 1: Version
             const version = 'FS1';
 
-            // Section 2: Detection bitmask - all 14 fastBotDetectionDetails booleans
+            // Section 2: Detection bitmask - all 21 fastBotDetectionDetails booleans
             // Order matches FastBotDetectionDetails interface for consistency
             const detBitmask = [
                 det.headlessChromeScreenResolution.detected,
@@ -289,6 +318,11 @@ class FingerprintScanner {
                 det.hasMismatchPlatformWorker.detected,
                 det.hasSwiftshaderRenderer.detected,
                 det.hasUTCTimezone.detected,
+                det.hasMismatchLanguages.detected,
+                det.hasInconsistentEtsl.detected,
+                det.hasBotUserAgent.detected,
+                det.hasGPUMismatch.detected,
+                det.hasPlatformMismatch.detected,
                 // Add other detection rules output here
             ].map(b => b ? '1' : '0').join('');
             const detSection = detBitmask;
@@ -471,8 +505,7 @@ class FingerprintScanner {
 
     /**
      * Detection rules with name and severity.
-     * All rules are currently HIGH severity as they indicate bot-like behavior.
-     */
+    */
     private getDetectionRules(): DetectionRule[] {
         return [
             { name: 'headlessChromeScreenResolution', severity: HIGH, test: hasHeadlessChromeScreenResolution },
@@ -491,6 +524,11 @@ class FingerprintScanner {
             { name: 'hasMismatchPlatformWorker', severity: HIGH, test: hasMismatchPlatformWorker },
             { name: 'hasSwiftshaderRenderer', severity: LOW, test: hasSwiftshaderRenderer },
             { name: 'hasUTCTimezone', severity: MEDIUM, test: hasUTCTimezone },
+            { name: 'hasMismatchLanguages', severity: LOW, test: hasMismatchLanguages },
+            { name: 'hasInconsistentEtsl', severity: HIGH, test: hasInconsistentEtsl },
+            { name: 'hasBotUserAgent', severity: HIGH, test: hasBotUserAgent },
+            { name: 'hasGPUMismatch', severity: HIGH, test: hasGPUMismatch },
+            { name: 'hasPlatformMismatch', severity: HIGH, test: hasPlatformMismatch },
         ];
     }
 
@@ -513,6 +551,11 @@ class FingerprintScanner {
             hasMismatchPlatformWorker: { detected: false, severity: 'high' },
             hasSwiftshaderRenderer: { detected: false, severity: 'low' },
             hasUTCTimezone: { detected: false, severity: 'medium' },
+            hasMismatchLanguages: { detected: false, severity: 'low' },
+            hasInconsistentEtsl: { detected: false, severity: 'high' },
+            hasBotUserAgent: { detected: false, severity: 'high' },
+            hasGPUMismatch: { detected: false, severity: 'high' },
+            hasPlatformMismatch: { detected: false, severity: 'high' },
         };
 
         for (const rule of rules) {

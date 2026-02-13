@@ -73,6 +73,24 @@ export interface BrowserFeaturesSignal {
     webAssembly: SignalValue<boolean>;
     buffer: SignalValue<boolean>;
     showModalDialog: SignalValue<boolean>;
+    safari: SignalValue<boolean>;
+    webkitPrefixedFunction: SignalValue<boolean>;
+    mozPrefixedFunction: SignalValue<boolean>;
+    usb: SignalValue<boolean>;
+    browserCapture: SignalValue<boolean>;
+    paymentRequestUpdateEvent: SignalValue<boolean>;
+    pressureObserver: SignalValue<boolean>;
+    audioSession: SignalValue<boolean>;
+    selectAudioOutput: SignalValue<boolean>;
+    barcodeDetector: SignalValue<boolean>;
+    battery: SignalValue<boolean>;
+    devicePosture: SignalValue<boolean>;
+    documentPictureInPicture: SignalValue<boolean>;
+    eyeDropper: SignalValue<boolean>;
+    editContext: SignalValue<boolean>;
+    fencedFrame: SignalValue<boolean>;
+    sanitizer: SignalValue<boolean>;
+    otpCredential: SignalValue<boolean>;
 }
 
 export interface MediaQueriesSignal {
@@ -205,6 +223,11 @@ export interface FastBotDetectionDetails {
     hasMismatchPlatformWorker: DetectionRuleResult;
     hasSwiftshaderRenderer: DetectionRuleResult;
     hasUTCTimezone: DetectionRuleResult;
+    hasMismatchLanguages: DetectionRuleResult;
+    hasInconsistentEtsl: DetectionRuleResult;
+    hasBotUserAgent: DetectionRuleResult;
+    hasGPUMismatch: DetectionRuleResult;
+    hasPlatformMismatch: DetectionRuleResult;
 }
 export interface Fingerprint {
     signals: FingerprintSignals;

@@ -1,6 +1,6 @@
 {
   "name": "fpscanner",
-  "version": "0.9.4",
+  "version": "0.9.5-beta.0",
   "description": "A lightweight browser fingerprinting and bot detection library with encryption, obfuscation, and cross-context validation",
   "main": "dist/fpScanner.cjs.js",
   "module": "dist/fpScanner.es.js",
@@ -58,9 +58,9 @@
   },
   "homepage": "https://github.com/antoinevastel/fpscanner",
   "dependencies": {
-    "ua-parser-js": "^0.7.18",
     "javascript-obfuscator": "^5.1.0",
-    "terser": "^5.46.0"
+    "terser": "^5.46.0",
+    "ua-parser-js": "^0.7.18"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

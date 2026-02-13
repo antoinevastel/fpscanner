@@ -59,10 +59,15 @@ test.describe('FPScanner Obfuscated Build', () => {
   });
 
   // Signal validations - using nested structure
-  test('device.memory should be a number greater than 0', () => {
+  test('device.memory should be a number greater than 0 or NA', () => {
     const memory = fingerprint.signals.device.memory;
-    expect(typeof memory).toBe('number');
-    expect(memory).toBeGreaterThan(0);
+    if (memory === 'NA') {
+      // Firefox and WebKit don't support navigator.deviceMemory
+      expect(memory).toBe('NA');
+    } else {
+      expect(typeof memory).toBe('number');
+      expect(memory).toBeGreaterThan(0);
+    }
   });
 
   test('device.cpuCount should be a number greater than 0', () => {
