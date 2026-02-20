@@ -1,0 +1,15 @@
+{
+  "name": "fpscanner-detection-tests-nodejs",
+  "version": "1.0.0",
+  "description": "Detection quality tests for fpscanner using Node.js automation tools",
+  "private": true,
+  "scripts": {
+    "test:headless": "node puppeteer-headless.js",
+    "test:stealth": "node puppeteer-stealth.js"
+  },
+  "dependencies": {
+    "puppeteer": "^22.0.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  }
+}
