@@ -18,43 +18,77 @@ npm run dev
 
 Located in `nodejs/`. Two variants:
 
-| Script | Framework | Evasion |
-|---|---|---|
-| `puppeteer-headless.js` | Puppeteer + headless Chrome | None |
-| `puppeteer-stealth.js` | Puppeteer + puppeteer-extra-plugin-stealth | Yes |
+| Script | Framework | Engine | Evasion |
+|---|---|---|---|
+| `puppeteer-headless.js` | Puppeteer | Chromium | None |
+| `puppeteer-stealth.js` | Puppeteer + stealth plugin | Chromium | Yes |
+| `playwright-chromium-headless.js` | Playwright | Chromium | None |
+| `playwright-firefox-headless.js` | Playwright | Firefox | None |
+| `playwright-webkit-headless.js` | Playwright | WebKit | None |
+| `playwright-iphone-headless.js` | Playwright | Chromium | None (iPhone 15 emulation) |
+| `playwright-android-headless.js` | Playwright | Chromium | None (Pixel 7 emulation) |
 
 ### Setup
 
 ```bash
 cd test/detection/nodejs
 npm install
+npx playwright install chromium firefox webkit   # download browser binaries
 ```
 
 ### Run
 
 ```bash
-# Plain headless Chrome (expect many detections)
 node puppeteer-headless.js
-
-# With stealth plugin (fewer detections expected)
 node puppeteer-stealth.js
+node playwright-chromium-headless.js
+node playwright-firefox-headless.js
+node playwright-webkit-headless.js
+node playwright-iphone-headless.js
+node playwright-android-headless.js
+```
+
+Or via npm scripts:
+
+```bash
+npm run test:headless
+npm run test:stealth
+npm run test:chromium
+npm run test:firefox
+npm run test:webkit
+npm run test:iphone
+npm run test:android
 ```
 
 ---
 
 ## Python tests
 
-Located in `python/`. Uses [undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver) which patches the ChromeDriver binary to reduce detection.
+Located in `python/`. Two variants:
+
+| Script | Framework | Evasion |
+|---|---|---|
+| `selenium_headless_test.py` | Selenium + headless Chrome | None |
+| `undetected_chromedriver_test.py` | undetected-chromedriver | Yes (Chromium) |
+| `camoufox_test.py` | Camoufox (patched Firefox) | Yes (Firefox, C++ level) |
 
 ### Setup
 
 ```bash
 cd test/detection/python
 pip install -r requirements.txt
+python -m camoufox fetch   # one-time download of the Camoufox browser binary
 ```
 
 ### Run
 
 ```bash
+# Plain headless Chrome via Selenium (expect many detections)
+python selenium_headless_test.py
+
+# With undetected-chromedriver patches (fewer detections expected)
 python undetected_chromedriver_test.py
+
+# Camoufox — patched Firefox, C++-level fingerprint spoofing via Playwright
+python camoufox_test.py
 ```

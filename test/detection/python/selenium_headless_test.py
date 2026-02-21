@@ -1,9 +1,5 @@
 """
-Detection test: undetected-chromedriver
-
-undetected-chromedriver patches the ChromeDriver binary to avoid triggering
-common bot-detection heuristics (navigator.webdriver removal, CDP fingerprint
-patches, etc.).
+Detection test: Selenium + headless Chrome (no evasion)
 
 Prerequisites:
     pip install -r requirements.txt
@@ -11,27 +7,16 @@ Prerequisites:
     npm run dev
 
 Run:
-    python undetected_chromedriver_test.py
+    python selenium_headless_test.py
 """
-
-import sys
-
-# Python 3.12 removed distutils from the stdlib; undetected-chromedriver still
-# depends on it. Inject the setuptools shim before the import so the module
-# resolver finds distutils.version without touching the installed package.
-try:
-    import distutils  # noqa: F401
-except ImportError:
-    import setuptools  # noqa: F401 – registers the distutils meta-path finder
-    import setuptools._distutils as _distutils
-    import setuptools._distutils.version as _distutils_version
-    sys.modules.setdefault("distutils", _distutils)
-    sys.modules.setdefault("distutils.version", _distutils_version)
 
 import json
 import time
 
-import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
 
 TARGET_URL = "http://localhost:3000/test/dev-source.html"
 WAIT_TIMEOUT_SECONDS = 15
@@ -53,19 +38,20 @@ def wait_for_result(driver, timeout=WAIT_TIMEOUT_SECONDS):
 
 
 def main():
-    print("[undetected-chromedriver] Launching Chrome...")
+    print("[selenium-headless] Launching headless Chrome...")
 
-    options = uc.ChromeOptions()
-    # Run headless so it matches the puppeteer examples
-    # options.add_argument("--headless=new")
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-setuid-sandbox")
 
-    driver = uc.Chrome(options=options, use_subprocess=False)
+    driver = webdriver.Chrome(options=options)
 
     try:
-        print(f"[undetected-chromedriver] Navigating to {TARGET_URL}")
+        print(f"[selenium-headless] Navigating to {TARGET_URL}")
         driver.get(TARGET_URL)
 
-        print("[undetected-chromedriver] Waiting for fingerprint result...")
+        print("[selenium-headless] Waiting for fingerprint result...")
         wait_for_result(driver)
 
         fast_bot_detection_details = driver.execute_script(
@@ -90,7 +76,7 @@ def main():
 
     finally:
         driver.quit()
-        print("\n[undetected-chromedriver] Done.")
+        print("\n[selenium-headless] Done.")
 
 
 if __name__ == "__main__":
