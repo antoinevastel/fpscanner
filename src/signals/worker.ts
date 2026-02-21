@@ -37,8 +37,9 @@ export async function worker() {
                 fingerprintWorker.vendor = 'INIT';
                 fingerprintWorker.renderer = 'INIT';
                 var gl = canvas.getContext('webgl');
+                const isFirefox = navigator.userAgent.includes('Firefox');
                 try {
-                    if (gl) {
+                    if (gl && !isFirefox) {
                         var glExt = gl.getExtension('WEBGL_debug_renderer_info');
                         fingerprintWorker.vendor = gl.getParameter(glExt.UNMASKED_VENDOR_WEBGL);
                         fingerprintWorker.renderer = gl.getParameter(glExt.UNMASKED_RENDERER_WEBGL);

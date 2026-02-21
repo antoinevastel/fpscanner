@@ -1,0 +1,4 @@
+setuptools
+camoufox
+selenium
+undetected-chromedriver
