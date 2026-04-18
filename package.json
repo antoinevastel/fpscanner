@@ -1,6 +1,6 @@
 {
   "name": "fpscanner",
-  "version": "1.0.2",
+  "version": "1.0.3-beta.0",
   "description": "A lightweight browser fingerprinting and bot detection library with encryption, obfuscation, and cross-context validation",
   "main": "dist/fpScanner.cjs.js",
   "module": "dist/fpScanner.es.js",
