@@ -1,7 +1,10 @@
 import { Fingerprint } from "../types";
 import { ERROR, INIT, NA, SKIPPED } from "../signals/utils";
 
-function webGLStringUnavailable(value: string): boolean {
+function webGLStringUnavailable(value: unknown): boolean {
+    if (typeof value !== "string" || value.length === 0) {
+        return true;
+    }
     return value === NA || value === ERROR || value === SKIPPED || value === INIT;
 }
 
