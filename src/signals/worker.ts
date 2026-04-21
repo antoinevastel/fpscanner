@@ -1,4 +1,4 @@
-import { ERROR, INIT, setObjectValues } from './utils';
+import { ERROR, INIT, NA, setObjectValues } from './utils';
 
 export async function worker() {
     return new Promise((resolve) => {
@@ -23,29 +23,45 @@ export async function worker() {
         };
 
         try {
-            const workerCode = `try {
-                var fingerprintWorker = {};
-
+            const workerCode = `var fingerprintWorker = {
+                userAgent: 'NA',
+                language: 'NA',
+                cpuCount: 'NA',
+                platform: 'NA',
+                memory: 'NA',
+                vendor: 'NA',
+                renderer: 'NA'
+            };
+            try {
                 fingerprintWorker.userAgent = navigator.userAgent;
                 fingerprintWorker.language = navigator.language;
                 fingerprintWorker.cpuCount = navigator.hardwareConcurrency;
                 fingerprintWorker.platform = navigator.platform;
-                fingerprintWorker.memory = navigator.deviceMemory;
-                
+                if (typeof navigator.deviceMemory !== 'undefined') {
+                    fingerprintWorker.memory = navigator.deviceMemory;
+                }
 
-                var canvas = new OffscreenCanvas(1, 1);
-                fingerprintWorker.vendor = 'INIT';
-                fingerprintWorker.renderer = 'INIT';
-                var gl = canvas.getContext('webgl');
-                const isFirefox = navigator.userAgent.includes('Firefox');
                 try {
-                    if (gl && !isFirefox) {
-                        var glExt = gl.getExtension('WEBGL_debug_renderer_info');
-                        fingerprintWorker.vendor = gl.getParameter(glExt.UNMASKED_VENDOR_WEBGL);
-                        fingerprintWorker.renderer = gl.getParameter(glExt.UNMASKED_RENDERER_WEBGL);
-                    } else {
+                    if (typeof OffscreenCanvas === 'undefined') {
                         fingerprintWorker.vendor = 'NA';
                         fingerprintWorker.renderer = 'NA';
+                    } else {
+                        var canvas = new OffscreenCanvas(1, 1);
+                        var gl = canvas.getContext('webgl');
+                        var isFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
+                        if (gl && !isFirefox) {
+                            var glExt = gl.getExtension('WEBGL_debug_renderer_info');
+                            if (glExt) {
+                                fingerprintWorker.vendor = gl.getParameter(glExt.UNMASKED_VENDOR_WEBGL);
+                                fingerprintWorker.renderer = gl.getParameter(glExt.UNMASKED_RENDERER_WEBGL);
+                            } else {
+                                fingerprintWorker.vendor = 'NA';
+                                fingerprintWorker.renderer = 'NA';
+                            }
+                        } else {
+                            fingerprintWorker.vendor = 'NA';
+                            fingerprintWorker.renderer = 'NA';
+                        }
                     }
                 } catch (_) {
                     fingerprintWorker.vendor = 'ERROR';
@@ -70,13 +86,14 @@ export async function worker() {
 
             worker.onmessage = function (e) {
                 try {
-                    workerData.vendor = e.data.vendor;
-                    workerData.renderer = e.data.renderer;
-                    workerData.userAgent = e.data.userAgent;
-                    workerData.language = e.data.language;
-                    workerData.platform = e.data.platform;
-                    workerData.memory = e.data.memory;
-                    workerData.cpuCount = e.data.cpuCount;
+                    const pick = (v: any) => (typeof v === 'undefined' ? NA : v);
+                    workerData.vendor = pick(e.data.vendor);
+                    workerData.renderer = pick(e.data.renderer);
+                    workerData.userAgent = pick(e.data.userAgent);
+                    workerData.language = pick(e.data.language);
+                    workerData.platform = pick(e.data.platform);
+                    workerData.memory = pick(e.data.memory);
+                    workerData.cpuCount = pick(e.data.cpuCount);
                 } catch (_) {
                     setObjectValues(workerData, ERROR);
                 } finally {
