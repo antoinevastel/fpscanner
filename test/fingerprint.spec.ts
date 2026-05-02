@@ -145,11 +145,11 @@ test.describe('FPScanner Obfuscated Build', () => {
     expect(fingerprint.signals).toHaveProperty('device');
     expect(fingerprint.signals.device).toHaveProperty('keyboard');
     if (fingerprint.signals.browser.userAgent.includes('Chrome')) {
-      expect(typeof fingerprint.signals.device.keyboard.keyboardLayout).toBe('string');
-      expect(typeof fingerprint.signals.device.keyboard.keyboardLayoutSize).toBe('number');
+      expect(typeof fingerprint.signals.device.keyboard.layout).toBe('string');
+      expect(typeof fingerprint.signals.device.keyboard.layoutSize).toBe('number');
     } else {
-      expect(fingerprint.signals.device.keyboard.keyboardLayout).toBe('NA');
-      expect(fingerprint.signals.device.keyboard.keyboardLayoutSize).toBe('NA');
+      expect(fingerprint.signals.device.keyboard.layout).toBe('NA');
+      expect(fingerprint.signals.device.keyboard.layoutSize).toBe('NA');
     }
   });
 });

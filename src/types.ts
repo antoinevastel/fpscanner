@@ -106,8 +106,8 @@ export interface MediaQueriesSignal {
 }
 
 export interface KeyboardSignals {
-    keyboardLayout: SignalValue<string>;
-    keyboardLayoutSize: SignalValue<number>;
+    layout: SignalValue<string>;
+    layoutSize: SignalValue<number>;
 }
 
 export interface ToSourceErrorSignal {

@@ -110,8 +110,8 @@ class FingerprintScanner {
                         colorDepth: INIT,
                     },
                     keyboard: {
-                        keyboardLayout: INIT,
-                        keyboardLayoutSize: INIT,
+                        layout: INIT,
+                        layoutSize: INIT,
                     },
                 },
                 // Browser identity & features
@@ -372,8 +372,8 @@ class FingerprintScanner {
                 s.device.mediaQueries.pointer,
                 s.device.mediaQueries.anyPointer,
                 s.device.mediaQueries.colorDepth,
-                s.device.keyboard.keyboardLayout,
-                s.device.keyboard.keyboardLayoutSize,
+                s.device.keyboard.layout,
+                s.device.keyboard.layoutSize,
             ].map(v => String(v)).join('|');
             const devHash = hashCode(devStr).slice(0, 6);
             const devSection = `${width}x${height}c${cpu}m${mem}b${devBitmask}h${devHash}`;
