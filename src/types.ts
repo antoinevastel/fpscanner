@@ -105,6 +105,11 @@ export interface MediaQueriesSignal {
     colorDepth: SignalValue<number>;
 }
 
+export interface KeyboardSignals {
+    keyboardLayout: SignalValue<string>;
+    keyboardLayoutSize: SignalValue<number>;
+}
+
 export interface ToSourceErrorSignal {
     toSourceError: SignalValue<string>;
     hasToSource: SignalValue<boolean>;
@@ -113,6 +118,11 @@ export interface ToSourceErrorSignal {
 export interface CanvasSignal {
     hasModifiedCanvas: SignalValue<boolean>;
     canvasFingerprint: SignalValue<string>;
+}
+
+export interface AISignal {
+    summarizerAvailability: SignalValue<boolean>;
+    summarizerLanguageAvailability: SignalValue<boolean>;
 }
 
 export interface HighEntropyValuesSignal {
@@ -167,6 +177,7 @@ export interface DeviceSignals {
     screenResolution: ScreenResolutionSignal;
     multimediaDevices: MultimediaDevicesSignal;
     mediaQueries: MediaQueriesSignal;
+    keyboard: KeyboardSignals;
 }
 
 export interface BrowserSignals {
@@ -178,6 +189,7 @@ export interface BrowserSignals {
     etsl: SignalValue<number>;
     maths: SignalValue<string>;
     toSourceError: ToSourceErrorSignal;
+    ai: AISignal;
 }
 
 export interface GraphicsSignals {
