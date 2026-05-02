@@ -26,5 +26,11 @@ export function maths() {
         }
     });
 
+    if ('sumPrecise' in Math) {
+        results.push((Math as any).sumPrecise([1e20, 0.1, -1e20]));
+    } else {
+        results.push(-1);
+    }
+
     return hashCode(results.map(String).join(","));
 }

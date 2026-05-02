@@ -40,6 +40,7 @@ export function browserFeatures() {
         fencedFrame: safeCheck(() => 'FencedFrameConfig' in window),
         sanitizer: safeCheck(() => 'Sanitizer' in window),
         otpCredential: safeCheck(() => 'OTPCredential' in window),
+        sumPrecise: safeCheck(() => 'sumPrecise' in Math),
     };
 
     // set bitmask to 0/1 string based on browserFeaturesData, exclude bitmask property itself (you need to filter on the key)
