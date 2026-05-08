@@ -31,6 +31,8 @@ import { hasContextMismatch } from './detections/hasContextMismatch';
 import { browserExtensions } from './signals/browserExtensions';
 import { browserFeatures } from './signals/browserFeatures';
 import { mediaQueries } from './signals/mediaQueries';
+import { keyboard } from './signals/keyboard';
+import { ai } from './signals/ai';
 
 // Fast Bot Detection tests
 import { hasHeadlessChromeScreenResolution } from './detections/hasHeadlessChromeScreenResolution';
@@ -107,6 +109,10 @@ class FingerprintScanner {
                         anyHover: INIT,
                         colorDepth: INIT,
                     },
+                    keyboard: {
+                        layout: INIT,
+                        layoutSize: INIT,
+                    },
                 },
                 // Browser identity & features
                 browser: {
@@ -168,6 +174,10 @@ class FingerprintScanner {
                     toSourceError: {
                         toSourceError: INIT,
                         hasToSource: INIT,
+                    },
+                    ai: {
+                        summarizerAvailability: INIT,
+                        summarizerLanguageAvailability: INIT,
                     },
                 },
                 // Graphics & rendering
@@ -362,13 +372,15 @@ class FingerprintScanner {
                 s.device.mediaQueries.pointer,
                 s.device.mediaQueries.anyPointer,
                 s.device.mediaQueries.colorDepth,
+                s.device.keyboard.layout,
+                s.device.keyboard.layoutSize,
             ].map(v => String(v)).join('|');
             const devHash = hashCode(devStr).slice(0, 6);
             const devSection = `${width}x${height}c${cpu}m${mem}b${devBitmask}h${devHash}`;
 
             // Section 5: Browser - use existing bitmasks + plugins bitmask + hash
-            const featuresBitmask = typeof s.browser.features.bitmask === 'string' ? s.browser.features.bitmask : '0000000000';
-            const extensionsBitmask = typeof s.browser.extensions.bitmask === 'string' ? s.browser.extensions.bitmask : '00000000';
+            const featuresBitmask = typeof s.browser.features.bitmask === 'string' ? s.browser.features.bitmask : "0".repeat(29);
+            const extensionsBitmask = typeof s.browser.extensions.bitmask === 'string' ? s.browser.extensions.bitmask : "0".repeat(8);
             const pluginsBitmask = [
                 s.browser.plugins.isValidPluginArray === true,
                 s.browser.plugins.pluginConsistency1 === true,
@@ -388,6 +400,8 @@ class FingerprintScanner {
                 s.browser.highEntropyValues.platformVersion,
                 s.browser.highEntropyValues.uaFullVersion,
                 s.browser.highEntropyValues.mobile,
+                s.browser.ai.summarizerAvailability,
+                s.browser.ai.summarizerLanguageAvailability,
             ].map(v => String(v)).join('|');
             const brwHash = hashCode(brwStr).slice(0, 6);
             const brwSection = `f${featuresBitmask}e${extensionsBitmask}p${pluginsBitmask}h${brwHash}`;
@@ -590,6 +604,7 @@ class FingerprintScanner {
             screenResolution: this.collectSignal(screenResolution),
             multimediaDevices: this.collectSignal(multimediaDevices),
             mediaQueries: this.collectSignal(mediaQueries),
+            keyboard: this.collectSignal(keyboard),
             // Browser signals
             userAgent: this.collectSignal(userAgent),
             browserFeatures: this.collectSignal(browserFeatures),
@@ -599,6 +614,7 @@ class FingerprintScanner {
             etsl: this.collectSignal(etsl),
             maths: this.collectSignal(maths),
             toSourceError: this.collectSignal(toSourceError),
+            ai: this.collectSignal(ai),
             // Graphics signals
             webGL: this.collectSignal(webGL),
             webgpu: this.collectSignal(webgpu),
@@ -648,6 +664,7 @@ class FingerprintScanner {
         s.device.screenResolution = r.screenResolution;
         s.device.multimediaDevices = r.multimediaDevices;
         s.device.mediaQueries = r.mediaQueries;
+        s.device.keyboard = r.keyboard;
         // Browser
         s.browser.userAgent = r.userAgent;
         s.browser.features = r.browserFeatures;
@@ -657,6 +674,7 @@ class FingerprintScanner {
         s.browser.etsl = r.etsl;
         s.browser.maths = r.maths;
         s.browser.toSourceError = r.toSourceError;
+        s.browser.ai = r.ai;
         // Graphics
         s.graphics.webGL = r.webGL;
         s.graphics.webgpu = r.webgpu;
