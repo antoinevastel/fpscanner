@@ -65,7 +65,7 @@
     "ua-parser-js": "^0.7.18"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.60.0",
     "@vitest/ui": "^4.0.16",
     "chai": "^4.2.0",
     "concurrently": "^9.2.1",
