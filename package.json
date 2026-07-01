@@ -68,7 +68,7 @@
     "@playwright/test": "^1.60.0",
     "@vitest/ui": "^4.0.16",
     "chai": "^4.2.0",
-    "concurrently": "^9.2.1",
+    "concurrently": "^10.0.3",
     "fpcollect": "^1.0.4",
     "mocha": "^11.7.5",
     "puppeteer": "^1.9.0",
