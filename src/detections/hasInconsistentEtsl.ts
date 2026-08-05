@@ -1,21 +1,28 @@
 import { Fingerprint } from "../types";
+import { describeEnvironment } from "./environment";
+
+/**
+ * `eval.toString().length` is a property of the JavaScript engine rather than of the
+ * browser: V8 reports 33, while SpiderMonkey (Firefox) and JavaScriptCore (WebKit) report 37.
+ */
+const V8_ETSL = 33;
+const SPIDERMONKEY_AND_JSC_ETSL = 37;
 
 export function hasInconsistentEtsl(fingerprint: Fingerprint) {
-
-    // On Chromium-based browsers, ETSL should be 33
-    if (fingerprint.signals.browser.features.chrome && fingerprint.signals.browser.etsl !== 33) {
-        return true;
+    const etsl = fingerprint.signals.browser.etsl;
+    if (typeof etsl !== "number") {
+        return false;
     }
 
-    // On Safari, ETSL should be 37
-    if (fingerprint.signals.browser.features.safari && fingerprint.signals.browser.etsl !== 37) {
-        return true;
+    const { engine, isDesktop } = describeEnvironment(fingerprint);
+    switch (engine) {
+        case "v8":
+            // A `Chrome/` token only pins the engine down on a Windows or macOS desktop.
+            return isDesktop && etsl !== V8_ETSL;
+        case "gecko":
+        case "webkit":
+            return etsl !== SPIDERMONKEY_AND_JSC_ETSL;
+        default:
+            return false;
     }
-
-    // On Firefox, ETSL should be 37
-    if (fingerprint.signals.browser.userAgent.includes('Firefox') && fingerprint.signals.browser.etsl !== 37) {
-        return true;
-    }
-
-    return false;
 }

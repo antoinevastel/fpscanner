@@ -1,10 +1,13 @@
 import { Fingerprint } from "../types";
-import { ERROR, NA } from "../signals/utils";
+import { usableString } from "../signals/utils";
 
 export function hasMismatchPlatformIframe(fingerprint: Fingerprint) {
-    if (fingerprint.signals.contexts.iframe.platform === NA || fingerprint.signals.contexts.iframe.platform === ERROR) {
+    const devicePlatform = usableString(fingerprint.signals.device.platform);
+    const iframePlatform = usableString(fingerprint.signals.contexts.iframe.platform);
+
+    if (devicePlatform === undefined || iframePlatform === undefined) {
         return false;
     }
 
-    return fingerprint.signals.device.platform !== fingerprint.signals.contexts.iframe.platform;
+    return devicePlatform !== iframePlatform;
 }
