@@ -2,14 +2,17 @@ import { Fingerprint } from "../types";
 import { ERROR, NA, SKIPPED } from "../signals/utils";
 
 /**
- * iPad Safari in desktop-style mode often reports navigator.platform as "MacIntel"
- * in the top-level window (and same-origin iframe) while dedicated workers can still
- * report "iPad". That split is expected on real hardware, not a worker spoof signal.
+ * iOS Safari in desktop-style mode reports navigator.platform as "MacIntel" in the
+ * top-level window (and same-origin iframe) while dedicated workers still report the
+ * real device. Desktop mode is the default on iPad and opt-in on iPhone/iPod via
+ * "Request Desktop Website", so the split is expected on all iOS hardware.
  */
-function isBenignIPadMacPlatformSplit(a: string, b: string): boolean {
-    const aIsIPad = a.includes("iPad");
-    const bIsIPad = b.includes("iPad");
-    if (aIsIPad === bIsIPad) {
+const IOS_DEVICE_PLATFORM = /^(iPhone|iPad|iPod)/;
+
+function isBenignIOSMacPlatformSplit(a: string, b: string): boolean {
+    const aIsIOS = IOS_DEVICE_PLATFORM.test(a);
+    const bIsIOS = IOS_DEVICE_PLATFORM.test(b);
+    if (aIsIOS === bIsIOS) {
         return false;
     }
     const macDesktopCompat = (p: string) => p === "MacIntel" || p === "MacPPC";
@@ -28,7 +31,7 @@ export function hasMismatchPlatformWorker(fingerprint: Fingerprint) {
         return false;
     }
 
-    if (isBenignIPadMacPlatformSplit(devicePlatform, workerPlatform)) {
+    if (isBenignIOSMacPlatformSplit(devicePlatform, workerPlatform)) {
         return false;
     }
 
