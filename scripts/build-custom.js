@@ -121,9 +121,13 @@ module.exports = async function build(args) {
         continue;
       }
       
-      // Replace all occurrences of the sentinel with the actual key
+      // Replace all occurrences of the sentinel with the actual key.
+      // Vite/rolldown may emit the sentinel as "...", '...', or `...` depending on format.
       const escapedSentinel = sentinel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const newCode = code.replace(new RegExp(`"${escapedSentinel}"`, 'g'), JSON.stringify(key));
+      const newCode = code.replace(
+        new RegExp(`["'\`]${escapedSentinel}["'\`]`, 'g'),
+        JSON.stringify(key)
+      );
       
       // Verify the replacement worked
       if (newCode === code) {

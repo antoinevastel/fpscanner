@@ -26,7 +26,8 @@ for (const file of files) {
   }
   
   const content = fs.readFileSync(filePath, 'utf8');
-  const matches = content.match(new RegExp(`"${sentinel}"`, 'g'));
+  // Vite/rolldown may emit the sentinel as "...", '...', or `...` depending on format.
+  const matches = content.match(new RegExp(`["'\`]${sentinel}["'\`]`, 'g'));
   
   if (!matches || matches.length === 0) {
     console.log(`❌ ${file}: Sentinel key "${sentinel}" NOT found`);
