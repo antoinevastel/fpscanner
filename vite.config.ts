@@ -11,6 +11,11 @@ export default defineConfig({
   server: {
     port: 3000,
     open: '/test/dev-source.html',
+    // Listen on all interfaces and accept tunnelled Host headers (e.g. BrowserStack
+    // Local, which requires bs-local.com instead of localhost on iOS Safari).
+    host: true,
+    allowedHosts: ['localhost', '127.0.0.1', 'bs-local.com', '.bs-local.com'],
+    cors: true,
   },
   build: {
     lib: {
@@ -30,6 +35,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // `test/**/*.spec.ts` belongs to Playwright, vitest only owns the unit tests.
+    include: ['src/**/*.test.ts'],
   },
 });
 

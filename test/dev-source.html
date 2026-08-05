@@ -49,12 +49,74 @@
             padding: 40px;
             color: #666;
         }
+        #verdict {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            background: #ececec;
+            color: #666;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .verdict-headline {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .verdict-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: currentColor;
+            flex: none;
+        }
+        .verdict-value {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+        #verdict.is-human {
+            border-color: #157f3c;
+            background: #e7f6ec;
+            color: #10682f;
+        }
+        #verdict.is-bot {
+            border-color: #b3141b;
+            background: #fdeaea;
+            color: #a4141a;
+        }
+        #verdict.is-error {
+            border-color: #8a5300;
+            background: #fff5e3;
+            color: #8a5300;
+        }
+        .verdict-detections {
+            margin: 12px 0 0;
+            padding-left: 20px;
+            font-size: 14px;
+            font-weight: normal;
+            line-height: 1.6;
+        }
+        .verdict-detections:empty {
+            display: none;
+        }
+        .verdict-severity {
+            opacity: 0.75;
+        }
     </style>
 </head>
 <body>
     <h1>Fingerprint Scanner Test</h1>
     <p>Open the browser console to see the fingerprint results.</p>
-    
+
+    <div id="verdict">
+        <div class="verdict-headline">
+            <span class="verdict-dot"></span>
+            <span>isBot: <span class="verdict-value" id="verdict-value">scanning…</span></span>
+        </div>
+        <ul class="verdict-detections" id="verdict-detections"></ul>
+    </div>
+
     <div id="fingerprint-container">
         <pre class="loading">Loading fingerprint...</pre>
     </div>
@@ -85,12 +147,35 @@
             });
         }
         
+        function renderVerdict(result) {
+            const verdict = document.getElementById('verdict');
+            const isBot = result.fastBotDetection;
+
+            verdict.classList.add(isBot ? 'is-bot' : 'is-human');
+            document.getElementById('verdict-value').textContent = String(isBot);
+
+            const triggered = Object.entries(result.fastBotDetectionDetails)
+                .filter(([, detail]) => detail.detected);
+            document.getElementById('verdict-detections').innerHTML = triggered
+                .map(([name, detail]) =>
+                    '<li>' + name + ' <span class="verdict-severity">(' + detail.severity + ')</span></li>')
+                .join('');
+        }
+
+        function renderError(error) {
+            const verdict = document.getElementById('verdict');
+            verdict.classList.add('is-error');
+            document.getElementById('verdict-value').textContent = 'scan failed — ' + error.message;
+        }
+
         async function testFingerprint() {
             const scanner = new FingerprintScanner();
             const result = await scanner.collectFingerprint({ encrypt: false });
             console.log('Fingerprint result:', result);
             window.result = result;
-            
+
+            renderVerdict(result);
+
             // Display in the page with syntax highlighting
             const container = document.getElementById('fingerprint-container');
             const highlighted = syntaxHighlight(result);
@@ -98,7 +183,10 @@
         }
         
         setTimeout(() => {
-            testFingerprint().catch(console.error);
+            testFingerprint().catch(error => {
+                console.error(error);
+                renderError(error);
+            });
         }, 1000);
     </script>
 </body>

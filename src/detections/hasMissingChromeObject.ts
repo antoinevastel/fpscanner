@@ -1,26 +1,16 @@
 import { Fingerprint } from "../types";
-
-/**
- * In-app browsers and system WebViews on Android/iOS often ship a Chrome-like UA but
- * do not expose window.chrome. That is common on real devices, so this rule is only
- * meant for desktop-style environments where missing chrome is suspicious.
- */
-function isClaimedMobileUserAgent(ua: string): boolean {
-    return (
-        ua.includes("Android") ||
-        ua.includes("iPhone") ||
-        ua.includes("iPod") ||
-        ua.includes("iPad")
-    );
-}
+import { describeEnvironment } from "./environment";
 
 export function hasMissingChromeObject(fingerprint: Fingerprint) {
-    const userAgent = fingerprint.signals.browser.userAgent;
-    if (typeof userAgent !== "string" || !userAgent.includes("Chrome")) {
+    const { os, engine } = describeEnvironment(fingerprint);
+
+    // In-app browsers and system WebViews on Android and iOS often ship a Chrome-like user
+    // agent without exposing window.chrome. That is common on real devices, so this rule is
+    // only meant for desktop-style environments where a missing chrome object is suspicious.
+    // iOS needs no test of its own: its claimed engine is never V8.
+    if (engine !== "v8" || os === "android") {
         return false;
     }
-    if (isClaimedMobileUserAgent(userAgent)) {
-        return false;
-    }
+
     return fingerprint.signals.browser.features.chrome === false;
 }

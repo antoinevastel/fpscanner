@@ -1,23 +1,12 @@
 import { Fingerprint } from "../types";
-import { ERROR, INIT, NA, SKIPPED } from "../signals/utils";
-
-function webGLStringUnavailable(value: unknown): boolean {
-    if (typeof value !== "string" || value.length === 0) {
-        return true;
-    }
-    return value === NA || value === ERROR || value === SKIPPED || value === INIT;
-}
+import { usableStrings } from "../signals/utils";
 
 export function hasMismatchWebGLInWorker(fingerprint: Fingerprint) {
     const worker = fingerprint.signals.contexts.webWorker;
     const webGL = fingerprint.signals.graphics.webGL;
 
-    if (
-        webGLStringUnavailable(webGL.vendor) ||
-        webGLStringUnavailable(webGL.renderer) ||
-        webGLStringUnavailable(worker.vendor) ||
-        webGLStringUnavailable(worker.renderer)
-    ) {
+    const collected = usableStrings(webGL.vendor, webGL.renderer, worker.vendor, worker.renderer);
+    if (collected.length !== 4) {
         return false;
     }
 
