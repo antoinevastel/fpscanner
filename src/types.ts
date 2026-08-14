@@ -91,6 +91,11 @@ export interface BrowserFeaturesSignal {
     fencedFrame: SignalValue<boolean>;
     sanitizer: SignalValue<boolean>;
     otpCredential: SignalValue<boolean>;
+    sumPrecise: SignalValue<boolean>;
+    managed: SignalValue<boolean>;
+    storageBuckets: SignalValue<boolean>;
+    presentationRequest: SignalValue<boolean>;
+    virtualKeyboard: SignalValue<boolean>;
 }
 
 export interface MediaQueriesSignal {
@@ -103,6 +108,32 @@ export interface MediaQueriesSignal {
     hover: SignalValue<boolean>;
     anyHover: SignalValue<boolean>;
     colorDepth: SignalValue<number>;
+}
+
+export interface AudioSignal {
+    baseLatency: SignalValue<number>;
+    sampleRate: SignalValue<number>;
+    maxChannelCount: SignalValue<number>;
+}
+
+export interface BatterySignal {
+    charging: SignalValue<boolean>;
+    level: SignalValue<number>;
+    chargingTime: SignalValue<number>;
+    dischargingTime: SignalValue<number>;
+}
+
+export interface WebAuthnSignal {
+    secureContext: SignalValue<boolean>;
+    available: SignalValue<boolean>;
+    capabilitiesBitmask: SignalValue<string>;
+    userVerifyingPlatformAuthenticator: SignalValue<boolean>;
+}
+
+export interface MediaCapabilitiesSignal {
+    videoDecodingInfo: SignalValue<string>;
+    audioDecodingInfo: SignalValue<string>;
+    hasPowerEfficientVideoDecoding: SignalValue<boolean>;
 }
 
 export interface KeyboardSignals {
@@ -142,6 +173,7 @@ export interface PluginsSignal {
     pluginNamesHash: SignalValue<string>;
     pluginConsistency1: SignalValue<boolean>;
     pluginOverflow: SignalValue<boolean>;
+    pdfViewerEnabled: SignalValue<boolean>;
 }
 
 export interface MultimediaDevicesSignal {
@@ -168,6 +200,7 @@ export interface AutomationSignals {
     cdp: SignalValue<boolean>;
     playwright: SignalValue<boolean>;
     navigatorPropertyDescriptors: SignalValue<string>;
+    nativeGetterTamper: SignalValue<boolean>;
 }
 
 export interface DeviceSignals {
@@ -178,6 +211,8 @@ export interface DeviceSignals {
     multimediaDevices: MultimediaDevicesSignal;
     mediaQueries: MediaQueriesSignal;
     keyboard: KeyboardSignals;
+    audio: AudioSignal;
+    battery: BatterySignal;
 }
 
 export interface BrowserSignals {
@@ -190,6 +225,8 @@ export interface BrowserSignals {
     maths: SignalValue<string>;
     toSourceError: ToSourceErrorSignal;
     ai: AISignal;
+    webauthn: WebAuthnSignal;
+    mediaCapabilities: MediaCapabilitiesSignal;
 }
 
 export interface GraphicsSignals {
@@ -240,6 +277,9 @@ export interface FastBotDetectionDetails {
     hasBotUserAgent: DetectionRuleResult;
     hasGPUMismatch: DetectionRuleResult;
     hasPlatformMismatch: DetectionRuleResult;
+    hasTamperedNativeGetter: DetectionRuleResult;
+    hasPdfViewerMismatch: DetectionRuleResult;
+    hasNoPlatformAuthenticator: DetectionRuleResult;
 }
 export interface Fingerprint {
     signals: FingerprintSignals;

@@ -41,6 +41,10 @@ export function browserFeatures() {
         sanitizer: safeCheck(() => 'Sanitizer' in window),
         otpCredential: safeCheck(() => 'OTPCredential' in window),
         sumPrecise: safeCheck(() => 'sumPrecise' in Math),
+        managed: safeCheck(() => 'managed' in navigator),
+        storageBuckets: safeCheck(() => 'storageBuckets' in navigator),
+        presentationRequest: safeCheck(() => 'PresentationRequest' in window),
+        virtualKeyboard: safeCheck(() => 'virtualKeyboard' in navigator),
     };
 
     // set bitmask to 0/1 string based on browserFeaturesData, exclude bitmask property itself (you need to filter on the key)
