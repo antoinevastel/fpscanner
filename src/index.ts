@@ -33,6 +33,11 @@ import { browserFeatures } from './signals/browserFeatures';
 import { mediaQueries } from './signals/mediaQueries';
 import { keyboard } from './signals/keyboard';
 import { ai } from './signals/ai';
+import { audio } from './signals/audio';
+import { battery } from './signals/battery';
+import { webauthn } from './signals/webauthn';
+import { mediaCapabilities } from './signals/mediaCapabilities';
+import { nativeGetterTamper } from './signals/nativeGetterTamper';
 
 // Fast Bot Detection tests
 import { hasHeadlessChromeScreenResolution } from './detections/hasHeadlessChromeScreenResolution';
@@ -56,6 +61,9 @@ import { hasInconsistentEtsl } from './detections/hasInconsistentEtsl';
 import { hasBotUserAgent } from './detections/hasBotUserAgent';
 import { hasGPUMismatch } from './detections/hasGPUMismatch';
 import { hasPlatformMismatch } from './detections/hasPlatformMismatch';
+import { hasTamperedNativeGetter } from './detections/hasTamperedNativeGetter';
+import { hasPdfViewerMismatch } from './detections/hasPdfViewerMismatch';
+import { hasNoPlatformAuthenticator } from './detections/hasNoPlatformAuthenticator';
 
 import { ERROR, HIGH, INIT, LOW, MEDIUM, SKIPPED, hashCode } from './signals/utils';
 import { encryptString } from './crypto-helpers';
@@ -76,6 +84,7 @@ class FingerprintScanner {
                     cdp: INIT,
                     playwright: INIT,
                     navigatorPropertyDescriptors: INIT,
+                    nativeGetterTamper: INIT,
                 },
                 // Device hardware characteristics
                 device: {
@@ -113,6 +122,17 @@ class FingerprintScanner {
                         layout: INIT,
                         layoutSize: INIT,
                     },
+                    audio: {
+                        baseLatency: INIT,
+                        sampleRate: INIT,
+                        maxChannelCount: INIT,
+                    },
+                    battery: {
+                        charging: INIT,
+                        level: INIT,
+                        chargingTime: INIT,
+                        dischargingTime: INIT,
+                    },
                 },
                 // Browser identity & features
                 browser: {
@@ -147,6 +167,11 @@ class FingerprintScanner {
                         fencedFrame: INIT,
                         sanitizer: INIT,
                         otpCredential: INIT,
+                        sumPrecise: INIT,
+                        managed: INIT,
+                        storageBuckets: INIT,
+                        presentationRequest: INIT,
+                        virtualKeyboard: INIT,
                     },
                     plugins: {
                         isValidPluginArray: INIT,
@@ -154,6 +179,7 @@ class FingerprintScanner {
                         pluginNamesHash: INIT,
                         pluginConsistency1: INIT,
                         pluginOverflow: INIT,
+                        pdfViewerEnabled: INIT,
                     },
                     extensions: {
                         bitmask: INIT,
@@ -178,6 +204,17 @@ class FingerprintScanner {
                     ai: {
                         summarizerAvailability: INIT,
                         summarizerLanguageAvailability: INIT,
+                    },
+                    webauthn: {
+                        secureContext: INIT,
+                        available: INIT,
+                        capabilitiesBitmask: INIT,
+                        userVerifyingPlatformAuthenticator: INIT,
+                    },
+                    mediaCapabilities: {
+                        videoDecodingInfo: INIT,
+                        audioDecodingInfo: INIT,
+                        hasPowerEfficientVideoDecoding: INIT,
                     },
                 },
                 // Graphics & rendering
@@ -267,6 +304,9 @@ class FingerprintScanner {
                 hasBotUserAgent: { detected: false, severity: 'high' },
                 hasGPUMismatch: { detected: false, severity: 'high' },
                 hasPlatformMismatch: { detected: false, severity: 'high' },
+                hasTamperedNativeGetter: { detected: false, severity: 'high' },
+                hasPdfViewerMismatch: { detected: false, severity: 'medium' },
+                hasNoPlatformAuthenticator: { detected: false, severity: 'low' },
             },
         };
     }
@@ -288,14 +328,16 @@ class FingerprintScanner {
      * Bitmasks are extensible - new boolean fields are appended without breaking existing positions.
      * 
      * Sections:
-     * - det:  fastBotDetectionDetails bitmask (21 bits: headlessChromeScreenResolution, hasWebdriver, 
+     * - det:  fastBotDetectionDetails bitmask (24 bits: headlessChromeScreenResolution, hasWebdriver,
      *         hasWebdriverWritable, hasSeleniumProperty, hasCDP, hasPlaywright, hasImpossibleDeviceMemory,
      *         hasHighCPUCount, hasMissingChromeObject, hasWebdriverIframe, hasWebdriverWorker,
      *         hasMismatchWebGLInWorker, hasMismatchPlatformIframe, hasMismatchPlatformWorker,
-     *         hasMismatchLanguages, hasInconsistentEtsl, hasBotUserAgent, hasGPUMismatch, hasPlatformMismatch)
-     * - auto: automation bitmask (5 bits: webdriver, webdriverWritable, selenium, cdp, playwright) + hash
-     * - dev:  WIDTHxHEIGHT + cpu + mem + device bitmask + hash of all device signals
-     * - brw:  features.bitmask + extensions.bitmask + plugins bitmask (3 bits) + hash of browser signals
+     *         hasMismatchLanguages, hasInconsistentEtsl, hasBotUserAgent, hasGPUMismatch, hasPlatformMismatch,
+     *         hasTamperedNativeGetter, hasPdfViewerMismatch, hasNoPlatformAuthenticator)
+     * - auto: automation bitmask (6 bits: webdriver, webdriverWritable, selenium, cdp, playwright,
+     *         nativeGetterTamper) + hash
+     * - dev:  WIDTHxHEIGHT + cpu + mem + device bitmask + hash of all device signals, battery excluded
+     * - brw:  features.bitmask + extensions.bitmask + plugins bitmask (4 bits) + hash of browser signals
      * - gfx:  canvas bitmask (1 bit: hasModifiedCanvas) + hash of all graphics signals
      * - cod:  codecs bitmask (1 bit: hasMediaSource) + hash of all codec hashes
      * - loc:  language code (2 chars) + language count + hash of locale signals
@@ -333,6 +375,9 @@ class FingerprintScanner {
                 det.hasBotUserAgent.detected,
                 det.hasGPUMismatch.detected,
                 det.hasPlatformMismatch.detected,
+                det.hasTamperedNativeGetter.detected,
+                det.hasPdfViewerMismatch.detected,
+                det.hasNoPlatformAuthenticator.detected,
                 // Add other detection rules output here
             ].map(b => b ? '1' : '0').join('');
             const detSection = detBitmask;
@@ -344,6 +389,7 @@ class FingerprintScanner {
                 s.automation.selenium === true,
                 s.automation.cdp === true,
                 s.automation.playwright === true,
+                s.automation.nativeGetterTamper === true,
             ].map(b => b ? '1' : '0').join('');
             const autoHash = hashCode(String(s.automation.navigatorPropertyDescriptors)).slice(0, 4);
             const autoSection = `${autoBitmask}h${autoHash}`;
@@ -374,7 +420,11 @@ class FingerprintScanner {
                 s.device.mediaQueries.colorDepth,
                 s.device.keyboard.layout,
                 s.device.keyboard.layoutSize,
+                s.device.audio.baseLatency,
+                s.device.audio.sampleRate,
+                s.device.audio.maxChannelCount,
             ].map(v => String(v)).join('|');
+            // Battery is left out on purpose: level and the charge times move during a session.
             const devHash = hashCode(devStr).slice(0, 6);
             const devSection = `${width}x${height}c${cpu}m${mem}b${devBitmask}h${devHash}`;
 
@@ -386,6 +436,7 @@ class FingerprintScanner {
                 s.browser.plugins.pluginConsistency1 === true,
                 s.browser.plugins.pluginOverflow === true,
                 s.browser.toSourceError.hasToSource === true,
+                s.browser.plugins.pdfViewerEnabled === true,
             ].map(b => b ? '1' : '0').join('');
             const brwStr = [
                 s.browser.userAgent,
@@ -402,6 +453,11 @@ class FingerprintScanner {
                 s.browser.highEntropyValues.mobile,
                 s.browser.ai.summarizerAvailability,
                 s.browser.ai.summarizerLanguageAvailability,
+                s.browser.webauthn.available,
+                s.browser.webauthn.capabilitiesBitmask,
+                s.browser.webauthn.userVerifyingPlatformAuthenticator,
+                s.browser.mediaCapabilities.videoDecodingInfo,
+                s.browser.mediaCapabilities.audioDecodingInfo,
             ].map(v => String(v)).join('|');
             const brwHash = hashCode(brwStr).slice(0, 6);
             const brwSection = `f${featuresBitmask}e${extensionsBitmask}p${pluginsBitmask}h${brwHash}`;
@@ -543,6 +599,9 @@ class FingerprintScanner {
             { name: 'hasBotUserAgent', severity: HIGH, test: hasBotUserAgent },
             { name: 'hasGPUMismatch', severity: HIGH, test: hasGPUMismatch },
             { name: 'hasPlatformMismatch', severity: HIGH, test: hasPlatformMismatch },
+            { name: 'hasTamperedNativeGetter', severity: HIGH, test: hasTamperedNativeGetter },
+            { name: 'hasPdfViewerMismatch', severity: MEDIUM, test: hasPdfViewerMismatch },
+            { name: 'hasNoPlatformAuthenticator', severity: LOW, test: hasNoPlatformAuthenticator },
         ];
     }
 
@@ -570,6 +629,9 @@ class FingerprintScanner {
             hasBotUserAgent: { detected: false, severity: 'high' },
             hasGPUMismatch: { detected: false, severity: 'high' },
             hasPlatformMismatch: { detected: false, severity: 'high' },
+            hasTamperedNativeGetter: { detected: false, severity: 'high' },
+            hasPdfViewerMismatch: { detected: false, severity: 'medium' },
+            hasNoPlatformAuthenticator: { detected: false, severity: 'low' },
         };
 
         for (const rule of rules) {
@@ -597,6 +659,7 @@ class FingerprintScanner {
             cdp: this.collectSignal(cdp),
             playwright: this.collectSignal(playwright),
             navigatorPropertyDescriptors: this.collectSignal(navigatorPropertyDescriptors),
+            nativeGetterTamper: this.collectSignal(nativeGetterTamper),
             // Device signals
             cpuCount: this.collectSignal(cpuCount),
             memory: this.collectSignal(memory),
@@ -605,6 +668,8 @@ class FingerprintScanner {
             multimediaDevices: this.collectSignal(multimediaDevices),
             mediaQueries: this.collectSignal(mediaQueries),
             keyboard: this.collectSignal(keyboard),
+            audio: this.collectSignal(audio),
+            battery: this.collectSignal(battery),
             // Browser signals
             userAgent: this.collectSignal(userAgent),
             browserFeatures: this.collectSignal(browserFeatures),
@@ -615,6 +680,8 @@ class FingerprintScanner {
             maths: this.collectSignal(maths),
             toSourceError: this.collectSignal(toSourceError),
             ai: this.collectSignal(ai),
+            webauthn: this.collectSignal(webauthn),
+            mediaCapabilities: this.collectSignal(mediaCapabilities),
             // Graphics signals
             webGL: this.collectSignal(webGL),
             webgpu: this.collectSignal(webgpu),
@@ -657,6 +724,7 @@ class FingerprintScanner {
         s.automation.cdp = r.cdp;
         s.automation.playwright = r.playwright;
         s.automation.navigatorPropertyDescriptors = r.navigatorPropertyDescriptors;
+        s.automation.nativeGetterTamper = r.nativeGetterTamper;
         // Device
         s.device.cpuCount = r.cpuCount;
         s.device.memory = r.memory;
@@ -665,6 +733,8 @@ class FingerprintScanner {
         s.device.multimediaDevices = r.multimediaDevices;
         s.device.mediaQueries = r.mediaQueries;
         s.device.keyboard = r.keyboard;
+        s.device.audio = r.audio;
+        s.device.battery = r.battery;
         // Browser
         s.browser.userAgent = r.userAgent;
         s.browser.features = r.browserFeatures;
@@ -675,6 +745,8 @@ class FingerprintScanner {
         s.browser.maths = r.maths;
         s.browser.toSourceError = r.toSourceError;
         s.browser.ai = r.ai;
+        s.browser.webauthn = r.webauthn;
+        s.browser.mediaCapabilities = r.mediaCapabilities;
         // Graphics
         s.graphics.webGL = r.webGL;
         s.graphics.webgpu = r.webgpu;

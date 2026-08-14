@@ -1,3 +1,5 @@
+import { NA } from "../signals/utils";
+
 export const USER_AGENTS = {
     windowsChrome: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     windowsEdge: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
@@ -22,6 +24,12 @@ export interface FingerprintOverrides {
     iframePlatform?: unknown;
     workerUserAgent?: unknown;
     workerPlatform?: unknown;
+    nativeGetterTamper?: unknown;
+    pdfViewerEnabled?: unknown;
+    pluginCount?: unknown;
+    secureContext?: unknown;
+    webauthnAvailable?: unknown;
+    userVerifyingPlatformAuthenticator?: unknown;
 }
 
 /**
@@ -37,10 +45,27 @@ export function buildFingerprint({
     iframePlatform = platform,
     workerUserAgent = userAgent,
     workerPlatform = platform,
+    nativeGetterTamper = NA,
+    pdfViewerEnabled = true,
+    pluginCount = 5,
+    secureContext = true,
+    webauthnAvailable = true,
+    userVerifyingPlatformAuthenticator = true,
 }: FingerprintOverrides = {}) {
     return {
         signals: {
-            browser: { userAgent, etsl, features: { chrome } },
+            automation: { nativeGetterTamper },
+            browser: {
+                userAgent,
+                etsl,
+                features: { chrome },
+                plugins: { pdfViewerEnabled, pluginCount },
+                webauthn: {
+                    secureContext,
+                    available: webauthnAvailable,
+                    userVerifyingPlatformAuthenticator,
+                },
+            },
             device: { platform },
             contexts: {
                 iframe: { userAgent: iframeUserAgent, platform: iframePlatform },

@@ -234,6 +234,9 @@ The library focuses on **strong, reliable signals** from major automation framew
 | `headlessChromeScreenResolution` | 800x600 default | Headless browsers |
 | `hasHighCPUCount` | Unrealistic core count | VM/container environments |
 | `hasImpossibleDeviceMemory` | Unrealistic memory values | Spoofed environments |
+| `hasTamperedNativeGetter` | Getter `toString()` without the globals | puppeteer-extra-stealth |
+| `hasPdfViewerMismatch` | `pdfViewerEnabled` vs plugin array | Patched plugin arrays |
+| `hasNoPlatformAuthenticator` | No WebAuthn platform authenticator | Headless, VM environments |
 
 ### Cross-Context Validation
 
@@ -291,7 +294,7 @@ Inspired by [JA4+](https://github.com/FoxIO-LLC/ja4), this format enables:
 <details>
 <summary><strong>Bitmask Reference</strong></summary>
 
-#### Detection Bitmask (21 bits in FS1, extensible)
+#### Detection Bitmask (24 bits in FS1, extensible)
 
 > ⚠️ **Note**: The number of detection bits increases as new bot detection checks are added. Always check the fingerprint version (FS1, FS2, etc.) to know the exact bit count and meaning. New checks are appended to maintain backward compatibility.
 
@@ -317,9 +320,12 @@ Bit 17: hasInconsistentEtsl
 Bit 18: hasBotUserAgent
 Bit 19: hasGPUMismatch
 Bit 20: hasPlatformMismatch
+Bit 21: hasTamperedNativeGetter
+Bit 22: hasPdfViewerMismatch
+Bit 23: hasNoPlatformAuthenticator
 ```
 
-#### Automation Bitmask (5 bits)
+#### Automation Bitmask (6 bits)
 
 ```
 Bit 0: webdriver
@@ -327,6 +333,7 @@ Bit 1: webdriverWritable
 Bit 2: selenium
 Bit 3: cdp
 Bit 4: playwright
+Bit 5: nativeGetterTamper
 ```
 
 #### Device Bitmask (5 bits)
@@ -339,7 +346,7 @@ Bit 3: hover
 Bit 4: anyHover
 ```
 
-#### Browser Features Bitmask (28 bits in FS1, extensible)
+#### Browser Features Bitmask (33 bits in FS1, extensible)
 
 ```
 Bit 0:  chrome
@@ -370,6 +377,11 @@ Bit 24: editContext
 Bit 25: fencedFrame
 Bit 26: sanitizer
 Bit 27: otpCredential
+Bit 28: sumPrecise
+Bit 29: managed
+Bit 30: storageBuckets
+Bit 31: presentationRequest
+Bit 32: virtualKeyboard
 ```
 
 #### Browser Extensions Bitmask (8 bits)
@@ -385,13 +397,14 @@ Bit 6: requestly
 Bit 7: veepn
 ```
 
-#### Plugins Bitmask (4 bits)
+#### Plugins Bitmask (5 bits)
 
 ```
 Bit 0: isValidPluginArray
 Bit 1: pluginConsistency1
 Bit 2: pluginOverflow
 Bit 3: hasToSource
+Bit 4: pdfViewerEnabled
 ```
 
 #### Contexts Bitmask (4 bits)

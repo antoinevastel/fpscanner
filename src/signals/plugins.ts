@@ -48,6 +48,11 @@ function isValidPluginArray() {
     }
   }
 
+  function getPdfViewerEnabled() {
+    if (typeof navigator.pdfViewerEnabled !== "boolean") return NA;
+    return navigator.pdfViewerEnabled;
+  }
+
 export function plugins() {
     const pluginsData = {
         isValidPluginArray: INIT as SignalValue<boolean>,
@@ -55,14 +60,16 @@ export function plugins() {
         pluginNamesHash: INIT as SignalValue<string>,
         pluginConsistency1: INIT as SignalValue<boolean>,
         pluginOverflow: INIT as SignalValue<boolean>,
+        pdfViewerEnabled: INIT as SignalValue<boolean>,
     }
-    
+
     try {
         pluginsData.isValidPluginArray = isValidPluginArray();
         pluginsData.pluginCount = getPluginCount();
         pluginsData.pluginNamesHash = getPluginNamesHash();
         pluginsData.pluginConsistency1 = getPluginConsistency1();
         pluginsData.pluginOverflow = getPluginOverflow();
+        pluginsData.pdfViewerEnabled = getPdfViewerEnabled();
     } catch (e) {
         setObjectValues(pluginsData, ERROR);
     }
