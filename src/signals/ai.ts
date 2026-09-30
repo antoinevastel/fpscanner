@@ -7,6 +7,25 @@ function isOpera(): boolean {
     return typeof (window as any).opr !== 'undefined';
 }
 
+const AI_AVAILABILITY_TIMEOUT_MS = 2_500;
+
+function boundedAwait<T>(promise: Promise<T>): Promise<T | typeof ERROR> {
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => resolve(ERROR), AI_AVAILABILITY_TIMEOUT_MS);
+
+        promise.then(
+            (value) => {
+                clearTimeout(timeout);
+                resolve(value);
+            },
+            (error) => {
+                clearTimeout(timeout);
+                reject(error);
+            },
+        );
+    });
+}
+
 export async function ai() {
     const aiResults = {
         summarizerAvailability: INIT,
@@ -16,10 +35,15 @@ export async function ai() {
     // Opera exposes Summarizer but availability() never settles, hanging the entire collection.
     if ('Summarizer' in window && !isOpera()) {
         try {
-            aiResults.summarizerAvailability = await (window as any).Summarizer.availability();
-            aiResults.summarizerLanguageAvailability = await (window as any).Summarizer.availability({
-                expectedInputLanguages: [navigator.language],
-            });
+            [
+                aiResults.summarizerAvailability,
+                aiResults.summarizerLanguageAvailability,
+            ] = await Promise.all([
+                boundedAwait<string>((window as any).Summarizer.availability()),
+                boundedAwait<string>((window as any).Summarizer.availability({
+                    expectedInputLanguages: [navigator.language],
+                })),
+            ]);
         } catch (error) {
             setObjectValues(aiResults, ERROR);
         }
