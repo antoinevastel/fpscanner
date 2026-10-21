@@ -153,3 +153,21 @@ test.describe('FPScanner Obfuscated Build', () => {
     }
   });
 });
+
+test.describe('Playwright detection', () => {
+  test('detects page.clock without any exposed binding', async ({ browser }) => {
+    const page = await browser.newPage();
+    await page.clock.install();
+    await page.goto('http://localhost:3333/test/test-page.html');
+    await page.waitForFunction(() => (window as any).__FINGERPRINT_READY__ === true, {
+      timeout: 10000,
+    });
+
+    const encryptedFingerprint = await page.evaluate(() => (window as any).__ENCRYPTED_FINGERPRINT__);
+    const fingerprint = decryptFingerprint(encryptedFingerprint);
+    await page.close();
+
+    expect(fingerprint.signals.automation.playwright).toBe(true);
+    expect(fingerprint.fastBotDetectionDetails.hasPlaywright.detected).toBe(true);
+  });
+});
